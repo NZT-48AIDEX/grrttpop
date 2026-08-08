@@ -63,7 +63,18 @@
     <p class="bags-sub" id="wallet-sub">read-only view of any public address</p>
     <ul id="wallet-list"></ul>
     <p class="bag-total-row">total <b id="wallet-total">$0</b></p>
-    <p class="card-fine">on-chain via public RPC + jupiter prices · nothing is signed or sent</p>
+
+    <div id="rpc-row" class="rpc-row" hidden>
+      <label for="rpc-input">your rpc endpoint <span>(optional, stored locally)</span></label>
+      <div class="bag-add">
+        <input id="rpc-input" type="text" placeholder="https://mainnet.helius-rpc.com/?api-key=…" autocomplete="off" spellcheck="false" />
+        <button id="rpc-save">save</button>
+      </div>
+      <p class="card-fine">free keys: helius · quicknode · alchemy. public endpoints block
+        token-account reads, so bring your own to see full wallets. it stays in your browser.</p>
+    </div>
+
+    <p class="card-fine">on-chain via RPC + jupiter prices · nothing is signed or sent</p>
   </aside>
 
   <footer class="reef-bottom">

@@ -382,6 +382,20 @@ a.sol-pill:hover { border-color: #14f195; color: #14f195; }
 #w-mint { cursor: pointer; }
 #w-mint:hover { color: var(--acid); }
 
+.rpc-row {
+  margin-top: .8rem;
+  padding-top: .8rem;
+  border-top: 1px solid var(--edge);
+}
+.rpc-row label {
+  display: block;
+  font: .72rem var(--mono);
+  color: var(--ink);
+  margin-bottom: .4rem;
+}
+.rpc-row label span { color: var(--dim); }
+.rpc-row .card-fine { margin-top: .4rem; line-height: 1.5; }
+
 @media (max-width: 640px) {
   .reef-title { display: none; }
   .reef-globals #global-mcap { display: none; }

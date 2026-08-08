@@ -182,11 +182,21 @@ const fmtAmt = (v) => v >= 1000 ? v.toLocaleString("en-US", { maximumFractionDig
   : v.toLocaleString("en-US", { maximumSignificantDigits: 5 });
 const pct = (v) => v == null ? "—" : (v >= 0 ? "+" : "") + v.toFixed(2) + "%";
 
-/* ---------------- solana rpc with failover ---------------- */
+/* ---------------- solana rpc with failover ----------------
+   Free public endpoints serve cheap calls (getBalance, epoch, perf
+   samples) but universally BLOCK getTokenAccountsByOwner — it's an
+   indexed method every provider gates behind an api key. So the pool
+   is: your own endpoint first (if you've set one), then the publics. */
+let customRpc = localStorage.getItem("trench-rpc") || "";
+const endpoints = () => (customRpc ? [customRpc, ...RPCS] : RPCS);
+const BLOCKED_RE = /blocked|forbidden|paid|not allowed|upgrade|api key|unauthor|payment/i;
+
 let rpcIdx = 0;
 async function rpc(method, params = []) {
-  for (let i = 0; i < RPCS.length; i++) {
-    const url = RPCS[(rpcIdx + i) % RPCS.length];
+  const pool = endpoints();
+  let blocked = false;
+  for (let i = 0; i < pool.length; i++) {
+    const url = pool[(rpcIdx + i) % pool.length];
     try {
       const r = await fetch(url, {
         method: "POST",
@@ -194,16 +204,21 @@ async function rpc(method, params = []) {
         body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
         signal: AbortSignal.timeout(15_000),
       });
-      if (!r.ok) throw 0;
-      const j = await r.json();
-      if (j.error) throw 0;
-      rpcIdx = (rpcIdx + i) % RPCS.length;
+      const j = await r.json().catch(() => null);
+      if (!r.ok || j?.error) {
+        const msg = String(j?.error?.message ?? r.status);
+        if (BLOCKED_RE.test(msg)) blocked = true;
+        throw new Error(msg);
+      }
+      rpcIdx = (rpcIdx + i) % pool.length;
       setRpcDot(true);
       return j.result;
     } catch { /* try next endpoint */ }
   }
-  setRpcDot(false);
-  throw new Error("solana rpc unreachable");
+  if (!blocked) setRpcDot(false);   // a gated method isn't a dead connection
+  const err = new Error("solana rpc unreachable");
+  err.blocked = blocked;   // "the method is gated" vs "the network is down"
+  throw err;
 }
 function setRpcDot(on) {
   const el = $("rpc-dot");
@@ -300,15 +315,17 @@ const isSolAddress = (s) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s.trim());
 
 async function peekWallet(addr) {
   note("🔭 reading wallet from mainnet…");
-  // public RPCs rate-limit getTokenAccountsByOwner hard; give it a few
-  // rounds with backoff before admitting defeat
+  // token-account reads are gated on free endpoints: retry transient
+  // failures, but a hard block is final — don't stall the user on it
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let gated = false;
   async function accountsFor(programId) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         return await rpc("getTokenAccountsByOwner", [addr, { programId }, { encoding: "jsonParsed" }]);
-      } catch {
-        if (attempt < 2) await sleep(900 * (attempt + 1));
+      } catch (e) {
+        if (e.blocked) { gated = true; return null; }
+        if (attempt < 2) await sleep(700 * (attempt + 1));
       }
     }
     return null;
@@ -360,10 +377,13 @@ async function peekWallet(addr) {
   walletAddr = addr;
   localStorage.setItem("trench-last-wallet", addr);
   // never pretend a partial read is the whole wallet
-  note(accountsFailed ? "🌊 rpc busy — token accounts unavailable, showing SOL only · peek again shortly" : "");
+  note(!accountsFailed ? ""
+    : gated ? "⚓ SOL balance only — free public RPCs block token-account reads. add your own endpoint below (free key from helius/quicknode) to see the whole school."
+    : "🌊 rpc unreachable for token accounts — showing SOL only · try again shortly");
   rebuild();               // spawn the school before the camera dives to it
   renderWalletPanel(total);
   setView("wallet");
+  $("rpc-row").hidden = !accountsFailed;   // surface the fix exactly when it's needed
 }
 
 function renderWalletPanel(total) {
@@ -382,6 +402,18 @@ function renderWalletPanel(total) {
   $("wallet-total").textContent = fmtBig(total);
 }
 $("wallet-close").addEventListener("click", () => ($("wallet-panel").hidden = true));
+
+/* bring-your-own endpoint — stays in localStorage, never sent anywhere else */
+$("rpc-input").value = customRpc;
+$("rpc-save").addEventListener("click", () => {
+  const v = $("rpc-input").value.trim();
+  if (v && !/^https:\/\//i.test(v)) { note("🌊 rpc endpoint must start with https://"); return; }
+  customRpc = v;
+  rpcIdx = 0;
+  v ? localStorage.setItem("trench-rpc", v) : localStorage.removeItem("trench-rpc");
+  note(v ? "⚓ endpoint saved — peeking again…" : "endpoint cleared");
+  if (walletAddr) peekWallet(walletAddr).catch(() => note("🌊 that endpoint didn't work — check the url"));
+});
 
 $("wallet-form").addEventListener("submit", async (e) => {
   e.preventDefault();
