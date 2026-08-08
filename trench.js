@@ -300,18 +300,29 @@ const isSolAddress = (s) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s.trim());
 
 async function peekWallet(addr) {
   note("🔭 reading wallet from mainnet…");
-  let failedPrograms = 0;
+  // public RPCs rate-limit getTokenAccountsByOwner hard; give it a few
+  // rounds with backoff before admitting defeat
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function accountsFor(programId) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await rpc("getTokenAccountsByOwner", [addr, { programId }, { encoding: "jsonParsed" }]);
+      } catch {
+        if (attempt < 2) await sleep(900 * (attempt + 1));
+      }
+    }
+    return null;
+  }
+
   const [bal, list, ...accounts] = await Promise.all([
     rpc("getBalance", [addr]),
     loadTokenList(),
-    ...TOKEN_PROGRAMS.map((p) =>
-      rpc("getTokenAccountsByOwner", [addr, { programId: p }, { encoding: "jsonParsed" }])
-        .catch(() => { failedPrograms++; return { value: [] }; })),
+    ...TOKEN_PROGRAMS.map(accountsFor),
   ]);
-  const accountsFailed = failedPrograms === TOKEN_PROGRAMS.length;
+  const accountsFailed = accounts.every((a) => a === null);
 
   const held = [{ mint: SOL_MINT, amount: (bal?.value ?? bal ?? 0) / 1e9 }];
-  for (const acc of accounts.flatMap((a) => a.value ?? [])) {
+  for (const acc of accounts.flatMap((a) => a?.value ?? [])) {
     const info = acc.account?.data?.parsed?.info;
     const amt = info?.tokenAmount?.uiAmount;
     if (amt > 0) held.push({ mint: info.mint, amount: amt });
