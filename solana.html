@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>the trench — solana, live · grrttpop</title>
+  <meta name="description" content="The Solana trench: live network vitals from mainnet, the SPL ecosystem as living creatures, and wallet peek — paste any address, watch it become a school of fish. Read-only, no keys, ever." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚓</text></svg>" />
+  <link rel="agent-card" type="application/json" href="agent.json" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="reef.css" />
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.js" } }
+  </script>
+</head>
+<body class="reef-body trench-body">
+  <canvas id="scene"></canvas>
+
+  <header class="reef-top">
+    <a class="logo" href="index.html">grrtt<span>pop</span></a>
+    <span class="reef-title">⚓ the trench <em>· solana, live</em></span>
+    <div class="reef-globals">
+      <span id="tps" class="sol-pill" title="live mainnet throughput">⚡ … tps</span>
+      <span id="epoch" class="sol-pill" title="epoch progress">epoch …</span>
+      <a class="sol-pill" href="market.html" title="back to the full market">🪸 reef</a>
+    </div>
+  </header>
+
+  <div class="reef-tooltip" id="tooltip" hidden></div>
+
+  <aside class="coin-card" id="coin-card" hidden>
+    <button class="card-close" id="card-close" title="close (esc)">×</button>
+    <div class="card-head">
+      <img id="card-img" alt="" width="36" height="36" />
+      <div>
+        <b id="card-name">—</b>
+        <span id="card-symbol" class="card-sym">—</span>
+      </div>
+    </div>
+    <div class="card-price" id="card-price">—</div>
+    <div class="card-changes" id="card-changes">
+      <span id="chg-1h">1h —</span>
+      <span id="chg-24h">24h —</span>
+      <span id="chg-7d">7d —</span>
+    </div>
+    <canvas id="spark" width="280" height="64"></canvas>
+    <dl class="card-stats" id="eco-stats">
+      <div><dt>rank</dt><dd id="card-rank">—</dd></div>
+      <div><dt>market cap</dt><dd id="card-mcap">—</dd></div>
+      <div><dt>24h volume</dt><dd id="card-vol">—</dd></div>
+    </dl>
+    <dl class="card-stats" id="wallet-stats" hidden>
+      <div><dt>amount</dt><dd id="w-amount">—</dd></div>
+      <div><dt>share</dt><dd id="w-share">—</dd></div>
+      <div><dt>mint</dt><dd id="w-mint" title="click to copy">—</dd></div>
+    </dl>
+    <p class="card-fine">read-only · we never ask for keys or signatures · not financial advice</p>
+  </aside>
+
+  <aside class="bags-panel" id="wallet-panel" hidden>
+    <button class="card-close" id="wallet-close" title="close">×</button>
+    <h3>🔭 wallet peek</h3>
+    <p class="bags-sub" id="wallet-sub">read-only view of any public address</p>
+    <ul id="wallet-list"></ul>
+    <p class="bag-total-row">total <b id="wallet-total">$0</b></p>
+    <p class="card-fine">on-chain via public RPC + jupiter prices · nothing is signed or sent</p>
+  </aside>
+
+  <footer class="reef-bottom">
+    <div class="sorts" role="group" aria-label="view">
+      <button data-view="eco" class="active">🌊 ecosystem</button>
+      <button data-view="wallet">🐟 wallet school</button>
+    </div>
+    <form id="wallet-form" class="wallet-form">
+      <input id="wallet-input" type="text" placeholder="paste any solana address… (read-only)" autocomplete="off" spellcheck="false" />
+      <button type="submit">🔭 peek</button>
+    </form>
+    <div class="legend">
+      <span><i class="dot dot-up"></i>up</span>
+      <span><i class="dot dot-down"></i>down</span>
+      <span id="rpc-dot" title="solana rpc connection">○ mainnet</span>
+    </div>
+  </footer>
+
+  <div class="reef-note" id="reef-note" hidden></div>
+
+  <script type="module" src="trench.js"></script>
+</body>
+</html>

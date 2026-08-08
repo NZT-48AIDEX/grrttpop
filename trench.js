@@ -1,0 +1,717 @@
+import * as THREE from "three";
+
+/* ================================================================
+   the trench — solana, live.
+   Two waters: the SPL ecosystem swimming at the surface, and any
+   wallet's holdings as a school of fish in the deep. Network
+   vitals stream from mainnet RPC; the current speed IS the TPS.
+   Strictly read-only: no keys, no signatures, no transactions.
+   ================================================================ */
+
+const CG = "https://api.coingecko.com/api/v3";
+const RPCS = [
+  "https://solana-rpc.publicnode.com",
+  "https://solana.drpc.org",
+  "https://endpoints.omniatech.io/v1/sol/mainnet/public",
+  "https://api.mainnet-beta.solana.com",
+];
+const SOL_MINT = "So11111111111111111111111111111111111111112";
+const TOKEN_PROGRAMS = [
+  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",              // spl-token
+  "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",              // token-2022
+];
+const BAND_Z = [0, -70];
+const ECO_COUNT = 40;
+const FOG_DENSITY = 0.014;
+
+/* ---------------- renderer / scene ---------------- */
+const canvas = document.getElementById("scene");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x070512, FOG_DENSITY);
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 300);
+camera.position.set(0, 0, 26);
+const lookTarget = new THREE.Vector3(0, 0, 0);
+
+/* ---------------- creature shader (solana palette) ---------------- */
+const NOISE_GLSL = /* glsl */ `
+  vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+  vec4 taylorInvSqrt(vec4 r){ return 1.79284291400159 - 0.85373472095314 * r; }
+  float snoise(vec3 v){
+    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+    vec3 i = floor(v + dot(v, C.yyy));
+    vec3 x0 = v - i + dot(i, C.xxx);
+    vec3 g = step(x0.yzx, x0.xyz);
+    vec3 l = 1.0 - g;
+    vec3 i1 = min(g.xyz, l.zxy);
+    vec3 i2 = max(g.xyz, l.zxy);
+    vec3 x1 = x0 - i1 + 1.0*C.xxx;
+    vec3 x2 = x0 - i2 + 2.0*C.xxx;
+    vec3 x3 = x0 - 1. + 3.0*C.xxx;
+    i = mod(i, 289.0);
+    vec4 p = permute(permute(permute(
+              i.z + vec4(0.0, i1.z, i2.z, 1.0))
+            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+    float n_ = 1.0/7.0;
+    vec3 ns = n_ * D.wyz - D.xzx;
+    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+    vec4 x_ = floor(j * ns.z);
+    vec4 y_ = floor(j - 7.0 * x_);
+    vec4 x = x_ * ns.x + ns.yyyy;
+    vec4 y = y_ * ns.x + ns.yyyy;
+    vec4 h = 1.0 - abs(x) - abs(y);
+    vec4 b0 = vec4(x.xy, y.xy);
+    vec4 b1 = vec4(x.zw, y.zw);
+    vec4 s0 = floor(b0)*2.0 + 1.0;
+    vec4 s1 = floor(b1)*2.0 + 1.0;
+    vec4 sh = -step(h, vec4(0.0));
+    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+    vec3 p0 = vec3(a0.xy, h.x);
+    vec3 p1 = vec3(a0.zw, h.y);
+    vec3 p2 = vec3(a1.xy, h.z);
+    vec3 p3 = vec3(a1.zw, h.w);
+    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+    m = m * m;
+    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+  }
+`;
+
+const VERT = /* glsl */ `
+  uniform float uTime, uAmp, uSpeed, uSeed, uPulse;
+  varying vec3 vNormal, vView;
+  varying float vDisp;
+  ${NOISE_GLSL}
+  void main() {
+    vec3 p = position;
+    float n = snoise(p * 1.8 + uSeed + uTime * uSpeed);
+    float disp = n * uAmp + uPulse * (0.3 + 0.3 * n);
+    p += normal * disp;
+    vDisp = disp;
+    vNormal = normalize(normalMatrix * normal);
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    vView = -mv.xyz;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const FRAG = /* glsl */ `
+  uniform float uTime, uChange, uDim, uGlow;
+  varying vec3 vNormal, vView;
+  varying float vDisp;
+  void main() {
+    vec3 up      = vec3(0.08, 0.95, 0.58);   // solana green
+    vec3 down    = vec3(1.00, 0.22, 0.50);
+    vec3 neutral = vec3(0.60, 0.27, 1.00);   // solana purple
+    vec3 base = uChange >= 0.0
+      ? mix(neutral, up, smoothstep(0.0, 1.0, uChange))
+      : mix(neutral, down, smoothstep(0.0, 1.0, -uChange));
+    vec3 N = normalize(vNormal);
+    vec3 V = normalize(vView);
+    float fresnel = pow(1.0 - abs(dot(N, V)), 2.2);
+    vec3 col = mix(base * 0.18, base, fresnel * 1.5 + 0.22 + vDisp * 0.35);
+    col += vec3(1.0) * uGlow * fresnel * 0.8;
+    col *= uDim;
+    float dist = length(vView);
+    float f = 1.0 - exp(-pow(dist * ${FOG_DENSITY}, 2.0));
+    col = mix(col, vec3(0.028, 0.020, 0.070), clamp(f, 0.0, 1.0));
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+const sharedGeo = new THREE.IcosahedronGeometry(1, 5);
+function makeCreature(seed) {
+  return new THREE.Mesh(sharedGeo, new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 }, uAmp: { value: 0.12 }, uSpeed: { value: 0.5 },
+      uSeed: { value: seed }, uPulse: { value: 0 }, uChange: { value: 0 },
+      uDim: { value: 1 }, uGlow: { value: 0 },
+    },
+    vertexShader: VERT, fragmentShader: FRAG,
+  }));
+}
+
+/* ---------------- the current (dust speed = live TPS) ---------------- */
+const DUST = 1200;
+const dustGeo = new THREE.BufferGeometry();
+const dustPos = new Float32Array(DUST * 3);
+for (let i = 0; i < DUST; i++) {
+  dustPos[i * 3] = (Math.random() - 0.5) * 100;
+  dustPos[i * 3 + 1] = (Math.random() - 0.5) * 60;
+  dustPos[i * 3 + 2] = 20 - Math.random() * 120;
+}
+dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
+  size: 0.09, color: 0x7a5cc0, transparent: true, opacity: 0.6,
+}));
+scene.add(dust);
+let currentSpeed = 0.3;   // scaled from live TPS
+
+/* ---------------- state ---------------- */
+const blobs = new Map();   // id -> { mesh, item, target, size, band, spring, springVel }
+let ecoCoins = [];
+let walletItems = [];      // [{ id, symbol, name, amount, usd, price, mint, image, share }]
+let walletAddr = "";
+let view = "eco";
+let selectedId = null;
+let hoveredId = null;
+let focus = null;
+let bandFit = [16, 16];
+const hash = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 1e6, 7);
+const lerp = (a, b, t) => a + (b - a) * t;
+const $ = (id) => document.getElementById(id);
+
+/* ---------------- formatting ---------------- */
+function fmtPrice(v) {
+  if (v == null) return "—";
+  if (v >= 1) return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  return "$" + v.toLocaleString("en-US", { maximumSignificantDigits: 4 });
+}
+function fmtBig(v) {
+  if (v == null) return "—";
+  for (const [s, m] of [["T", 1e12], ["B", 1e9], ["M", 1e6]])
+    if (v >= m) return "$" + (v / m).toFixed(2) + s;
+  return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
+const fmtAmt = (v) => v >= 1000 ? v.toLocaleString("en-US", { maximumFractionDigits: 0 })
+  : v.toLocaleString("en-US", { maximumSignificantDigits: 5 });
+const pct = (v) => v == null ? "—" : (v >= 0 ? "+" : "") + v.toFixed(2) + "%";
+
+/* ---------------- solana rpc with failover ---------------- */
+let rpcIdx = 0;
+async function rpc(method, params = []) {
+  for (let i = 0; i < RPCS.length; i++) {
+    const url = RPCS[(rpcIdx + i) % RPCS.length];
+    try {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!r.ok) throw 0;
+      const j = await r.json();
+      if (j.error) throw 0;
+      rpcIdx = (rpcIdx + i) % RPCS.length;
+      setRpcDot(true);
+      return j.result;
+    } catch { /* try next endpoint */ }
+  }
+  setRpcDot(false);
+  throw new Error("solana rpc unreachable");
+}
+function setRpcDot(on) {
+  const el = $("rpc-dot");
+  el.textContent = (on ? "●" : "○") + " mainnet";
+  el.classList.toggle("on", on);
+}
+
+/* ---------------- network vitals ---------------- */
+async function fetchVitals() {
+  try {
+    const samples = await rpc("getRecentPerformanceSamples", [1]);
+    const s = samples?.[0];
+    if (s) {
+      const tps = s.numTransactions / s.samplePeriodSecs;
+      $("tps").textContent = `⚡ ${Math.round(tps).toLocaleString()} tps`;
+      currentSpeed = 0.2 + Math.min(tps / 4000, 1.5);
+    }
+  } catch { $("tps").textContent = "⚡ … tps"; }
+  try {
+    const e = await rpc("getEpochInfo");
+    const prog = Math.round((e.slotIndex / e.slotsInEpoch) * 100);
+    $("epoch").textContent = `epoch ${e.epoch} · ${prog}%`;
+  } catch { /* keep last */ }
+}
+
+/* ---------------- ecosystem data ---------------- */
+async function fetchEco() {
+  const url = `${CG}/coins/markets?vs_currency=usd&category=solana-ecosystem&order=market_cap_desc` +
+    `&per_page=${ECO_COUNT}&sparkline=true&price_change_percentage=1h,24h,7d`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("coingecko " + r.status);
+  return r.json();
+}
+
+let retryTimer = null;
+async function refreshEco(first = false) {
+  try {
+    ecoCoins = await fetchEco();
+    localStorage.setItem("trench-cache", JSON.stringify({ t: Date.now(), coins: ecoCoins }));
+    note("");
+  } catch {
+    try {
+      const c = JSON.parse(localStorage.getItem("trench-cache") || "null");
+      if (c?.coins?.length && !ecoCoins.length) {
+        ecoCoins = c.coins;
+        note("🌊 market api busy — cached ecosystem · retrying…");
+      } else if (!ecoCoins.length) {
+        note("🌊 can't reach market data — retrying…");
+      }
+    } catch { /* nothing cached */ }
+    clearTimeout(retryTimer);
+    retryTimer = setTimeout(refreshEco, 20_000);
+  }
+  rebuild();
+  if (first) fetchVitals();
+}
+
+/* ---------------- wallet peek (read-only) ---------------- */
+const jfetch = (url, ms = 8000) =>
+  fetch(url, { signal: AbortSignal.timeout(ms) }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+
+let tokenList = null;   // mint -> { symbol, name, logoURI }
+async function loadTokenList() {
+  if (tokenList?.size) return tokenList;   // retry on next peek if a load ever failed
+  try {
+    const arr = await jfetch("https://lite-api.jup.ag/tokens/v2/tag?query=verified", 20_000);
+    tokenList = new Map(arr.map((t) => [t.id, { symbol: t.symbol, name: t.name, logoURI: t.icon }]));
+  } catch { return new Map(); }
+  return tokenList;
+}
+
+async function fetchPrices(mints) {
+  const out = new Map();   // mint -> { price, chg }
+  try {   // jupiter price v3: { mint: { usdPrice, priceChange24h } }
+    for (let i = 0; i < mints.length; i += 50) {
+      const j = await jfetch("https://lite-api.jup.ag/price/v3?ids=" + mints.slice(i, i + 50).join(","));
+      for (const [mint, d] of Object.entries(j))
+        if (d?.usdPrice != null) out.set(mint, { price: d.usdPrice, chg: d.priceChange24h ?? 0 });
+    }
+    if (out.size) return out;
+  } catch { /* fall through */ }
+  try {   // fallback: coingecko token prices by contract address
+    for (let i = 0; i < mints.length; i += 80) {
+      const j = await jfetch(`${CG}/simple/token_price/solana?contract_addresses=` +
+        mints.slice(i, i + 80).join(",") + "&vs_currencies=usd&include_24hr_change=true");
+      for (const [mint, d] of Object.entries(j))
+        if (d?.usd != null) out.set(mint, { price: d.usd, chg: d.usd_24h_change ?? 0 });
+    }
+  } catch { /* amounts-only view still works */ }
+  return out;
+}
+
+const isSolAddress = (s) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s.trim());
+
+async function peekWallet(addr) {
+  note("🔭 reading wallet from mainnet…");
+  let failedPrograms = 0;
+  const [bal, list, ...accounts] = await Promise.all([
+    rpc("getBalance", [addr]),
+    loadTokenList(),
+    ...TOKEN_PROGRAMS.map((p) =>
+      rpc("getTokenAccountsByOwner", [addr, { programId: p }, { encoding: "jsonParsed" }])
+        .catch(() => { failedPrograms++; return { value: [] }; })),
+  ]);
+  const accountsFailed = failedPrograms === TOKEN_PROGRAMS.length;
+
+  const held = [{ mint: SOL_MINT, amount: (bal?.value ?? bal ?? 0) / 1e9 }];
+  for (const acc of accounts.flatMap((a) => a.value ?? [])) {
+    const info = acc.account?.data?.parsed?.info;
+    const amt = info?.tokenAmount?.uiAmount;
+    if (amt > 0) held.push({ mint: info.mint, amount: amt });
+  }
+
+  // prefer verified mints (whale wallets hold thousands of spam tokens);
+  // if the list is unavailable, price a capped set so peek still works
+  const priceable = list.size
+    ? held.filter((h) => h.mint === SOL_MINT || list.has(h.mint))
+    : held.slice(0, 150);
+  const prices = await fetchPrices(priceable.map((h) => h.mint));
+  let items = priceable.map((h) => {
+    const meta = h.mint === SOL_MINT
+      ? { symbol: "SOL", name: "Solana", logoURI: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png" }
+      : list.get(h.mint);
+    const p = prices.get(h.mint);
+    return {
+      id: "w:" + h.mint,
+      mint: h.mint,
+      symbol: meta?.symbol ?? h.mint.slice(0, 4) + "…",
+      name: meta?.name ?? "unknown token",
+      image: meta?.logoURI ?? "",
+      amount: h.amount,
+      price: p?.price ?? null,
+      chg: p?.chg ?? 0,
+      usd: p ? p.price * h.amount : 0,
+    };
+  });
+  // keep it a school, not a landfill: best 24 by value
+  items = items.sort((a, b) => b.usd - a.usd).slice(0, 24);
+  const total = items.reduce((s, i) => s + i.usd, 0);
+  items.forEach((i) => (i.share = total > 0 ? i.usd / total : 0));
+
+  walletItems = items;
+  walletAddr = addr;
+  localStorage.setItem("trench-last-wallet", addr);
+  // never pretend a partial read is the whole wallet
+  note(accountsFailed ? "🌊 rpc busy — token accounts unavailable, showing SOL only · peek again shortly" : "");
+  rebuild();               // spawn the school before the camera dives to it
+  renderWalletPanel(total);
+  setView("wallet");
+}
+
+function renderWalletPanel(total) {
+  $("wallet-panel").hidden = false;
+  $("wallet-sub").textContent = walletAddr.slice(0, 4) + "…" + walletAddr.slice(-4) +
+    " · " + walletItems.length + " holdings shown";
+  const ul = $("wallet-list");
+  ul.innerHTML = "";
+  for (const it of walletItems) {
+    const li = document.createElement("li");
+    const img = it.image ? `<img src="${it.image}" alt="" loading="lazy" onerror="this.remove()">` : "";
+    li.innerHTML = `${img}<span>${fmtAmt(it.amount)} ${it.symbol}</span>` +
+      `<span class="bag-val">${it.usd ? fmtBig(it.usd) : "—"}</span>`;
+    ul.appendChild(li);
+  }
+  $("wallet-total").textContent = fmtBig(total);
+}
+$("wallet-close").addEventListener("click", () => ($("wallet-panel").hidden = true));
+
+$("wallet-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const addr = $("wallet-input").value.trim();
+  if (!isSolAddress(addr)) { note("🌊 that doesn't look like a solana address"); return; }
+  try { await peekWallet(addr); }
+  catch { note("🌊 couldn't read that wallet (rpc busy?) — try again in a moment"); }
+});
+$("wallet-input").value = localStorage.getItem("trench-last-wallet") || "";
+
+/* ---------------- layout ---------------- */
+function packPositions(items) {
+  const placed = [];
+  for (const it of items) {
+    if (!placed.length) { placed.push({ x: 0, y: 0, r: it.size }); continue; }
+    const a0 = (hash(it.id) % 628) / 100;
+    let done = false;
+    for (let rad = placed[0].r + it.size; !done && rad < 120; rad += 0.2) {
+      for (let k = 0; k < 40; k++) {
+        const a = a0 + (k / 40) * Math.PI * 2;
+        const x = Math.cos(a) * rad, y = Math.sin(a) * rad * 0.72;
+        if (placed.every((p) => Math.hypot(p.x - x, p.y - y) > p.r + it.size + 0.18)) {
+          placed.push({ x, y, r: it.size });
+          done = true;
+          break;
+        }
+      }
+    }
+    if (!done) placed.push({ x: 0, y: 0, r: it.size });
+  }
+  return placed;
+}
+
+function fitDist(boundR) {
+  const vFov = (camera.fov * Math.PI) / 180 / 2;
+  const hFov = Math.atan(Math.tan(vFov) * camera.aspect);
+  return THREE.MathUtils.clamp((boundR * 1.15) / Math.tan(Math.min(vFov, hFov)), 9, 42);
+}
+
+function rebuild() {
+  /* band 0: ecosystem */
+  const caps = ecoCoins.map((c) => c.market_cap || 1);
+  const lo = Math.log(Math.min(...caps, 1)), hi = Math.log(Math.max(...caps, 2));
+  const ecoItems = ecoCoins.map((c) => ({
+    id: c.id,
+    size: 0.55 + 2.05 * (hi > lo ? (Math.log(c.market_cap || 1) - lo) / (hi - lo) : 0.5),
+    coin: c,
+  }));
+  /* band 1: wallet school */
+  const maxShare = Math.max(...walletItems.map((i) => Math.sqrt(i.share)), 0.01);
+  const walletBand = walletItems.map((i) => ({
+    id: i.id,
+    size: 0.5 + 1.9 * (Math.sqrt(i.share) / maxShare),
+    item: i,
+  }));
+
+  const keep = new Set([...ecoItems, ...walletBand].map((i) => i.id));
+  for (const [id, b] of blobs) {
+    b.mesh.visible = keep.has(id);
+    if (!keep.has(id) && selectedId === id) closeCard();
+  }
+
+  [[ecoItems, 0], [walletBand, 1]].forEach(([items, band]) => {
+    if (!items.length) { bandFit[band] = 12; return; }
+    const pos = packPositions(items);
+    let boundR = 1;
+    items.forEach((it, i) => {
+      let b = blobs.get(it.id);
+      if (!b) {
+        const mesh = makeCreature(hash(it.id) % 100);
+        mesh.position.set(pos[i].x, pos[i].y, BAND_Z[band] - 25);
+        scene.add(mesh);
+        b = { mesh, target: new THREE.Vector3(), size: it.size, spring: 0, springVel: 0 };
+        blobs.set(it.id, b);
+      }
+      b.coin = it.coin ?? null;
+      b.item = it.item ?? null;
+      b.size = it.size;
+      b.band = band;
+      b.mesh.visible = true;
+      b.target.set(pos[i].x, pos[i].y, BAND_Z[band] + Math.sin(hash(it.id)) * 2.0);
+      const u = b.mesh.material.uniforms;
+      if (it.coin) {
+        const chg = it.coin.price_change_percentage_24h_in_currency ?? 0;
+        u.uChange.value = THREE.MathUtils.clamp(chg / 5, -1, 1);
+        u.uAmp.value = THREE.MathUtils.clamp(0.06 + Math.abs(chg) * 0.02, 0.06, 0.4);
+        u.uSpeed.value = THREE.MathUtils.clamp(0.3 + Math.abs(it.coin.price_change_percentage_1h_in_currency ?? 0) * 0.5, 0.3, 2.5);
+      } else {
+        u.uChange.value = THREE.MathUtils.clamp((it.item.chg ?? 0) / 5, -1, 1);
+        u.uAmp.value = THREE.MathUtils.clamp(0.08 + Math.abs(it.item.chg ?? 0) * 0.02, 0.08, 0.4);
+        u.uSpeed.value = 0.4;
+      }
+      boundR = Math.max(boundR, Math.hypot(pos[i].x, pos[i].y) + it.size);
+    });
+    bandFit[band] = fitDist(boundR);
+  });
+}
+
+/* ---------------- view switching ---------------- */
+let targetCamZ = BAND_Z[0] + 26;
+function setView(v) {
+  view = v;
+  document.querySelectorAll(".sorts button").forEach((b) =>
+    b.classList.toggle("active", b.dataset.view === v));
+  const band = v === "wallet" ? 1 : 0;
+  targetCamZ = BAND_Z[band] + bandFit[band];
+  focus = null;
+  if (v === "wallet" && !walletItems.length) note("🔭 paste an address below to see its school");
+}
+document.querySelectorAll(".sorts button").forEach((b) =>
+  b.addEventListener("click", () => setView(b.dataset.view)));
+
+addEventListener("wheel", (e) => {
+  if (e.target.closest(".coin-card, .bags-panel")) return;
+  targetCamZ = THREE.MathUtils.clamp(targetCamZ - e.deltaY * 0.06, BAND_Z[1] + 8, BAND_Z[0] + 44);
+  focus = null;
+}, { passive: true });
+
+/* ---------------- pointer: hover, tap vs drag ---------------- */
+const raycaster = new THREE.Raycaster();
+const mouseNDC = new THREE.Vector2(0, 0);
+const tooltip = $("tooltip");
+let pointerActive = false;
+let drag = null;
+
+function setNDC(e) {
+  mouseNDC.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+}
+addEventListener("pointermove", (e) => {
+  pointerActive = true;
+  setNDC(e);
+  tooltip.style.left = e.clientX + "px";
+  tooltip.style.top = e.clientY + "px";
+  if (drag) {
+    if (Math.abs(e.clientY - drag.y0) > 8) drag.moved = true;
+    if (drag.moved && e.pointerType !== "mouse") {
+      targetCamZ = THREE.MathUtils.clamp(drag.camZ0 + (e.clientY - drag.y0) * 0.16, BAND_Z[1] + 8, BAND_Z[0] + 44);
+      focus = null;
+    }
+  }
+});
+canvas.addEventListener("pointerdown", (e) => {
+  pointerActive = true;
+  setNDC(e);
+  drag = { y0: e.clientY, camZ0: targetCamZ, moved: false };
+});
+canvas.addEventListener("pointerup", (e) => {
+  const wasDrag = drag?.moved;
+  drag = null;
+  if (wasDrag) return;
+  setNDC(e);
+  const id = pickBlob();
+  if (!id) { closeCard(); return; }
+  const b = blobs.get(id);
+  b.springVel = 8;
+  blip();
+  selectedId = id;
+  focus = { id };
+  fillCard(b);
+});
+
+function pickBlob() {
+  if (!pointerActive) return null;
+  raycaster.setFromCamera(mouseNDC, camera);
+  const hits = raycaster.intersectObjects([...blobs.values()].filter((b) => b.mesh.visible).map((b) => b.mesh));
+  if (!hits.length) return null;
+  for (const [id, b] of blobs) if (b.mesh === hits[0].object) return id;
+  return null;
+}
+
+/* ---------------- card (eco coins + wallet tokens) ---------------- */
+const card = $("coin-card");
+
+function fillCard(b) {
+  card.hidden = false;
+  const eco = !!b.coin;
+  $("card-changes").style.display = eco ? "" : "none";
+  $("spark").style.display = eco ? "" : "none";
+  $("eco-stats").hidden = !eco;
+  $("wallet-stats").hidden = eco;
+
+  if (eco) {
+    const c = b.coin;
+    $("card-img").src = c.image || "";
+    $("card-name").textContent = c.name;
+    $("card-symbol").textContent = c.symbol;
+    $("card-price").textContent = fmtPrice(c.current_price);
+    for (const [id, v] of [["chg-1h", c.price_change_percentage_1h_in_currency],
+                           ["chg-24h", c.price_change_percentage_24h_in_currency],
+                           ["chg-7d", c.price_change_percentage_7d_in_currency]]) {
+      const el = $(id);
+      el.textContent = id.replace("chg-", "") + " " + pct(v);
+      el.className = v >= 0 ? "up" : "down";
+    }
+    $("card-rank").textContent = "#" + (c.market_cap_rank ?? "—");
+    $("card-mcap").textContent = fmtBig(c.market_cap);
+    $("card-vol").textContent = fmtBig(c.total_volume);
+    drawSpark(c);
+  } else {
+    const it = b.item;
+    $("card-img").src = it.image || "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>";
+    $("card-name").textContent = it.name;
+    $("card-symbol").textContent = it.symbol;
+    $("card-price").textContent = it.usd ? fmtBig(it.usd) : fmtAmt(it.amount) + " " + it.symbol;
+    $("w-amount").textContent = fmtAmt(it.amount) + " " + it.symbol;
+    $("w-share").textContent = (it.share * 100).toFixed(1) + "%";
+    $("w-mint").textContent = it.mint.slice(0, 6) + "…" + it.mint.slice(-4);
+    $("w-mint").dataset.mint = it.mint;
+  }
+}
+$("w-mint").addEventListener("click", (e) => {
+  navigator.clipboard?.writeText(e.target.dataset.mint || "");
+  note("mint copied");
+  setTimeout(() => note(""), 1200);
+});
+
+function drawSpark(c) {
+  const cv = $("spark"), ctx = cv.getContext("2d");
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  const data = c.sparkline_in_7d?.price;
+  if (!data?.length) return;
+  const min = Math.min(...data), max = Math.max(...data);
+  const up = data[data.length - 1] >= data[0];
+  const X = (i) => (i / (data.length - 1)) * (cv.width - 8) + 4;
+  const Y = (v) => cv.height - 6 - ((v - min) / (max - min || 1)) * (cv.height - 12);
+  ctx.beginPath();
+  data.forEach((v, i) => (i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v))));
+  ctx.strokeStyle = up ? "#14f195" : "#ff5e8a";
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+}
+
+function closeCard() { card.hidden = true; selectedId = null; focus = null; }
+$("card-close").addEventListener("click", closeCard);
+addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeCard(); $("wallet-panel").hidden = true; }
+});
+
+/* ---------------- pop ---------------- */
+let audioCtx;
+function blip() {
+  try {
+    audioCtx ??= new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(500, audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.12);
+    g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + 0.16);
+  } catch { /* fine */ }
+}
+
+function note(msg) {
+  const el = $("reef-note");
+  el.textContent = msg;
+  el.hidden = !msg;
+}
+
+/* ---------------- boot + loops ---------------- */
+refreshEco(true);
+setInterval(refreshEco, 120_000);
+setInterval(fetchVitals, 12_000);
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  if (ecoCoins.length || walletItems.length) rebuild();
+}
+addEventListener("resize", resize);
+resize();
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const rawDt = clock.getDelta();
+  const dt = Math.min(rawDt, 0.05);
+  const t = clock.elapsedTime;
+  const kCam = 1 - Math.exp(-3.2 * rawDt);
+  const kLook = 1 - Math.exp(-5 * rawDt);
+
+  const hovId = pickBlob();
+  if (hovId !== hoveredId) {
+    hoveredId = hovId;
+    canvas.style.cursor = hovId ? "pointer" : "default";
+    if (hovId) {
+      const b = blobs.get(hovId);
+      tooltip.innerHTML = b.coin
+        ? (() => { const chg = b.coin.price_change_percentage_24h_in_currency ?? 0;
+            return `<b>${b.coin.name}</b> ${fmtPrice(b.coin.current_price)} <span class="${chg >= 0 ? "up" : "down"}">${pct(chg)}</span>`; })()
+        : `<b>${b.item.symbol}</b> ${fmtAmt(b.item.amount)} · ${b.item.usd ? fmtBig(b.item.usd) : "unpriced"}`;
+    }
+    tooltip.hidden = !hovId;
+  }
+
+  for (const [id, b] of blobs) {
+    if (!b.mesh.visible) continue;
+    const u = b.mesh.material.uniforms;
+    u.uTime.value = t;
+    const bobY = Math.sin(t * 0.6 + u.uSeed.value) * 0.12;
+    b.mesh.position.x = lerp(b.mesh.position.x, b.target.x, 0.04);
+    b.mesh.position.y = lerp(b.mesh.position.y, b.target.y + bobY, 0.04);
+    b.mesh.position.z = lerp(b.mesh.position.z, b.target.z, 0.04);
+    b.springVel -= b.spring * 60 * dt;
+    b.springVel *= Math.exp(-7 * dt);
+    b.spring += b.springVel * dt;
+    u.uPulse.value = b.spring;
+    const hovBoost = id === hoveredId ? 1.12 : 1;
+    b.mesh.scale.setScalar(lerp(b.mesh.scale.x, b.size * hovBoost, 0.12));
+    u.uGlow.value = lerp(u.uGlow.value, id === selectedId ? 0.9 : id === hoveredId ? 0.45 : 0, 0.1);
+    b.mesh.rotation.y = t * 0.1 + u.uSeed.value;
+  }
+
+  if (focus) {
+    const b = blobs.get(focus.id);
+    if (b?.mesh.visible) {
+      const p = b.mesh.position;
+      const dist = (b.size * 3.2 + 2.6) / Math.min(1, Math.max(0.5, camera.aspect));
+      camera.position.x = lerp(camera.position.x, p.x, kCam);
+      camera.position.y = lerp(camera.position.y, p.y + b.size * 0.4, kCam);
+      camera.position.z = lerp(camera.position.z, p.z + dist, kCam);
+      lookTarget.lerp(p, kLook);
+      targetCamZ = p.z + dist;
+    } else focus = null;
+  } else {
+    camera.position.x = lerp(camera.position.x, mouseNDC.x * 1.4, kCam * 0.6);
+    camera.position.y = lerp(camera.position.y, mouseNDC.y * 0.9, kCam * 0.6);
+    camera.position.z = lerp(camera.position.z, targetCamZ, kCam);
+    lookTarget.lerp(new THREE.Vector3(camera.position.x * 0.5, camera.position.y * 0.5, camera.position.z - 12), kLook);
+  }
+  camera.lookAt(lookTarget);
+  dust.rotation.z += currentSpeed * 0.004 * (dt / 0.016);   // the current IS the tps
+
+  renderer.render(scene, camera);
+});
+
+/* hackable, like everything here */
+window.trench = {
+  blobs, get eco() { return ecoCoins; }, get wallet() { return walletItems; },
+  peekWallet, setView, rpc, fillCard,
+};
+console.log("%c⚓ the trench", "font-size:1.6rem;font-weight:900;color:#9945ff");
+console.log("solana, live. read-only, always. hack me: trench.rpc('getSlot'), trench.peekWallet(addr)");

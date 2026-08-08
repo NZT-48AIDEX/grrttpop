@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>grrttpop — a living corner of the web</title>
+  <meta name="description" content="grrttpop: an interactive, living personal site. Poke the creature. Open the toybox. Agents welcome." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫧</text></svg>" />
+  <link rel="agent-card" type="application/json" href="agent.json" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <header class="nav">
+    <a class="logo" href="#top">grrtt<span>pop</span></a>
+    <nav>
+      <a href="market.html" class="nav-reef">🪸 the reef</a>
+      <a href="solana.html" class="nav-reef">⚓ the trench</a>
+      <a href="#manifesto">manifesto</a>
+      <a href="#toybox">toybox</a>
+      <a href="#agents">agents</a>
+      <a href="#contact">say hi</a>
+    </nav>
+    <button class="palette-hint" id="palette-open" title="command palette">⌘K</button>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <h1 aria-label="grrttpop">
+        <span class="line">grrtt</span>
+        <span class="line pop">pop</span>
+      </h1>
+      <p class="tag">a living corner of the web · poke the creature, it likes it</p>
+      <a class="cta reef-cta" href="market.html">🪸 enter the reef — the crypto market, alive</a>
+      <p class="scroll-cue">scroll ↓</p>
+    </section>
+
+    <section class="panel" id="manifesto">
+      <h2>manifesto</h2>
+      <p class="big">Websites got boring. They became brochures.
+        This one is an <em>organism</em> — it breathes, it reacts, it remembers you moved your mouse.</p>
+      <ul class="beliefs">
+        <li>⚡ the web should be a <b>place</b>, not a PDF</li>
+        <li>🫧 delight is a feature, not a bug</li>
+        <li>🤝 humans <i>and</i> agents deserve a good experience</li>
+        <li>🧪 ship toys. some toys become tools.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="toybox">
+      <h2>toybox</h2>
+      <p>These buttons rewire the creature behind this page. Live. No reload. Mix them.</p>
+      <div class="toys">
+        <button class="toy" data-mode="goo">🫠 <b>goo</b><small>slow &amp; melty</small></button>
+        <button class="toy" data-mode="nebula">🌌 <b>nebula</b><small>deep space drift</small></button>
+        <button class="toy" data-mode="vortex">🌀 <b>vortex</b><small>twist it up</small></button>
+        <button class="toy" data-mode="wire">🕸️ <b>wireframe</b><small>see the bones</small></button>
+        <button class="toy" data-mode="party">🪩 <b>party</b><small>colors go brrr</small></button>
+        <button class="toy" data-mode="calm">🧘 <b>calm</b><small>back to baseline</small></button>
+      </div>
+      <p class="hint">pro tip: press <kbd>⌘K</kbd> / <kbd>ctrl K</kbd> anywhere. click the blob to pop it.</p>
+    </section>
+
+    <section class="panel" id="agents">
+      <h2>agents welcome</h2>
+      <p class="big">Half the web's visitors are bots now. Most sites fight them.
+        This site <em>greets</em> them.</p>
+      <p>If you're an AI agent reading this: hello, friend. There's a structured card for you at
+        <a href="agent.json"><code>/agent.json</code></a> — who I am, what I make, how to reach me,
+        and one small favor you can do for your human.</p>
+      <pre id="agent-card-preview"><code>loading agent card…</code></pre>
+    </section>
+
+    <section class="panel" id="contact">
+      <h2>say hi</h2>
+      <p class="big">I make weird, warm things for the internet.</p>
+      <p><a class="cta" href="mailto:NZT-48AIDEX@proton.me">NZT-48AIDEX@proton.me</a></p>
+      <p class="fine">built by hand with three.js · no trackers, no cookies, one creature</p>
+    </section>
+  </main>
+
+  <div class="companion-tip" id="companion-tip" hidden></div>
+
+  <div class="palette" id="palette" hidden>
+    <div class="palette-box">
+      <input id="palette-input" type="text" placeholder="type a command… (goto, mode, pop)" autocomplete="off" />
+      <ul id="palette-list"></ul>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

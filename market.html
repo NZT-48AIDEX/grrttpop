@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>the reef — dive the live crypto market · grrttpop</title>
+  <meta name="description" content="Dive the crypto market: blue chips in the shallows, small caps in the deep. Real-time trades pulse through living creatures. No login, no tracking." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪸</text></svg>" />
+  <link rel="agent-card" type="application/json" href="agent.json" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="reef.css" />
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.js" } }
+  </script>
+</head>
+<body class="reef-body">
+  <canvas id="scene"></canvas>
+
+  <header class="reef-top">
+    <a class="logo" href="index.html">grrtt<span>pop</span></a>
+    <span class="reef-title">🪸 the reef <em>· dive the market</em></span>
+    <div class="reef-globals">
+      <a class="sol-pill" href="solana.html" title="dive the solana trench">⚓ trench</a>
+      <button id="bag-total" class="bag-pill" hidden title="open my bags">🎒 …</button>
+      <span id="global-mcap" title="total crypto market cap">…</span>
+      <span id="fng" class="fng" title="fear &amp; greed index">…</span>
+      <button id="sound-btn" class="sound-btn" title="ambient soundscape">🔇</button>
+    </div>
+  </header>
+
+  <nav class="depth-rail" id="depth-rail" aria-label="depth">
+    <button data-band="0" class="active"><i></i><span>the shallows · blue chips</span></button>
+    <button data-band="1"><i></i><span>mid waters · majors</span></button>
+    <button data-band="2"><i></i><span>the deep · small caps</span></button>
+  </nav>
+
+  <div class="dive-hint" id="dive-hint">scroll ↓ to dive</div>
+  <div id="band-labels"><span></span><span></span><span></span></div>
+
+  <div class="reef-tooltip" id="tooltip" hidden></div>
+
+  <aside class="coin-card" id="coin-card" hidden>
+    <button class="card-close" id="card-close" title="close (esc)">×</button>
+    <div class="card-head">
+      <img id="card-img" alt="" width="36" height="36" />
+      <div>
+        <b id="card-name">—</b>
+        <span id="card-symbol" class="card-sym">—</span>
+      </div>
+      <button id="card-watch" class="watch-btn" title="add to watchlist">☆</button>
+    </div>
+    <div class="card-price" id="card-price">—</div>
+    <div class="card-changes">
+      <span id="chg-1h">1h —</span>
+      <span id="chg-24h">24h —</span>
+      <span id="chg-7d">7d —</span>
+    </div>
+    <canvas id="spark" width="280" height="64"></canvas>
+    <dl class="card-stats">
+      <div><dt>rank</dt><dd id="card-rank">—</dd></div>
+      <div><dt>market cap</dt><dd id="card-mcap">—</dd></div>
+      <div><dt>24h volume</dt><dd id="card-vol">—</dd></div>
+    </dl>
+    <div class="convert">
+      <input id="conv-coin" type="number" min="0" step="any" value="1" />
+      <span id="conv-sym">BTC</span>
+      <span class="conv-eq">=</span>
+      <input id="conv-usd" type="number" min="0" step="any" />
+      <span>USD</span>
+    </div>
+    <p class="card-fine">data: CoinGecko + Binance ticks · not financial advice</p>
+  </aside>
+
+  <aside class="bags-panel" id="bags-panel" hidden>
+    <button class="card-close" id="bags-close" title="close">×</button>
+    <h3>🎒 my bags</h3>
+    <p class="bags-sub">local only — never leaves your browser</p>
+    <div class="bag-add">
+      <input id="bag-coin" list="coin-list" placeholder="coin (btc…)" autocomplete="off" />
+      <datalist id="coin-list"></datalist>
+      <input id="bag-amt" type="number" step="any" min="0" placeholder="amount" />
+      <button id="bag-add-btn">add</button>
+    </div>
+    <ul id="bag-list"></ul>
+    <p class="bag-total-row">total <b id="bag-total-inline">$0</b></p>
+    <p class="card-fine">a tracker, not advice · prices tick live</p>
+  </aside>
+
+  <footer class="reef-bottom">
+    <div class="sorts" role="group" aria-label="sort">
+      <button data-sort="mcap" class="active">🐋 by size</button>
+      <button data-sort="gainers">📈 gainers</button>
+      <button data-sort="losers">📉 losers</button>
+      <button data-sort="watched">⭐ watched</button>
+      <button data-sort="bags">🎒 bags</button>
+    </div>
+    <input id="search" type="search" placeholder="find a coin… (/)" autocomplete="off" />
+    <div class="legend">
+      <span><i class="dot dot-up"></i>up</span>
+      <span><i class="dot dot-down"></i>down</span>
+      <span>size = mcap · twitch = volatility</span>
+      <span id="live-dot" title="realtime trade ticks">○ live</span>
+    </div>
+  </footer>
+
+  <div class="reef-note" id="reef-note" hidden></div>
+
+  <script type="module" src="reef.js"></script>
+</body>
+</html>
