@@ -6,6 +6,8 @@ import {
   peekWallet as readWallet, isSolAddress, hostOf,
   RPCS, SOL_MINT, TOKEN_PROGRAMS, ECO_COUNT, CG,
 } from "./lib/solana.js";
+import { describeTrench } from "./lib/solana.js";
+import { isAgentView, mountAgentView, trenchToText } from "./lib/describe.js";
 
 /* ================================================================
    the trench — solana, live.
@@ -652,6 +654,18 @@ renderer.setAnimationLoop(() => {
 window.trench = {
   blobs, get eco() { return ecoCoins; }, get wallet() { return walletItems; },
   peekWallet, setView, rpc, fillCard,
+  /* the trench in words, for anything without eyes */
+  describe: () => describeTrench({
+    vitals,
+    eco: ecoCoins,
+    wallet: walletItems.length
+      ? { address: walletAddr, items: walletItems, total: walletItems.reduce((s, i) => s + i.usd, 0),
+          partial: walletMeta.partial, gated: walletMeta.gated,
+          reason: walletMeta.partial ? (walletMeta.gated
+            ? "free public RPCs block token-account reads — add your own endpoint to see the whole wallet"
+            : "rpc unreachable for token accounts — SOL balance only") : null }
+      : null,
+  }),
   /* one structured snapshot, for anything without eyes */
   state: () => ({
     ...diag.snapshot(),
@@ -686,5 +700,10 @@ window.trench = {
     note: $("reef-note")?.hidden === false ? $("reef-note").textContent : null,
   }),
 };
+/* a visitor with no eyes gets the trench described instead of a black canvas */
+if (isAgentView()) {
+  mountAgentView({ render: () => trenchToText(window.trench.describe()) });
+}
+
 console.log("%c⚓ the trench", "font-size:1.6rem;font-weight:900;color:#9945ff");
 console.log("solana, live. read-only, always. hack me: trench.rpc('getSlot'), trench.peekWallet(addr)");

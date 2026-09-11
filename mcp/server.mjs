@@ -177,6 +177,32 @@ const tools = [
   },
 
   {
+    name: "describe_page",
+    description:
+      "What a page is showing right now, in words — the same text a visitor with no eyes gets at " +
+      "?agent=1. The reef reports how many creatures are in which depth band and which way they're " +
+      "moving; the trench reports what mainnet is doing. Use this to read the site as a scene " +
+      "rather than as a data dump.",
+    inputSchema: {
+      type: "object",
+      properties: { page: pageEnum, live: liveFlag, format: { type: "string", enum: ["text", "json"], default: "text" } },
+      required: ["page"],
+    },
+    async run({ page: name, live = false, format = "text" }) {
+      const page = await openPage(name, { live, settle: 60, extraQuery: live ? "?agent=1" : "&agent=1" });
+      // the view repaints as data trickles in; wait for it to say something real
+      await page.waitFor(`(document.getElementById("agent-view")?.textContent ?? "").length > 200`,
+        { timeout: 30_000, label: "the page to describe itself" });
+      if (format === "json") {
+        return name === "index"
+          ? await page.eval("return grrtt.state()")
+          : await page.eval(`return ${GLOBALS[name]}.describe()`);
+      }
+      return await page.eval(`return document.getElementById("agent-view").textContent`);
+    },
+  },
+
+  {
     name: "site_state",
     description:
       "Boot a page in a headless browser and report what it actually did: fps, draw calls, shader " +

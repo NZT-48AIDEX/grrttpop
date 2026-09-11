@@ -130,6 +130,12 @@ try {
     check("shader_try returns the compile log", () =>
       /ERROR|error/.test(JSON.stringify(bad.compileLog)) ? null : JSON.stringify(bad.compileLog).slice(0, 200));
 
+    const described = await call("describe_page", { page: "reef" });
+    check("describe_page returns prose, not a data dump", () =>
+      typeof described === "string" && described.includes("depth bands") ? null : String(described).slice(0, 150));
+    check("describe_page carries the disclaimer", () =>
+      String(described).includes("not financial advice") ? null : "disclaimer missing from the description");
+
     const vis = await call("visual_diff", { page: "trench" });
     check("visual_diff matches the baseline", () => vis.status === "pass" ? null : vis.message);
   }

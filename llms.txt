@@ -1,0 +1,29 @@
+# grrttpop
+
+> A living corner of the web — not a brochure, an organism. One WebGL creature you
+> can poke, and two working instruments built on live data: the reef (the crypto
+> market rendered as an ocean) and the trench (Solana mainnet, read-only).
+> No trackers, no cookies, no analytics.
+
+Every page can describe itself in words instead of pixels: add `?agent=1` to any
+URL and the WebGL scene is replaced by a live text rendering of the same state.
+You do not need to run a browser to know what this site is showing.
+
+## Pages
+
+- [grrttpop](/index.html): the creature — a noise-displaced blob with an iridescent fresnel shader, a cursor companion, a toybox that rewires the shader live, and a ⌘K palette. Text view: /index.html?agent=1
+- [the reef](/market.html): the live crypto market as a three-band ocean. Size = market cap, colour = 24h move, twitch = volatility. Real-time Binance trade pulses. Text view: /market.html?agent=1
+- [the trench](/solana.html): Solana mainnet. TPS literally drives the speed of the water. Paste any public address to see its holdings as a school of fish. Strictly read-only. Text view: /solana.html?agent=1
+
+## For agents
+
+- [agent card](/agent.json): who runs this, what it offers, how to inspect it. Also at /.well-known/agent.json
+- [card schema](/agent-card.schema.json): the shape of that card
+- MCP server: `node mcp/server.mjs` — 8 read-only tools (reef_snapshot, trench_vitals, trench_ecosystem, trench_wallet_peek, site_state, shader_try, visual_diff, run_check). The repo ships a .mcp.json.
+- Console API: every page exposes `state()` (structured health: fps, shader failures, data staleness, socket liveness, errors) and `describe()` (the current scene as JSON). `window.__diag.errors` holds the last 50 failures, including shader compile logs with line numbers.
+
+## Limits worth carrying with the data
+
+- Market data is visualization only: no trading, no custody, not financial advice.
+- Solana access is read-only. No keys, no signatures, no transactions — there is no code path that could.
+- Free public Solana RPCs block token-account reads, so a wallet peek can be partial. When it is, it says so via `partial`/`gated` and is never presented as a whole wallet.

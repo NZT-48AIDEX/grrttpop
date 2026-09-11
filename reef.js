@@ -7,6 +7,7 @@ import {
   bagValue as sumBags, fmtPrice, fmtBig, pct, moodEmoji, describeReef,
   BAND_SPLIT as SPLIT, COINS as COIN_COUNT,
 } from "./lib/market.js";
+import { isAgentView, mountAgentView, reefToText } from "./lib/describe.js";
 
 /* ================================================================
    the reef — dive the crypto market.
@@ -842,6 +843,8 @@ renderer.setAnimationLoop(() => {
 window.reef = {
   blobs, get coins() { return coins; }, refresh, watchlist,
   get bags() { return bags; }, dive: setDepthByBand, sound,
+  /* the reef in words, for anything without eyes */
+  describe: () => describeReef(coins, { trending, mood, global: globalStats, sort: sortMode }),
   /* one structured snapshot, for anything without eyes */
   state: () => {
     const vis = [...blobs.values()].filter((b) => b.mesh.visible);
@@ -879,5 +882,10 @@ window.reef = {
     };
   },
 };
+/* a visitor with no eyes gets the reef described instead of a black canvas */
+if (isAgentView()) {
+  mountAgentView({ render: () => reefToText(window.reef.describe(), { demoMode, live: liveOn }) });
+}
+
 console.log("%c🪸 the reef", "font-size:1.6rem;font-weight:900");
 console.log("dive: scroll, or keys 1/2/3 · hack me: reef.dive(2), reef.coins, reef.sound.toggle()");

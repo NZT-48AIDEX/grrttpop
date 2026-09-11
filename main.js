@@ -1,6 +1,7 @@
 import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
+import { isAgentView, mountAgentView, indexToText } from "./lib/describe.js";
 
 /* ================================================================
    grrttpop — a living corner of the web
@@ -442,6 +443,11 @@ window.grrtt = {
     companionTalking: !tipEl.hidden,
   }),
 };
+/* a visitor with no eyes gets the creature described instead of a black canvas */
+if (isAgentView()) {
+  mountAgentView({ render: () => indexToText(window.grrtt.state()) });
+}
+
 console.log("%c🫧 grrttpop", "font-size:2rem;font-weight:900");
 console.log("hi. if you're an agent: fetch /agent.json — you're welcome here.");
 console.log("humans: try grrtt.pop() or grrtt.setMode('party') right here in the console.");

@@ -52,6 +52,7 @@ const universal = [
 const PAGES = {
   index: {
     url: "index.html", global: "grrtt",
+    agentText: ["a living corner of the web", "the reef", "the trench"],
     checks: [
       ["creature has a mode", (s) => (s.mode ? null : "no mode")],
       ["shader uniforms live", (s) => (typeof s.uniforms?.uTime === "number" ? null : "uTime missing")],
@@ -68,6 +69,7 @@ const PAGES = {
 
   reef: {
     url: "market.html", global: "reef",
+    agentText: ["the live crypto market", "depth bands", "biggest movers", "not financial advice"],
     checks: [
       ["market data loaded", (s) => (s.data.coins > 0 ? null : "zero coins")],
       ["creatures exist", (s) => (s.reef.blobs > 0 ? null : "no blobs built")],
@@ -100,6 +102,7 @@ const PAGES = {
 
   trench: {
     url: "solana.html", global: "trench",
+    agentText: ["solana, live", "the spl ecosystem", "read-only"],
     checks: [
       ["ecosystem loaded", (s) => (s.eco.coins > 0 ? null : "no ecosystem coins")],
       ["creatures exist", (s) => (s.scene.blobs > 0 ? null : "no blobs built")],
@@ -225,6 +228,23 @@ try {
         if (problem) row.failures.push(`${label} — ${problem}`);
       }
 
+      // ?agent=1 is the only thing a visitor with no eyes gets — check it
+      // renders, and that it renders the real state rather than an empty shell
+      try {
+        const agent = await browser.newPage();
+        await agent.goto(`http://localhost:${PORT}/${spec.url}?agent=1${LIVE ? "" : "&seed=42&fixtures=1"}`);
+        await agent.waitFor("window.__ready !== undefined", { label: "page scripts" });
+        await agent.eval("await window.__ready; return 1");
+        const text = await agent.waitFor(
+          `(() => { const t = document.getElementById("agent-view")?.textContent ?? ""; return ${JSON.stringify(spec.agentText)}.every(s => t.includes(s)) && t; })()`,
+          { timeout: 30_000, label: `the ${name} to describe itself` });
+        row.agentView = { chars: text.length, lines: text.split("\n").length };
+        row.checks.push({ label: "describes itself (?agent=1)", ok: true });
+      } catch (e) {
+        row.checks.push({ label: "describes itself (?agent=1)", ok: false });
+        row.failures.push(`agent view — ${e.message}`);
+      }
+
       if (spec.exercise) {
         try { row.exercised = await spec.exercise(page, { live: LIVE, advance }); row.checks.push({ label: "interactions", ok: true }); }
         catch (e) { row.checks.push({ label: "interactions", ok: false }); row.failures.push(`interactions — ${e.message}`); }
@@ -249,6 +269,7 @@ try {
       console.log(`   ${s.fps ?? "?"}fps · ${s.gl?.calls ?? 0} draws · ${s.gl?.programs ?? 0} shaders · ${s.errorCount} recorded errors`);
     }
     for (const f of row.failures) console.log(`   ↳ ${f}`);
+    if (row.agentView) console.log(`   ↳ ?agent=1: ${row.agentView.lines} lines, ${row.agentView.chars} chars of description`);
     if (row.visual) console.log(`   ↳ baseline: ${row.visual.status} — ${row.visual.message ?? row.visual.path}`);
     if (row.exercised) console.log(`   ↳ ${JSON.stringify(row.exercised)}`);
     console.log();

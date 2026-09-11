@@ -169,6 +169,77 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
   if (!firstImport.includes("harness")) fail(js, "lib/harness.js is not the first import — seeding and the fixed-step clock will not apply");
 }
 
+/* ---------------- 5b. the promises made to agents ---------------- */
+/* the card, the copy of it, the schema and llms.txt are four files that
+   describe the same site. they drift apart the moment nobody checks. */
+{
+  const cardPath = join(ROOT, "agent.json");
+  const wellKnown = join(ROOT, ".well-known", "agent.json");
+  const schemaPath = join(ROOT, "agent-card.schema.json");
+
+  if (!existsSync(wellKnown)) {
+    fail(".well-known/agent.json", "missing — agents look here first. `cp agent.json .well-known/agent.json`");
+  } else if (existsSync(cardPath) &&
+             readFileSync(wellKnown, "utf8") !== readFileSync(cardPath, "utf8")) {
+    fail(".well-known/agent.json", "has drifted from agent.json. `cp agent.json .well-known/agent.json`");
+  }
+
+  if (!existsSync(schemaPath)) fail("agent-card.schema.json", "missing — agent.json's $schema points at it");
+  else if (existsSync(cardPath)) {
+    const card = JSON.parse(readFileSync(cardPath, "utf8"));
+    const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
+
+    if (card.$schema && /^https?:\/\//.test(card.$schema)) {
+      fail("agent.json", `$schema points at an absolute url (${card.$schema}) — use a path this site actually serves`);
+    }
+    // a deliberate subset of json-schema: required keys and top-level types.
+    // enough to catch a hand-edit that drops a field, without pretending to
+    // be a validator.
+    for (const key of schema.required ?? []) {
+      if (!(key in card)) fail("agent.json", `missing required field "${key}" (per agent-card.schema.json)`);
+    }
+    for (const [key, spec] of Object.entries(schema.properties ?? {})) {
+      if (!(key in card) || !spec.type) continue;
+      const actual = Array.isArray(card[key]) ? "array" : typeof card[key];
+      if (spec.type !== actual) fail("agent.json", `"${key}" should be ${spec.type}, got ${actual}`);
+    }
+    for (const key of schema.properties?.site?.required ?? []) {
+      if (!(key in (card.site ?? {}))) fail("agent.json", `site is missing required field "${key}"`);
+    }
+    // the card must not promise tools the server does not have
+    const promised = Object.keys(card.site?.mcp?.tools ?? {});
+    if (promised.length) {
+      const server = readFileSync(join(ROOT, "mcp", "server.mjs"), "utf8");
+      for (const t of promised) {
+        if (!server.includes(`name: "${t}"`)) fail("agent.json", `advertises an mcp tool the server does not define: ${t}`);
+      }
+    }
+    if (card.site?.mcp && card.site.mcp.read_only !== true) {
+      fail("agent.json", "the mcp block must declare read_only: true — every tool is read-only and the card should say so");
+    }
+  }
+
+  if (!existsSync(join(ROOT, "llms.txt"))) fail("llms.txt", "missing — the plain-language index for language models");
+  if (!existsSync(join(ROOT, "CLAUDE.md"))) fail("CLAUDE.md", "missing — the conventions a fresh agent needs");
+}
+
+/* ---------------- 5c. can the site still describe itself? ---------------- */
+/* ?agent=1 is the only thing an eyeless visitor gets. if a page loses
+   describe(), it silently goes back to serving a black rectangle. */
+for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.js", "trench"]]) {
+  const src = readFileSync(join(ROOT, js), "utf8");
+  if (!src.includes("isAgentView()")) fail(js, "no ?agent=1 view — an eyeless visitor gets a black canvas");
+  if (js !== "main.js" && !/describe:\s*\(\)/.test(src)) {
+    fail(js, `no ${global}.describe() — nothing to render as text`);
+  }
+}
+for (const page of ["index.html", "market.html", "solana.html"]) {
+  const src = readFileSync(join(ROOT, page), "utf8");
+  for (const rel_ of ["agent-card", "llms-txt"]) {
+    if (!src.includes(`rel="${rel_}"`)) fail(page, `no <link rel="${rel_}"> — agents cannot discover it`);
+  }
+}
+
 /* ---------------- 6. can the harness still replay? ---------------- */
 /* fixtures are the difference between a test suite and a rate-limit
    fight, so a missing one should fail here, not halfway through smoke. */

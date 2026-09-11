@@ -103,6 +103,61 @@ drives the browser in about a hundred lines. WebGL works headless through
 SwiftShader — slower than a GPU, but the shaders genuinely compile and
 rasterise.
 
+## it can describe itself
+
+Every page here is a WebGL scene, which means an agent arriving with no eyes
+gets a black rectangle and a `<canvas>` element — a strange way to greet someone
+you claim is welcome.
+
+So add `?agent=1` to any page and the scene is replaced by a live text rendering
+of the same state. Not a static fallback: the actual current scene, in words.
+
+```
+the reef — the live crypto market, as an ocean
+
+50 creatures. 10 rising, 40 falling.
+mood: 56 😋
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ████················  2 up / 8 down · median -0.54%
+  mid waters · majors
+     15 creatures  █████···············  4 up / 11 down · median -1.60%
+
+biggest movers
+  ↑ NEAR        +2.94%  $2.48
+  ↓ ZEC         -8.98%  $1,109
+```
+
+The trench does the same for mainnet, including an epoch progress bar — and when
+a wallet read is partial it says **⚠️ PARTIAL READ** in the text, because the
+honesty has to survive the translation too.
+
+`describe()` sits next to `state()` on every console global and returns the same
+thing as structured JSON. `npm run smoke` asserts each page can still describe
+itself, and `npm run check` fails if a page loses `?agent=1` — otherwise it would
+quietly go back to serving a black rectangle.
+
+## discoverable
+
+| where | what |
+|---|---|
+| `/agent.json` | the agent card — who runs this, what it offers, how to inspect it |
+| `/.well-known/agent.json` | the same card, where agents look first |
+| `/agent-card.schema.json` | the card's shape, as a real JSON Schema |
+| `/llms.txt` | a plain-language index of the site |
+| `<link rel="agent-card">`, `<link rel="llms-txt">` | on all three pages |
+| `CLAUDE.md` | the conventions a fresh agent needs before touching anything |
+
+The card's `$schema` used to point at `grrttpop.example`, a domain that has never
+existed. It now points at a schema this site actually serves, and `npm run check`
+validates the card against it — required fields, top-level types, that the
+`.well-known` copy hasn't drifted, that the card doesn't advertise an MCP tool the
+server doesn't define, and that the MCP block still declares `read_only: true`.
+
+That last one matters: the card is the thing an agent trusts before it has read
+any code. It should not be able to lie, even by accident.
+
 ## agents: the site as tools
 
 `agent.json` has always said *hello, agent, you are welcome here* and then
@@ -119,6 +174,7 @@ up; otherwise register `node mcp/server.mjs` as a stdio server.
 | tool | what you get |
 |---|---|
 | `reef_snapshot` | the live market as the reef models it — depth bands, movers, trending, mood |
+| `describe_page` | what a page is showing right now, in words — the ?agent=1 view as a tool |
 | `trench_vitals` | solana mainnet tps, epoch, progress, and which endpoint answered |
 | `trench_ecosystem` | the SPL ecosystem: top tokens, gainers, losers |
 | `trench_wallet_peek` | any public address's holdings — and an honest `partial`/`gated` when the RPC refuses |
@@ -269,6 +325,7 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `reef.js` / `trench.js` | the reef and the trench |
 | `lib/diag.js` | the nervous system: error capture, fps, the ready beacon |
 | `lib/harness.js` | seeded rng, the stepped clock, fixture replay |
+| `lib/describe.js` | the organism in words — the ?agent=1 view |
 | `lib/market.js` | the reef's data + modelling, browser and node |
 | `lib/solana.js` | chain access, read-only, browser and node |
 | `mcp/server.mjs` | the site as tools for agents |
