@@ -1,4 +1,6 @@
+import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
+import diag from "./lib/diag.js";
 
 /* ================================================================
    the trench — solana, live.
@@ -28,6 +30,7 @@ const FOG_DENSITY = 0.014;
 const canvas = document.getElementById("scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+diag.install({ name: "trench", renderer });
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x070512, FOG_DENSITY);
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 300);
@@ -158,6 +161,11 @@ let ecoCoins = [];
 let walletItems = [];      // [{ id, symbol, name, amount, usd, price, mint, image, share }]
 let walletAddr = "";
 let view = "eco";
+let lastEcoAt = null;       // when the ecosystem list last came back real
+let rpcOk = false;          // mainnet reachable on the last call
+let lastRpcAt = null;
+let vitals = { tps: null, epoch: null, epochPct: null };
+let walletMeta = { addr: "", partial: false, gated: false, at: null };
 let selectedId = null;
 let hoveredId = null;
 let focus = null;
@@ -213,14 +221,21 @@ async function rpc(method, params = []) {
       rpcIdx = (rpcIdx + i) % pool.length;
       setRpcDot(true);
       return j.result;
-    } catch { /* try next endpoint */ }
+    } catch (err) {
+      // record which endpoint refused what — failover hides this entirely
+      diag.track("rpc", err?.message ?? err, { method, host: hostOf(url), blocked });
+    }
   }
   if (!blocked) setRpcDot(false);   // a gated method isn't a dead connection
   const err = new Error("solana rpc unreachable");
   err.blocked = blocked;   // "the method is gated" vs "the network is down"
   throw err;
 }
+const hostOf = (u) => { try { return new URL(u).host; } catch { return "?"; } };
+
 function setRpcDot(on) {
+  rpcOk = on;
+  if (on) lastRpcAt = Date.now();
   const el = $("rpc-dot");
   el.textContent = (on ? "●" : "○") + " mainnet";
   el.classList.toggle("on", on);
@@ -233,15 +248,21 @@ async function fetchVitals() {
     const s = samples?.[0];
     if (s) {
       const tps = s.numTransactions / s.samplePeriodSecs;
+      vitals.tps = Math.round(tps);
       $("tps").textContent = `⚡ ${Math.round(tps).toLocaleString()} tps`;
       currentSpeed = 0.2 + Math.min(tps / 4000, 1.5);
     }
-  } catch { $("tps").textContent = "⚡ … tps"; }
+  } catch (err) {
+    diag.track("vitals", err?.message ?? err, { call: "getRecentPerformanceSamples" });
+    $("tps").textContent = "⚡ … tps";
+  }
   try {
     const e = await rpc("getEpochInfo");
     const prog = Math.round((e.slotIndex / e.slotsInEpoch) * 100);
+    vitals.epoch = e.epoch;
+    vitals.epochPct = prog;
     $("epoch").textContent = `epoch ${e.epoch} · ${prog}%`;
-  } catch { /* keep last */ }
+  } catch (err) { diag.track("vitals", err?.message ?? err, { call: "getEpochInfo" }); }
 }
 
 /* ---------------- ecosystem data ---------------- */
@@ -257,22 +278,26 @@ let retryTimer = null;
 async function refreshEco(first = false) {
   try {
     ecoCoins = await fetchEco();
+    lastEcoAt = Date.now();
     localStorage.setItem("trench-cache", JSON.stringify({ t: Date.now(), coins: ecoCoins }));
     note("");
-  } catch {
+  } catch (err) {
+    diag.track("eco", err?.message ?? err);
     try {
       const c = JSON.parse(localStorage.getItem("trench-cache") || "null");
       if (c?.coins?.length && !ecoCoins.length) {
         ecoCoins = c.coins;
+        lastEcoAt = c.t;
         note("🌊 market api busy — cached ecosystem · retrying…");
       } else if (!ecoCoins.length) {
         note("🌊 can't reach market data — retrying…");
       }
-    } catch { /* nothing cached */ }
+    } catch (err) { diag.track("cache", err?.message ?? err); }
     clearTimeout(retryTimer);
     retryTimer = setTimeout(refreshEco, 20_000);
   }
   rebuild();
+  if (ecoCoins.length) diag.ready({ page: "trench" });   // alive even if the tab is hidden and never paints
   if (first) fetchVitals();
 }
 
@@ -286,7 +311,7 @@ async function loadTokenList() {
   try {
     const arr = await jfetch("https://lite-api.jup.ag/tokens/v2/tag?query=verified", 20_000);
     tokenList = new Map(arr.map((t) => [t.id, { symbol: t.symbol, name: t.name, logoURI: t.icon }]));
-  } catch { return new Map(); }
+  } catch (err) { diag.track("tokenlist", err?.message ?? err); return new Map(); }
   return tokenList;
 }
 
@@ -375,6 +400,8 @@ async function peekWallet(addr) {
 
   walletItems = items;
   walletAddr = addr;
+  walletMeta = { addr, partial: accountsFailed, gated, at: Date.now() };
+  if (accountsFailed) diag.track("wallet", gated ? "token accounts gated" : "token accounts unreachable", { addr });
   localStorage.setItem("trench-last-wallet", addr);
   // never pretend a partial read is the whole wallet
   note(!accountsFailed ? ""
@@ -693,6 +720,7 @@ renderer.setAnimationLoop(() => {
   const rawDt = clock.getDelta();
   const dt = Math.min(rawDt, 0.05);
   const t = clock.elapsedTime;
+  diag.frame(rawDt);
   const kCam = 1 - Math.exp(-3.2 * rawDt);
   const kLook = 1 - Math.exp(-5 * rawDt);
 
@@ -749,12 +777,46 @@ renderer.setAnimationLoop(() => {
   dust.rotation.z += currentSpeed * 0.004 * (dt / 0.016);   // the current IS the tps
 
   renderer.render(scene, camera);
+  if (ecoCoins.length) diag.ready({ page: "trench" });   // alive = painted, with data
 });
 
 /* hackable, like everything here */
 window.trench = {
   blobs, get eco() { return ecoCoins; }, get wallet() { return walletItems; },
   peekWallet, setView, rpc, fillCard,
+  /* one structured snapshot, for anything without eyes */
+  state: () => ({
+    ...diag.snapshot(),
+    chain: {
+      connected: rpcOk,
+      sinceLastOkMs: lastRpcAt ? Date.now() - lastRpcAt : null,
+      endpoint: hostOf(endpoints()[rpcIdx] ?? ""),
+      customRpc: !!customRpc,
+      poolSize: endpoints().length,
+      ...vitals,
+    },
+    eco: { coins: ecoCoins.length, ageMs: lastEcoAt ? Date.now() - lastEcoAt : null },
+    wallet: {
+      address: walletMeta.addr || null,
+      holdings: walletItems.length,
+      valueUsd: +walletItems.reduce((s, i) => s + i.usd, 0).toFixed(2),
+      /* a partial read is never presented as the whole thing */
+      partial: walletMeta.partial,
+      gated: walletMeta.gated,
+      ageMs: walletMeta.at ? Date.now() - walletMeta.at : null,
+    },
+    scene: {
+      blobs: blobs.size,
+      visible: [...blobs.values()].filter((b) => b.mesh.visible).length,
+      view,
+      selected: selectedId,
+      hovered: hoveredId,
+      currentSpeed: +currentSpeed.toFixed(3),
+      camZ: +camera.position.z.toFixed(2),
+    },
+    tokenList: tokenList ? tokenList.size : null,
+    note: $("reef-note")?.hidden === false ? $("reef-note").textContent : null,
+  }),
 };
 console.log("%c⚓ the trench", "font-size:1.6rem;font-weight:900;color:#9945ff");
 console.log("solana, live. read-only, always. hack me: trench.rpc('getSlot'), trench.peekWallet(addr)");

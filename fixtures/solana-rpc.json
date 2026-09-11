@@ -1,0 +1,33 @@
+{
+ "getRecentPerformanceSamples": [
+  {
+   "numNonVoteTransactions": 92078,
+   "numSlots": 191,
+   "numTransactions": 220701,
+   "samplePeriodSecs": 60,
+   "slot": 446133764
+  }
+ ],
+ "getEpochInfo": {
+  "absoluteSlot": 446133793,
+  "blockHeight": 424177007,
+  "epoch": 1032,
+  "slotIndex": 309793,
+  "slotsInEpoch": 432000,
+  "transactionCount": 547342872278
+ },
+ "getBalance": {
+  "context": {
+   "apiVersion": "4.2.2",
+   "slot": 446133793
+  },
+  "value": 1841046033034874
+ },
+ "getSlot": 446133793,
+ "getTokenAccountsByOwner": {
+  "__error": {
+   "code": -32602,
+   "message": "Request blocked"
+  }
+ }
+}

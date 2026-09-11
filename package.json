@@ -1,15 +1,27 @@
 {
   "name": "grrttpop",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "node tools/check.mjs",
+    "smoke": "node tools/smoke.mjs",
+    "record": "node tools/record-fixtures.mjs",
+    "dev": "npx --yes http-server -p 4173 -c-1 .",
+    "test": "node tools/check.mjs && node tools/smoke.mjs"
   },
-  "keywords": [],
+  "keywords": [
+    "webgl",
+    "three.js",
+    "creative-coding",
+    "solana",
+    "crypto",
+    "agents"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "a living corner of the web — one webgl creature, the reef (live market), the trench (solana)",
   "dependencies": {
     "three": "^0.185.1"
-  }
+  },
+  "type": "module"
 }

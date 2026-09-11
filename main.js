@@ -1,4 +1,6 @@
+import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
+import diag from "./lib/diag.js";
 
 /* ================================================================
    grrttpop — a living corner of the web
@@ -10,6 +12,7 @@ import * as THREE from "three";
 const canvas = document.getElementById("scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+diag.install({ name: "index", renderer });
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
@@ -241,7 +244,11 @@ const idleTips = [
   "agents get their own page here",
   "i'm just 20 triangles but i dream big",
 ];
-setInterval(() => { if (tipEl.hidden && Math.random() < 0.5) say(pick(idleTips), 3000); }, 12000);
+// idle chatter fires on a wall-clock timer, so it would drift into
+// screenshots at unpredictable moments — a deterministic run stays quiet
+if (!window.__harness?.freeze) {
+  setInterval(() => { if (tipEl.hidden && Math.random() < 0.5) say(pick(idleTips), 3000); }, 12000);
+}
 
 /* ---------------- toybox modes ---------------- */
 const MODES = {
@@ -253,11 +260,13 @@ const MODES = {
   party:  { uAmp: 0.55, uFreq: 2.0, uSpeed: 1.4, uTwist: 0.6, uPartyRate: 0.25, uHue: 0.0, wire: false },
 };
 const target = { ...MODES.calm }; // lerped toward each frame
+let currentMode = "calm";
 
 function setMode(name) {
   const m = MODES[name];
   if (!m) return;
   Object.assign(target, m);
+  currentMode = name;
   creatureMat.wireframe = m.wire;
   document.querySelectorAll(".toy").forEach((b) =>
     b.classList.toggle("active", b.dataset.mode === name));
@@ -344,6 +353,9 @@ function resize() {
 }
 addEventListener("resize", resize);
 resize();
+// a hidden tab never runs rAF, and under a driven clock nothing runs until
+// something pumps — in both cases the loop's beacon would never fire
+if (document.hidden || window.__harness?.freeze) diag.ready({ page: "index" });
 
 /* ---------------- animate ---------------- */
 const clock = new THREE.Clock();
@@ -354,6 +366,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(rawDt, 0.05);
   const t = clock.elapsedTime;
   uniforms.uTime.value = t;
+  diag.frame(rawDt);
 
   if (rawDt > 0.045) slowFrames++;
   if (++frameCount >= 60) {
@@ -410,10 +423,25 @@ renderer.setAnimationLoop(() => {
   }
 
   renderer.render(scene, camera);
+  diag.ready({ page: "index" });   // first painted frame = the site is alive
 });
 
 /* a hello for curious humans — the creature is yours to hack */
-window.grrtt = { uniforms, creature, setMode, pop, say, setQuality };
+window.grrtt = {
+  uniforms, creature, setMode, pop, say, setQuality,
+  /* one structured snapshot, for anything without eyes */
+  state: () => ({
+    ...diag.snapshot(),
+    mode: currentMode,
+    quality,
+    wireframe: creatureMat.wireframe,
+    uniforms: Object.fromEntries(
+      Object.entries(uniforms)
+        .filter(([, u]) => typeof u.value === "number")
+        .map(([k, u]) => [k, +u.value.toFixed(4)])),
+    companionTalking: !tipEl.hidden,
+  }),
+};
 console.log("%c🫧 grrttpop", "font-size:2rem;font-weight:900");
 console.log("hi. if you're an agent: fetch /agent.json — you're welcome here.");
 console.log("humans: try grrtt.pop() or grrtt.setMode('party') right here in the console.");

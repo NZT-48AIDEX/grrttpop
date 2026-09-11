@@ -1,4 +1,6 @@
+import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
+import diag from "./lib/diag.js";
 
 /* ================================================================
    the reef — dive the crypto market.
@@ -20,6 +22,7 @@ const FOG_DENSITY = 0.014;
 const canvas = document.getElementById("scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+diag.install({ name: "reef", renderer });
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05060e, FOG_DENSITY);   // applies to the dust
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 300);
@@ -162,6 +165,10 @@ let searchQ = "";
 let selectedId = null;
 let hoveredId = null;
 let demoMode = false;
+let lastDataAt = null;      // when coins last came back real
+let lastTickAt = null;      // last binance trade that moved a price
+let liveOn = false;         // websocket actually connected
+let wsFailures = 0;         // reconnect churn — a socket that never sticks
 let trending = new Set();
 let focus = null;          // { id } while camera is visiting a creature
 let bandFit = [16, 16, 16];
@@ -214,14 +221,15 @@ async function fetchGlobals() {
     const chg = g.market_cap_change_percentage_24h_usd;
     document.getElementById("global-mcap").textContent =
       `market ${fmtBig(t)} · ${chg >= 0 ? "+" : ""}${chg.toFixed(1)}% 24h`;
-  } catch { /* non-essential */ }
+  } catch (err) { diag.track("globals", err?.message ?? err); }
   try {
     const f = (await (await fetch("https://api.alternative.me/fng/")).json()).data[0];
     mood = +f.value;
     document.getElementById("fng").textContent =
       `${moodEmoji(mood)} ${f.value} · ${f.value_classification.toLowerCase()}`;
     sound.setMood(mood);
-  } catch {
+  } catch (err) {
+    diag.track("fng", err?.message ?? err);
     document.getElementById("fng").textContent = "🌊 mood unknown";
   }
 }
@@ -232,7 +240,7 @@ async function fetchTrending() {
     const j = await (await fetch(`${API}/search/trending`)).json();
     trending = new Set(j.coins.map((c) => c.item.id));
     for (const [id, b] of blobs) b.mesh.material.uniforms.uTrend.value = trending.has(id) ? 1 : 0;
-  } catch { /* non-essential */ }
+  } catch (err) { diag.track("trending", err?.message ?? err); }
 }
 
 /* ---------------- formatting ---------------- */
@@ -630,6 +638,7 @@ const liveDot = $("live-dot");
 const symbolMap = new Map();
 
 function setLive(on) {
+  liveOn = on;
   liveDot.textContent = (on ? "●" : "○") + " live";
   liveDot.classList.toggle("on", on);
 }
@@ -644,10 +653,13 @@ function connectTicks() {
   ws?.close();
   const streams = [...symbolMap.keys()].map((s) => s + "usdt@miniTicker").join("/");
   try { ws = new WebSocket("wss://stream.binance.com:9443/stream?streams=" + streams); }
-  catch { setLive(false); return; }
+  catch (err) { wsFailures++; diag.track("ws", err?.message ?? "constructor threw"); setLive(false); return; }
   ws.onopen = () => setLive(true);
-  ws.onclose = () => { setLive(false); ws = null; setTimeout(connectTicks, 8000); };
-  ws.onerror = () => ws?.close();
+  ws.onclose = (e) => {
+    if (!e.wasClean) { wsFailures++; diag.track("ws", `closed ${e.code}${e.reason ? " " + e.reason : ""}`, { streams: symbolMap.size }); }
+    setLive(false); ws = null; setTimeout(connectTicks, 8000);
+  };
+  ws.onerror = () => { wsFailures++; diag.track("ws", "socket error (blocked, offline, or geo-restricted)"); ws?.close(); };
   ws.onmessage = (ev) => {
     try {
       const { data: d } = JSON.parse(ev.data);
@@ -658,6 +670,7 @@ function connectTicks() {
       const nu = +d.c;
       c.current_price = nu;
       const rel = old ? Math.abs(nu - old) / old : 0;
+      lastTickAt = Date.now();
       if (rel > 0.00008) {
         const b = blobs.get(id);
         if (b?.mesh.visible) {
@@ -666,7 +679,7 @@ function connectTicks() {
         }
         if (selectedId === id) $("card-price").textContent = fmtPrice(nu);
       }
-    } catch { /* malformed tick, ignore */ }
+    } catch (err) { diag.track("tick", err?.message ?? "malformed tick"); }
   };
 }
 
@@ -761,14 +774,17 @@ async function refresh(first = false) {
   try {
     coins = await fetchMarket();
     demoMode = false;
+    lastDataAt = Date.now();
     localStorage.setItem("reef-cache", JSON.stringify({ t: Date.now(), coins }));
     note("");
     if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
-  } catch {
+  } catch (err) {
+    diag.track("market", err?.message ?? err, { demoMode });
     const cache = loadCache();
     if (cache && (demoMode || !coins.length)) {
       coins = cache.coins;
       demoMode = false;
+      lastDataAt = cache.t;
       note(`🌊 market api busy — real data from ${timeAgo(cache.t)}, ticks still live · retrying…`);
     } else if (!coins.length) {
       coins = demoData();
@@ -786,10 +802,12 @@ async function refresh(first = false) {
     retryTimer = setTimeout(refresh, 20_000);
   }
   rebuildReef();
+  if (coins.length) diag.ready({ page: "reef" });   // alive even if the tab is hidden and never paints
   if (selectedId) fillCard(coins.find((c) => c.id === selectedId));
   if (first) {   // stagger the extras so a fresh load never bursts the rate limit
-    setTimeout(fetchGlobals, 2500);
-    setTimeout(fetchTrending, 5500);
+    const spread = window.__harness?.fixtures ? 0 : 1;   // nothing to dodge when replaying
+    setTimeout(fetchGlobals, 2500 * spread);
+    setTimeout(fetchTrending, 5500 * spread);
   }
   connectTicks();
 }
@@ -824,6 +842,7 @@ renderer.setAnimationLoop(() => {
   const rawDt = clock.getDelta();
   const dt = Math.min(rawDt, 0.05);
   const t = clock.elapsedTime;
+  diag.frame(rawDt);
   // frame-rate-independent smoothing for camera travel (works even at 1fps)
   const kCam = 1 - Math.exp(-3.2 * rawDt);
   const kLook = 1 - Math.exp(-5 * rawDt);
@@ -897,12 +916,49 @@ renderer.setAnimationLoop(() => {
   });
 
   renderer.render(scene, camera);
+  if (coins.length) diag.ready({ page: "reef" });   // alive = painted, with data
 });
 
 /* hackable, like everything here */
 window.reef = {
   blobs, get coins() { return coins; }, refresh, watchlist,
   get bags() { return bags; }, dive: setDepthByBand, sound,
+  /* one structured snapshot, for anything without eyes */
+  state: () => {
+    const vis = [...blobs.values()].filter((b) => b.mesh.visible);
+    return {
+      ...diag.snapshot(),
+      data: {
+        source: demoMode ? "demo" : "coingecko",
+        demoMode,
+        coins: coins.length,
+        ageMs: lastDataAt ? Date.now() - lastDataAt : null,
+        mood,
+        trending: trending.size,
+      },
+      ws: {
+        connected: liveOn,
+        readyState: ["connecting", "open", "closing", "closed"][ws?.readyState] ?? "none",
+        sinceLastTickMs: lastTickAt ? Date.now() - lastTickAt : null,
+        streams: symbolMap.size,
+        failures: wsFailures,
+      },
+      reef: {
+        blobs: blobs.size,
+        visible: vis.length,
+        band: currentBand(),
+        sort: sortMode,
+        search: searchQ || null,
+        selected: selectedId,
+        hovered: hoveredId,
+        camZ: +camera.position.z.toFixed(2),
+      },
+      bags: { count: bags.length, valueUsd: +bagValue().toFixed(2) },
+      sound: { on: sound.on },
+      note: document.getElementById("reef-note")?.hidden === false
+        ? document.getElementById("reef-note").textContent : null,
+    };
+  },
 };
 console.log("%c🪸 the reef", "font-size:1.6rem;font-weight:900");
 console.log("dive: scroll, or keys 1/2/3 · hack me: reef.dive(2), reef.coins, reef.sound.toggle()");
