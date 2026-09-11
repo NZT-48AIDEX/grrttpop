@@ -1,6 +1,11 @@
 import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
+import {
+  makeRpc, fetchVitals as readVitals, fetchEcosystem, loadTokenList as loadJupList,
+  peekWallet as readWallet, isSolAddress, hostOf,
+  RPCS, SOL_MINT, TOKEN_PROGRAMS, ECO_COUNT, CG,
+} from "./lib/solana.js";
 
 /* ================================================================
    the trench — solana, live.
@@ -10,20 +15,7 @@ import diag from "./lib/diag.js";
    Strictly read-only: no keys, no signatures, no transactions.
    ================================================================ */
 
-const CG = "https://api.coingecko.com/api/v3";
-const RPCS = [
-  "https://solana-rpc.publicnode.com",
-  "https://solana.drpc.org",
-  "https://endpoints.omniatech.io/v1/sol/mainnet/public",
-  "https://api.mainnet-beta.solana.com",
-];
-const SOL_MINT = "So11111111111111111111111111111111111111112";
-const TOKEN_PROGRAMS = [
-  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",              // spl-token
-  "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",              // token-2022
-];
 const BAND_Z = [0, -70];
-const ECO_COUNT = 40;
 const FOG_DENSITY = 0.014;
 
 /* ---------------- renderer / scene ---------------- */
@@ -166,6 +158,7 @@ let rpcOk = false;          // mainnet reachable on the last call
 let lastRpcAt = null;
 let vitals = { tps: null, epoch: null, epochPct: null };
 let walletMeta = { addr: "", partial: false, gated: false, at: null };
+let tokenListSize = null;   // how many verified mints jupiter gave us
 let selectedId = null;
 let hoveredId = null;
 let focus = null;
@@ -196,42 +189,22 @@ const pct = (v) => v == null ? "—" : (v >= 0 ? "+" : "") + v.toFixed(2) + "%";
    indexed method every provider gates behind an api key. So the pool
    is: your own endpoint first (if you've set one), then the publics. */
 let customRpc = localStorage.getItem("trench-rpc") || "";
-const endpoints = () => (customRpc ? [customRpc, ...RPCS] : RPCS);
-const BLOCKED_RE = /blocked|forbidden|paid|not allowed|upgrade|api key|unauthor|payment/i;
 
-let rpcIdx = 0;
-async function rpc(method, params = []) {
-  const pool = endpoints();
-  let blocked = false;
-  for (let i = 0; i < pool.length; i++) {
-    const url = pool[(rpcIdx + i) % pool.length];
-    try {
-      const r = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-        signal: AbortSignal.timeout(15_000),
-      });
-      const j = await r.json().catch(() => null);
-      if (!r.ok || j?.error) {
-        const msg = String(j?.error?.message ?? r.status);
-        if (BLOCKED_RE.test(msg)) blocked = true;
-        throw new Error(msg);
-      }
-      rpcIdx = (rpcIdx + i) % pool.length;
-      setRpcDot(true);
-      return j.result;
-    } catch (err) {
-      // record which endpoint refused what — failover hides this entirely
-      diag.track("rpc", err?.message ?? err, { method, host: hostOf(url), blocked });
-    }
-  }
-  if (!blocked) setRpcDot(false);   // a gated method isn't a dead connection
-  const err = new Error("solana rpc unreachable");
-  err.blocked = blocked;   // "the method is gated" vs "the network is down"
-  throw err;
+/* failover, the blocked-vs-down distinction and the endpoint pool all live
+   in lib/solana.js so node can use the same code. the page supplies the
+   side effects: light the dot, record each refusal. */
+let rpc = buildRpc();
+function buildRpc() {
+  return makeRpc({
+    custom: customRpc,
+    onEvent: (e) => {
+      if (e.kind === "ok") setRpcDot(true);
+      else diag.track("rpc", e.message, { method: e.method, host: e.host, blocked: e.blocked });
+    },
+  });
 }
-const hostOf = (u) => { try { return new URL(u).host; } catch { return "?"; } };
+const endpoints = () => rpc.endpoints();
+
 
 function setRpcDot(on) {
   rpcOk = on;
@@ -243,36 +216,16 @@ function setRpcDot(on) {
 
 /* ---------------- network vitals ---------------- */
 async function fetchVitals() {
-  try {
-    const samples = await rpc("getRecentPerformanceSamples", [1]);
-    const s = samples?.[0];
-    if (s) {
-      const tps = s.numTransactions / s.samplePeriodSecs;
-      vitals.tps = Math.round(tps);
-      $("tps").textContent = `⚡ ${Math.round(tps).toLocaleString()} tps`;
-      currentSpeed = 0.2 + Math.min(tps / 4000, 1.5);
-    }
-  } catch (err) {
-    diag.track("vitals", err?.message ?? err, { call: "getRecentPerformanceSamples" });
-    $("tps").textContent = "⚡ … tps";
-  }
-  try {
-    const e = await rpc("getEpochInfo");
-    const prog = Math.round((e.slotIndex / e.slotsInEpoch) * 100);
-    vitals.epoch = e.epoch;
-    vitals.epochPct = prog;
-    $("epoch").textContent = `epoch ${e.epoch} · ${prog}%`;
-  } catch (err) { diag.track("vitals", err?.message ?? err, { call: "getEpochInfo" }); }
+  const v = await readVitals(rpc);          // shared: the reads and the maths
+  for (const e of v.errors) diag.track("vitals", e.message, { call: e.call });
+  vitals = { tps: v.tps, epoch: v.epoch, epochPct: v.epochPct };
+  $("tps").textContent = v.tps == null ? "⚡ … tps" : `⚡ ${v.tps.toLocaleString()} tps`;
+  if (v.tps != null) currentSpeed = 0.2 + Math.min(v.tps / 4000, 1.5);   // the current IS the tps
+  if (v.epoch != null) $("epoch").textContent = `epoch ${v.epoch} · ${v.epochPct}%`;
 }
 
 /* ---------------- ecosystem data ---------------- */
-async function fetchEco() {
-  const url = `${CG}/coins/markets?vs_currency=usd&category=solana-ecosystem&order=market_cap_desc` +
-    `&per_page=${ECO_COUNT}&sparkline=true&price_change_percentage=1h,24h,7d`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error("coingecko " + r.status);
-  return r.json();
-}
+const fetchEco = () => fetchEcosystem({ count: ECO_COUNT });
 
 let retryTimer = null;
 async function refreshEco(first = false) {
@@ -302,101 +255,16 @@ async function refreshEco(first = false) {
 }
 
 /* ---------------- wallet peek (read-only) ---------------- */
-const jfetch = (url, ms = 8000) =>
-  fetch(url, { signal: AbortSignal.timeout(ms) }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
-
-let tokenList = null;   // mint -> { symbol, name, logoURI }
-async function loadTokenList() {
-  if (tokenList?.size) return tokenList;   // retry on next peek if a load ever failed
-  try {
-    const arr = await jfetch("https://lite-api.jup.ag/tokens/v2/tag?query=verified", 20_000);
-    tokenList = new Map(arr.map((t) => [t.id, { symbol: t.symbol, name: t.name, logoURI: t.icon }]));
-  } catch (err) { diag.track("tokenlist", err?.message ?? err); return new Map(); }
-  return tokenList;
-}
-
-async function fetchPrices(mints) {
-  const out = new Map();   // mint -> { price, chg }
-  try {   // jupiter price v3: { mint: { usdPrice, priceChange24h } }
-    for (let i = 0; i < mints.length; i += 50) {
-      const j = await jfetch("https://lite-api.jup.ag/price/v3?ids=" + mints.slice(i, i + 50).join(","));
-      for (const [mint, d] of Object.entries(j))
-        if (d?.usdPrice != null) out.set(mint, { price: d.usdPrice, chg: d.priceChange24h ?? 0 });
-    }
-    if (out.size) return out;
-  } catch { /* fall through */ }
-  try {   // fallback: coingecko token prices by contract address
-    for (let i = 0; i < mints.length; i += 80) {
-      const j = await jfetch(`${CG}/simple/token_price/solana?contract_addresses=` +
-        mints.slice(i, i + 80).join(",") + "&vs_currencies=usd&include_24hr_change=true");
-      for (const [mint, d] of Object.entries(j))
-        if (d?.usd != null) out.set(mint, { price: d.usd, chg: d.usd_24h_change ?? 0 });
-    }
-  } catch { /* amounts-only view still works */ }
-  return out;
-}
-
-const isSolAddress = (s) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s.trim());
-
+/* the reads, the pricing fallbacks and the gated-endpoint handling all live
+   in lib/solana.js. the page keeps the school, the camera and the note. */
 async function peekWallet(addr) {
   note("🔭 reading wallet from mainnet…");
-  // token-account reads are gated on free endpoints: retry transient
-  // failures, but a hard block is final — don't stall the user on it
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  let gated = false;
-  async function accountsFor(programId) {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        return await rpc("getTokenAccountsByOwner", [addr, { programId }, { encoding: "jsonParsed" }]);
-      } catch (e) {
-        if (e.blocked) { gated = true; return null; }
-        if (attempt < 2) await sleep(700 * (attempt + 1));
-      }
-    }
-    return null;
-  }
-
-  const [bal, list, ...accounts] = await Promise.all([
-    rpc("getBalance", [addr]),
-    loadTokenList(),
-    ...TOKEN_PROGRAMS.map(accountsFor),
-  ]);
-  const accountsFailed = accounts.every((a) => a === null);
-
-  const held = [{ mint: SOL_MINT, amount: (bal?.value ?? bal ?? 0) / 1e9 }];
-  for (const acc of accounts.flatMap((a) => a?.value ?? [])) {
-    const info = acc.account?.data?.parsed?.info;
-    const amt = info?.tokenAmount?.uiAmount;
-    if (amt > 0) held.push({ mint: info.mint, amount: amt });
-  }
-
-  // prefer verified mints (whale wallets hold thousands of spam tokens);
-  // if the list is unavailable, price a capped set so peek still works
-  const priceable = list.size
-    ? held.filter((h) => h.mint === SOL_MINT || list.has(h.mint))
-    : held.slice(0, 150);
-  const prices = await fetchPrices(priceable.map((h) => h.mint));
-  let items = priceable.map((h) => {
-    const meta = h.mint === SOL_MINT
-      ? { symbol: "SOL", name: "Solana", logoURI: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png" }
-      : list.get(h.mint);
-    const p = prices.get(h.mint);
-    return {
-      id: "w:" + h.mint,
-      mint: h.mint,
-      symbol: meta?.symbol ?? h.mint.slice(0, 4) + "…",
-      name: meta?.name ?? "unknown token",
-      image: meta?.logoURI ?? "",
-      amount: h.amount,
-      price: p?.price ?? null,
-      chg: p?.chg ?? 0,
-      usd: p ? p.price * h.amount : 0,
-    };
+  const res = await readWallet(addr, {
+    rpc,
+    onEvent: (e) => diag.track(e.kind, e.message ?? "", { source: e.source }),
   });
-  // keep it a school, not a landfill: best 24 by value
-  items = items.sort((a, b) => b.usd - a.usd).slice(0, 24);
-  const total = items.reduce((s, i) => s + i.usd, 0);
-  items.forEach((i) => (i.share = total > 0 ? i.usd / total : 0));
+  const { items, total, partial: accountsFailed, gated } = res;
+  tokenListSize = res.tokenListSize;
 
   walletItems = items;
   walletAddr = addr;
@@ -436,7 +304,7 @@ $("rpc-save").addEventListener("click", () => {
   const v = $("rpc-input").value.trim();
   if (v && !/^https:\/\//i.test(v)) { note("🌊 rpc endpoint must start with https://"); return; }
   customRpc = v;
-  rpcIdx = 0;
+  rpc = buildRpc();          // a new endpoint means a fresh pool, yours first
   v ? localStorage.setItem("trench-rpc", v) : localStorage.removeItem("trench-rpc");
   note(v ? "⚓ endpoint saved — peeking again…" : "endpoint cleared");
   if (walletAddr) peekWallet(walletAddr).catch(() => note("🌊 that endpoint didn't work — check the url"));
@@ -790,9 +658,9 @@ window.trench = {
     chain: {
       connected: rpcOk,
       sinceLastOkMs: lastRpcAt ? Date.now() - lastRpcAt : null,
-      endpoint: hostOf(endpoints()[rpcIdx] ?? ""),
-      customRpc: !!customRpc,
-      poolSize: endpoints().length,
+      endpoint: rpc.state().endpoint,
+      customRpc: rpc.state().custom,
+      poolSize: rpc.state().poolSize,
       ...vitals,
     },
     eco: { coins: ecoCoins.length, ageMs: lastEcoAt ? Date.now() - lastEcoAt : null },
@@ -814,7 +682,7 @@ window.trench = {
       currentSpeed: +currentSpeed.toFixed(3),
       camZ: +camera.position.z.toFixed(2),
     },
-    tokenList: tokenList ? tokenList.size : null,
+    tokenList: tokenListSize,
     note: $("reef-note")?.hidden === false ? $("reef-note").textContent : null,
   }),
 };

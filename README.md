@@ -103,6 +103,63 @@ drives the browser in about a hundred lines. WebGL works headless through
 SwiftShader — slower than a GPU, but the shaders genuinely compile and
 rasterise.
 
+## agents: the site as tools
+
+`agent.json` has always said *hello, agent, you are welcome here* and then
+offered nothing to do. This is the chair.
+
+```sh
+npm run mcp        # speaks MCP on stdin/stdout
+npm run mcp:test   # conformance: handshake, discovery, errors, every tool
+```
+
+The repo ships a `.mcp.json`, so a client that reads project config picks it
+up; otherwise register `node mcp/server.mjs` as a stdio server.
+
+| tool | what you get |
+|---|---|
+| `reef_snapshot` | the live market as the reef models it — depth bands, movers, trending, mood |
+| `trench_vitals` | solana mainnet tps, epoch, progress, and which endpoint answered |
+| `trench_ecosystem` | the SPL ecosystem: top tokens, gainers, losers |
+| `trench_wallet_peek` | any public address's holdings — and an honest `partial`/`gated` when the RPC refuses |
+| `site_state` | boot a page headless and report what it *did*: fps, draw calls, shader failures, errors, console |
+| `shader_try` | compile a shader change and get the driver's log back, with line numbers |
+| `visual_diff` | render a page and measure how far it moved from its baseline |
+| `run_check` | the static check, as a tool |
+
+Everything is read-only. No tool can spend, sign, or send, and `lib/solana.js`
+contains no code path that could.
+
+`shader_try` is the one worth having. Shader iteration is otherwise blind — a
+broken shader is a black canvas and nothing else:
+
+```json
+{ "compiled": false,
+  "compileLog": [{ "fragment": "ERROR: 0:58: 'oops' : undeclared identifier" }],
+  "movedFromBaseline": { "percentChanged": 19.98, "region": [361,122,912,663] } }
+```
+
+The protocol is implemented directly in [`mcp/protocol.mjs`](mcp/protocol.mjs) —
+MCP is JSON-RPC 2.0 with a short handshake over newline-delimited stdio, which
+costs less to write than to depend on. One rule it enforces: **stdout is the
+transport**, so every log goes to stderr. `npm run mcp:test` checks that too.
+
+## one codebase, two runtimes
+
+[`lib/market.js`](lib/market.js) and [`lib/solana.js`](lib/solana.js) hold all
+the fetching and modelling — depth bands, log-scale sizing, spiral packing, RPC
+failover, the pricing fallback chain, the gated-wallet handling — with no DOM,
+no three.js and no localStorage. The pages import them for rendering; the MCP
+server imports them for answers.
+
+That's the point: an agent asking about the reef and a human looking at it are
+told the same thing by the same code, instead of a second implementation that
+drifts. It also means the fragile parts are testable without a browser at all.
+
+The extraction was verified by the baselines from the section above: after
+moving every data function out of `reef.js`, the rendered page still matched
+its reference **to the pixel**.
+
 ## make it repeat itself
 
 Three query params, off by default, turn the organism into something a machine
@@ -212,6 +269,10 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `reef.js` / `trench.js` | the reef and the trench |
 | `lib/diag.js` | the nervous system: error capture, fps, the ready beacon |
 | `lib/harness.js` | seeded rng, the stepped clock, fixture replay |
+| `lib/market.js` | the reef's data + modelling, browser and node |
+| `lib/solana.js` | chain access, read-only, browser and node |
+| `mcp/server.mjs` | the site as tools for agents |
+| `mcp/protocol.mjs` | MCP over stdio, ~120 lines, no dependencies |
 | `tools/check.mjs` | `npm run check` — parse, resolve, verify promises |
 | `tools/smoke.mjs` | `npm run smoke` — boot every page and assert it's alive |
 | `tools/cdp.mjs` | a browser driver in ~100 lines, zero dependencies |

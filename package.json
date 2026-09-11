@@ -6,6 +6,8 @@
     "check": "node tools/check.mjs",
     "smoke": "node tools/smoke.mjs",
     "record": "node tools/record-fixtures.mjs",
+    "mcp": "node mcp/server.mjs",
+    "mcp:test": "node tools/mcp-test.mjs",
     "dev": "npx --yes http-server -p 4173 -c-1 .",
     "test": "node tools/check.mjs && node tools/smoke.mjs"
   },

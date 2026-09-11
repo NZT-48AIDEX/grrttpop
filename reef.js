@@ -1,6 +1,12 @@
 import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
+import {
+  fetchMarkets, fetchGlobal, fetchFearGreed, fetchTrending as fetchTrendingIds,
+  demoData, hash, sortCoins, sizeFor as sizeForCoin, packPositions as packCircles,
+  bagValue as sumBags, fmtPrice, fmtBig, pct, moodEmoji, describeReef,
+  BAND_SPLIT as SPLIT, COINS as COIN_COUNT,
+} from "./lib/market.js";
 
 /* ================================================================
    the reef — dive the crypto market.
@@ -11,11 +17,8 @@ import diag from "./lib/diag.js";
    fear. Visualization only — no trading, no advice.
    ================================================================ */
 
-const API = "https://api.coingecko.com/api/v3";
 const REFRESH_MS = 90_000;
-const COINS = 50;
 const BAND_Z = [0, -55, -110];   // spacing must exceed max fit distance or the camera parks inside a band
-const BAND_SPLIT = [10, 15];             // shallows 10, mid 15, deep = rest
 const FOG_DENSITY = 0.014;
 
 /* ---------------- renderer / scene ---------------- */
@@ -176,127 +179,48 @@ let bandTop = [6, 6, 6];
 const watchlist = new Set(JSON.parse(localStorage.getItem("reef-watchlist") || "[]"));
 let bags = JSON.parse(localStorage.getItem("reef-bags") || "[]");   // [{id, amt}]
 
-const hash = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 1e6, 7);
 const lerp = (a, b, t) => a + (b - a) * t;
 
 /* ---------------- data ---------------- */
-async function fetchMarket() {
-  const url = `${API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${COINS}` +
-    `&sparkline=true&price_change_percentage=1h,24h,7d`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error("coingecko " + r.status);
-  return r.json();
-}
-
-function demoData() {
-  const names = ["bitcorn", "etherdream", "solwave", "dogeling", "pepecoral", "linkfish",
-    "adakelp", "dotplankton", "avaquid", "xrpolyp", "tonshell", "shibafry", "uniswirl",
-    "atomsquid", "nearreef", "aptoray", "arbeel", "opurchin", "maticrab", "ltcoral",
-    "suijelly", "injkraken", "tiacoral", "seiurchin", "ftmfin", "runegill", "ordishell",
-    "jupwhale", "wifhat", "bonkfry", "pythfish", "junosnail", "kavakelp", "roseanemone",
-    "glmrguppy", "strkray", "mantaray", "zetaeel", "dymdrift", "altbubble"];
-  return names.map((n, i) => {
-    const seed = hash(n);
-    const wave = Math.sin(seed + Date.now() / 3e4);
-    return {
-      id: n, name: n, symbol: n.slice(0, 4), image: "",
-      current_price: 10000 / (i + 1) * (1 + wave * 0.03),
-      market_cap: 9e11 / Math.pow(i + 1, 1.4),
-      total_volume: 2e10 / (i + 1),
-      market_cap_rank: i + 1,
-      price_change_percentage_1h_in_currency: wave * 1.2,
-      price_change_percentage_24h_in_currency: wave * 6,
-      price_change_percentage_7d_in_currency: Math.cos(seed) * 14,
-      sparkline_in_7d: { price: Array.from({ length: 84 }, (_, k) =>
-        100 * (1 + 0.1 * Math.sin(seed + k / 9) + 0.03 * Math.sin(k / 2 + seed * 3))) },
-    };
-  });
-}
+/* fetching and modelling live in lib/market.js so node can run them too —
+   an agent asking about the reef gets answers from this exact code. */
+const fetchMarket = () => fetchMarkets({ perPage: COIN_COUNT });
 
 let mood = 50;
+let globalStats = null;
 async function fetchGlobals() {
   try {
-    const g = (await (await fetch(`${API}/global`)).json()).data;
-    const t = g.total_market_cap.usd;
-    const chg = g.market_cap_change_percentage_24h_usd;
+    globalStats = await fetchGlobal();
     document.getElementById("global-mcap").textContent =
-      `market ${fmtBig(t)} · ${chg >= 0 ? "+" : ""}${chg.toFixed(1)}% 24h`;
+      `market ${fmtBig(globalStats.totalMcap)} · ${globalStats.change24h >= 0 ? "+" : ""}${globalStats.change24h.toFixed(1)}% 24h`;
   } catch (err) { diag.track("globals", err?.message ?? err); }
   try {
-    const f = (await (await fetch("https://api.alternative.me/fng/")).json()).data[0];
-    mood = +f.value;
-    document.getElementById("fng").textContent =
-      `${moodEmoji(mood)} ${f.value} · ${f.value_classification.toLowerCase()}`;
+    const f = await fetchFearGreed();
+    mood = f.value;
+    document.getElementById("fng").textContent = `${moodEmoji(mood)} ${f.value} · ${f.label}`;
     sound.setMood(mood);
   } catch (err) {
     diag.track("fng", err?.message ?? err);
     document.getElementById("fng").textContent = "🌊 mood unknown";
   }
 }
-const moodEmoji = (v) => v < 25 ? "😱" : v < 45 ? "😟" : v < 55 ? "😐" : v < 75 ? "😋" : "🤪";
 
 async function fetchTrending() {
   try {
-    const j = await (await fetch(`${API}/search/trending`)).json();
-    trending = new Set(j.coins.map((c) => c.item.id));
+    trending = new Set(await fetchTrendingIds());
     for (const [id, b] of blobs) b.mesh.material.uniforms.uTrend.value = trending.has(id) ? 1 : 0;
   } catch (err) { diag.track("trending", err?.message ?? err); }
 }
 
 /* ---------------- formatting ---------------- */
-function fmtPrice(v) {
-  if (v == null) return "—";
-  if (v >= 1) return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  return "$" + v.toLocaleString("en-US", { maximumSignificantDigits: 4 });
-}
-function fmtBig(v) {
-  if (v == null) return "—";
-  for (const [s, m] of [["T", 1e12], ["B", 1e9], ["M", 1e6]])
-    if (v >= m) return "$" + (v / m).toFixed(2) + s;
-  return "$" + Math.round(v).toLocaleString();
-}
-const pct = (v) => v == null ? "—" : (v >= 0 ? "+" : "") + v.toFixed(2) + "%";
 
 /* ---------------- layout ---------------- */
-function packPositions(items) {
-  const placed = [];
-  for (const it of items) {
-    if (!placed.length) { placed.push({ x: 0, y: 0, r: it.size }); continue; }
-    const a0 = (hash(it.id) % 628) / 100;
-    let done = false;
-    for (let rad = placed[0].r + it.size; !done && rad < 120; rad += 0.2) {
-      for (let k = 0; k < 40; k++) {
-        const a = a0 + (k / 40) * Math.PI * 2;
-        const x = Math.cos(a) * rad, y = Math.sin(a) * rad * 0.72;
-        if (placed.every((p) => Math.hypot(p.x - x, p.y - y) > p.r + it.size + 0.18)) {
-          placed.push({ x, y, r: it.size });
-          done = true;
-          break;
-        }
-      }
-    }
-    if (!done) placed.push({ x: 0, y: 0, r: it.size });
-  }
-  return placed;
-}
-
-function currentList() {
-  let list = [...coins];
-  if (sortMode === "gainers") list.sort((a, b) => (b.price_change_percentage_24h_in_currency ?? -99) - (a.price_change_percentage_24h_in_currency ?? -99));
-  if (sortMode === "losers") list.sort((a, b) => (a.price_change_percentage_24h_in_currency ?? 99) - (b.price_change_percentage_24h_in_currency ?? 99));
-  if (sortMode === "watched") list = list.filter((c) => watchlist.has(c.id));
-  if (sortMode === "bags") list = list.filter((c) => bags.some((b) => b.id === c.id));
-  return list;
-}
-
-function sizeFor(c, lo, hi) {
-  if (sortMode === "bags") {
-    const bag = bags.find((b) => b.id === c.id);
-    const val = Math.sqrt((bag?.amt ?? 0) * (c.current_price ?? 0));
-    return 0.6 + 2.0 * (hi > lo ? (val - lo) / (hi - lo) : 0.5);
-  }
-  return 0.55 + 2.05 * (hi > lo ? (Math.log(c.market_cap || 1) - lo) / (hi - lo) : 0.5);
-}
+/* layout, sorting and sizing come from lib/market.js; the page keeps the
+   mutable state (what's sorted, what's watched, what's in the bags) and
+   hands it in. */
+const packPositions = packCircles;
+const currentList = () => sortCoins(coins, { sort: sortMode, watchlist, bags });
+const sizeFor = (c, lo, hi) => sizeForCoin(c, lo, hi, { sort: sortMode, bags });
 
 function fitDist(boundR) {
   const vFov = (camera.fov * Math.PI) / 180 / 2;
@@ -317,9 +241,9 @@ function rebuildReef() {
 
   // slice the current ordering into depth bands
   const bands = [
-    list.slice(0, BAND_SPLIT[0]),
-    list.slice(BAND_SPLIT[0], BAND_SPLIT[0] + BAND_SPLIT[1]),
-    list.slice(BAND_SPLIT[0] + BAND_SPLIT[1]),
+    list.slice(0, SPLIT[0]),
+    list.slice(SPLIT[0], SPLIT[0] + SPLIT[1]),
+    list.slice(SPLIT[0] + SPLIT[1]),
   ];
 
   const keep = new Set(list.map((c) => c.id));
@@ -599,12 +523,7 @@ function saveBags() {
   if (sortMode === "bags") rebuildReef();
 }
 
-function bagValue() {
-  return bags.reduce((s, b) => {
-    const c = coins.find((x) => x.id === b.id);
-    return s + (c?.current_price ?? 0) * b.amt;
-  }, 0);
-}
+const bagValue = () => sumBags(bags, coins);
 
 function renderBagList() {
   const ul = $("bag-list");

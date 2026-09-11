@@ -40,7 +40,7 @@ const pages = files.filter((f) => extname(f) === ".html");
 const jsons = files.filter((f) => extname(f) === ".json");
 /* tooling runs in node, where bare specifiers are legal — the import-map
    rule below is about what the *browser* can resolve. */
-const browserScripts = scripts.filter((f) => !rel(f).startsWith("tools/"));
+const browserScripts = scripts.filter((f) => !rel(f).startsWith("tools/") && !rel(f).startsWith("mcp/"));
 
 /* ---------------- 1. does every script parse? ---------------- */
 /* careful: `node --check foo.js` EXITS 0 on a broken file if the file
