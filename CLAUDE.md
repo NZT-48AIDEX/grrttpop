@@ -55,15 +55,42 @@ as done without it.
 ## Baselines and fixtures
 
 `baselines/<platform>-<arch>/*.png` are the expected renders; `npm run smoke`
-fails if a page moves more than 0.05% of its pixels. After an *intended* visual
-change, re-bless with `npm run smoke -- --update-baselines` and say so. Never
-re-bless to make a failure go away.
+fails if a page moves more than 0.05% of its pixels. Never re-bless to make a
+failure go away.
 
 Baselines are **per-platform on purpose**. The site asks for `-apple-system` and
 `Menlo`; a Linux runner substitutes different fonts and a different SwiftShader
-build, so a macOS baseline can never match there. CI reports `CREATED` and
-compares nothing until `baselines/linux-x64/` is committed — that is expected,
-not a bug to paper over by widening the tolerance.
+build, so a macOS baseline can never match there. Two sets are committed:
+
+| set | rendered by | checked by |
+|---|---|---|
+| `baselines/darwin-arm64/` | a mac running `npm run smoke` | local runs |
+| `baselines/linux-x64/` | the ubuntu CI runner | every push |
+
+### Re-blessing after an intended visual change
+
+`--update-baselines` **only updates the platform you are running on.** A mac
+cannot produce the Linux set and CI cannot commit the mac one, so any change
+that moves pixels takes two rounds. This is the whole procedure:
+
+1. `npm run smoke -- --update-baselines` locally, then commit and push. Your
+   platform's set is now correct; the other one is deliberately stale.
+2. **CI will fail, and that is the expected outcome** — not something to fix by
+   widening the tolerance, deleting the Linux set, or reverting. Read the
+   failure: it reports the contiguous row bands that moved. Confirm the mass is
+   where your change was. If pixels moved somewhere you did not touch, that is a
+   real regression and the rest of this list does not apply yet.
+3. Download the `renders-linux-x64` artifact from that failed run
+   (`gh run download <id> -n renders-linux-x64 -D <dir>`).
+4. **Look at the PNGs before committing them.** A baseline is a promise that
+   this is what correct looks like; blessing a broken render locks the bug in.
+   Zoom in on anything glyph-shaped — a missing glyph and a real box character
+   are nearly identical at normal size on a Linux font stack, and `◫ text` in
+   the nav is exactly that risk.
+5. Copy them into `baselines/linux-x64/`, commit, push. Both platforms green.
+
+Say in the commit message that baselines were re-blessed and why. A silent
+baseline update is indistinguishable from hiding a regression.
 
 `fixtures/` are recorded API responses; `npm run record` refreshes them. They
 exist because CoinGecko rate-limits hard — a loop of live runs will spend its
