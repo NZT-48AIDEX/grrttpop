@@ -219,6 +219,12 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
     }
   }
 
+  // github pages runs jekyll by default, and jekyll drops dotdirs from the
+  // built site — without this file /.well-known/agent.json 404s in production
+  // while working perfectly on every local server.
+  if (!existsSync(join(ROOT, ".nojekyll"))) {
+    fail(".nojekyll", "missing — jekyll will strip /.well-known/ and the agent card 404s once deployed");
+  }
   if (!existsSync(join(ROOT, "llms.txt"))) fail("llms.txt", "missing — the plain-language index for language models");
   if (!existsSync(join(ROOT, "CLAUDE.md"))) fail("CLAUDE.md", "missing — the conventions a fresh agent needs");
 }
