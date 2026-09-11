@@ -54,10 +54,16 @@ as done without it.
 
 ## Baselines and fixtures
 
-`baselines/*.png` are the expected renders; `npm run smoke` fails if a page moves
-more than 0.05% of its pixels. After an *intended* visual change, re-bless with
-`npm run smoke -- --update-baselines` and say so. Never re-bless to make a
-failure go away.
+`baselines/<platform>-<arch>/*.png` are the expected renders; `npm run smoke`
+fails if a page moves more than 0.05% of its pixels. After an *intended* visual
+change, re-bless with `npm run smoke -- --update-baselines` and say so. Never
+re-bless to make a failure go away.
+
+Baselines are **per-platform on purpose**. The site asks for `-apple-system` and
+`Menlo`; a Linux runner substitutes different fonts and a different SwiftShader
+build, so a macOS baseline can never match there. CI reports `CREATED` and
+compares nothing until `baselines/linux-x64/` is committed — that is expected,
+not a bug to paper over by widening the tolerance.
 
 `fixtures/` are recorded API responses; `npm run record` refreshes them. They
 exist because CoinGecko rate-limits hard — a loop of live runs will spend its

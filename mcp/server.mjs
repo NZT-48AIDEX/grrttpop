@@ -38,7 +38,7 @@ import { launch } from "../tools/cdp.mjs";
 import { checkBaseline, diffPng } from "../tools/visual.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const BASELINES = join(ROOT, "baselines");
+const BASELINES = join(ROOT, "baselines", `${process.platform}-${process.arch}`);
 const SHOTS = join(ROOT, ".smoke", "mcp");
 const PORT = 4179;
 const execFileP = promisify(execFile);

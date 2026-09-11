@@ -24,7 +24,11 @@ import { checkBaseline } from "./visual.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SHOTS = join(ROOT, ".smoke");
-const BASELINES = join(ROOT, "baselines");
+/* baselines are platform-specific: the site asks for -apple-system and Menlo,
+   a linux runner substitutes something else, and swiftshader differs too. one
+   directory per platform, rather than a shared one that can never match. */
+const PLATFORM = `${process.platform}-${process.arch}`;
+const BASELINES = join(ROOT, "baselines", PLATFORM);
 const PORT = 4178;
 const args = process.argv.slice(2);
 const flag = (n) => args.includes("--" + n);
@@ -270,7 +274,11 @@ try {
     }
     for (const f of row.failures) console.log(`   ↳ ${f}`);
     if (row.agentView) console.log(`   ↳ ?agent=1: ${row.agentView.lines} lines, ${row.agentView.chars} chars of description`);
-    if (row.visual) console.log(`   ↳ baseline: ${row.visual.status} — ${row.visual.message ?? row.visual.path}`);
+    if (row.visual) {
+      console.log(row.visual.status === "created"
+        ? `   ↳ baseline: CREATED for ${PLATFORM} — nothing was compared. commit it to turn visual regression on here.`
+        : `   ↳ baseline: ${row.visual.status} — ${row.visual.message ?? row.visual.path}`);
+    }
     if (row.exercised) console.log(`   ↳ ${JSON.stringify(row.exercised)}`);
     console.log();
   }

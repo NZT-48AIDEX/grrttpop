@@ -21,6 +21,9 @@ import { homedir, tmpdir } from "node:os";
 /* prefer a puppeteer-cached Chrome for Testing (pinned, no profile of
    the user's to touch), then whatever the mac has installed. */
 export function findChrome() {
+  // an explicit path wins — ci images put chrome wherever they like
+  if (process.env.CHROME_PATH && existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
+
   const cache = join(homedir(), ".cache", "puppeteer", "chrome");
   if (existsSync(cache)) {
     const builds = readdirSync(cache).sort().reverse();
@@ -37,7 +40,10 @@ export function findChrome() {
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
     "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
     "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/snap/bin/chromium",
   ]) if (existsSync(p)) return p;
   return null;
 }
@@ -67,6 +73,9 @@ export async function launch({ headless = true, port = 9222 + (process.pid % 900
     "--hide-scrollbars", "--mute-audio", "--disable-background-timer-throttling",
     // software webgl: no gpu in headless, but the shaders really do compile
     "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader",
+    // ci containers usually can't use chrome's sandbox; the workflow opts in
+    // explicitly rather than this weakening every local run by default
+    ...(process.env.GRRTT_CHROME_FLAGS ?? "").split(/\s+/).filter(Boolean),
     "about:blank",
   ].filter(Boolean), { stdio: ["ignore", "pipe", "pipe"] });
 

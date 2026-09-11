@@ -1,0 +1,95 @@
+# The organism, checked.
+#
+# Two jobs on purpose: `check` is a few seconds of parsing and answers the
+# most common mistakes immediately, so a broken import never waits behind a
+# browser boot. `browser` is the one that decides whether the pages actually
+# render — it runs headless Chrome with software WebGL and compares against
+# the committed baselines.
+#
+# Nothing here touches the network APIs: every run replays fixtures/, because
+# CoinGecko rate-limits hard enough that a few CI runs would spend their time
+# fighting 429s instead of finding bugs.
+
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# a new push makes the previous run irrelevant
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: check (static)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22           # global fetch + WebSocket; tools/cdp.mjs needs both
+          cache: npm
+      - run: npm ci
+      - name: static check
+        run: npm run check
+      - name: mcp protocol conformance
+        run: npm run mcp:test
+
+  browser:
+    name: smoke (headless webgl)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # ci containers can't use chrome's sandbox, and /dev/shm is tiny on runners.
+      # scoped to this job rather than weakening every local run.
+      GRRTT_CHROME_FLAGS: --no-sandbox --disable-dev-shm-usage
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: locate chrome
+        run: |
+          for p in /usr/bin/google-chrome /usr/bin/google-chrome-stable /usr/bin/chromium; do
+            if [ -x "$p" ]; then echo "CHROME_PATH=$p" >> "$GITHUB_ENV"; echo "found $p"; "$p" --version; exit 0; fi
+          done
+          echo "::error::no chrome on this runner — install one or set CHROME_PATH"
+          exit 1
+
+      # Baselines are per-platform. The committed ones were rendered on macOS,
+      # which asks for -apple-system and Menlo; this runner substitutes other
+      # fonts and a different SwiftShader build, so those PNGs can never match
+      # here. Until baselines/linux-x64/ is committed, every other check still
+      # runs — state assertions, shader compiles, the ?agent=1 view, console
+      # errors — and smoke says plainly that nothing was compared.
+      #
+      # To turn visual regression on for CI: download the `renders` artifact
+      # from a green run and commit its PNGs to baselines/linux-x64/.
+      - name: smoke (all pages, fixtures, baselines)
+        run: npm run smoke
+
+      - name: mcp tools (browser-backed)
+        run: npm run mcp:test -- --slow
+
+      # a failed visual check is only actionable if you can see what it rendered
+      - name: upload renders
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: renders-linux-x64
+          path: |
+            .smoke/*.png
+            .smoke/report.json
+          retention-days: 14
+          if-no-files-found: warn

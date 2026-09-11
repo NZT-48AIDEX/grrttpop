@@ -266,7 +266,9 @@ npm run smoke                          # compares against baselines/
 npm run smoke -- --update-baselines    # re-bless them after an intended change
 ```
 
-Each page's settled scene is committed under `baselines/`. A run decodes both
+Each page's settled scene is committed under `baselines/<platform>-<arch>/` —
+per-platform, because the site asks for `-apple-system` and `Menlo` and a Linux
+runner substitutes neither. A run decodes both
 images inside Chrome (which already has a PNG decoder, so this stays dependency
 -free), ignores per-channel deltas ≤ 2, and fails if more than 0.05% of pixels
 move.
