@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22           # global fetch + WebSocket; tools/cdp.mjs needs both
           cache: npm
@@ -52,8 +52,8 @@ jobs:
       # scoped to this job rather than weakening every local run.
       GRRTT_CHROME_FLAGS: --no-sandbox --disable-dev-shm-usage
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -85,7 +85,7 @@ jobs:
       # a failed visual check is only actionable if you can see what it rendered
       - name: upload renders
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: renders-linux-x64
           path: |
@@ -93,3 +93,7 @@ jobs:
             .smoke/report.json
           retention-days: 14
           if-no-files-found: warn
+          # .smoke is a dotdir, and upload-artifact skips hidden files by
+          # default — without this the renders silently never upload, which
+          # you only discover on the run where you needed them
+          include-hidden-files: true
