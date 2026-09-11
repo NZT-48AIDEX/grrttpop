@@ -189,8 +189,24 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
     const card = JSON.parse(readFileSync(cardPath, "utf8"));
     const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
 
-    if (card.$schema && /^https?:\/\//.test(card.$schema)) {
-      fail("agent.json", `$schema points at an absolute url (${card.$schema}) — use a path this site actually serves`);
+    /* $schema has to resolve from the card's own url. an absolute url pins
+       one deployment; a leading slash assumes the site is mounted at the
+       domain root, which breaks the moment it is served from a subpath —
+       github pages puts this one under /grrttpop/. document-relative is the
+       only form that works locally and deployed, which is why a copy of the
+       schema also sits next to the .well-known copy of the card. */
+    if (/^https?:\/\//.test(card.$schema ?? "")) {
+      fail("agent.json", `$schema is an absolute url (${card.$schema}) — pins one deployment; use a relative path`);
+    } else if (card.$schema?.startsWith("/")) {
+      fail("agent.json", `$schema "${card.$schema}" is root-absolute — 404s wherever the site is served from a subpath`);
+    } else if (card.$schema && !existsSync(join(ROOT, card.$schema))) {
+      fail("agent.json", `$schema "${card.$schema}" does not resolve to a file`);
+    }
+    const wkSchema = join(ROOT, ".well-known", "agent-card.schema.json");
+    if (!existsSync(wkSchema)) {
+      fail(".well-known/agent-card.schema.json", "missing — the .well-known card's relative $schema resolves here");
+    } else if (readFileSync(wkSchema, "utf8") !== readFileSync(schemaPath, "utf8")) {
+      fail(".well-known/agent-card.schema.json", "has drifted from agent-card.schema.json");
     }
     // a deliberate subset of json-schema: required keys and top-level types.
     // enough to catch a hand-edit that drops a field, without pretending to

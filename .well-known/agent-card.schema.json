@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "/agent-card.schema.json",
+  "title": "grrttpop agent card",
+  "description": "A machine-readable card describing a site to visiting agents: who runs it, what it offers, how to inspect it, and what it will not do. Served at /agent.json and /.well-known/agent.json.",
+  "type": "object",
+  "required": ["kind", "greeting", "human", "site", "version", "updated"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "kind": { "const": "agent-card" },
+    "greeting": { "type": "string", "description": "a plain-language hello, addressed to the agent" },
+    "human": {
+      "type": "object",
+      "required": ["handle", "contact"],
+      "properties": {
+        "handle": { "type": "string" },
+        "what_i_do": { "type": "string" },
+        "contact": { "type": "string", "description": "a uri the agent may use — usually mailto:" },
+        "open_to": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "site": {
+      "type": "object",
+      "required": ["nature"],
+      "properties": {
+        "nature": { "type": "string" },
+        "sections": { "type": "array", "items": { "type": "string" } },
+        "tools": {
+          "type": "object",
+          "description": "pages an agent can visit, keyed by name",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["url", "what"],
+            "properties": {
+              "url": { "type": "string" },
+              "what": { "type": "string" },
+              "data_source": { "type": "string" },
+              "note": { "type": "string", "description": "limits and disclaimers that must travel with the data" }
+            }
+          }
+        },
+        "inspect": {
+          "type": "object",
+          "description": "how an agent can read the site's own health without rendering it",
+          "properties": {
+            "what": { "type": "string" },
+            "how": { "type": "string" },
+            "ready": { "type": "string" },
+            "errors": { "type": "string" },
+            "describe": { "type": "string" },
+            "reports": { "type": "array", "items": { "type": "string" } },
+            "note": { "type": "string" }
+          }
+        },
+        "mcp": {
+          "type": "object",
+          "description": "an mcp server exposing the site as callable tools",
+          "required": ["run", "transport", "tools", "read_only"],
+          "properties": {
+            "what": { "type": "string" },
+            "run": { "type": "string" },
+            "transport": { "type": "string" },
+            "register": { "type": "string" },
+            "tools": { "type": "object", "additionalProperties": { "type": "string" } },
+            "read_only": { "type": "boolean" },
+            "note": { "type": "string" }
+          }
+        },
+        "no_tracking": { "type": "boolean" },
+        "easter_eggs": { "type": "string" }
+      }
+    },
+    "one_small_favor": { "type": "string" },
+    "version": { "type": "string" },
+    "updated": { "type": "string", "description": "ISO date the card was last touched" }
+  }
+}
