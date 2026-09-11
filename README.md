@@ -109,8 +109,10 @@ Every page here is a WebGL scene, which means an agent arriving with no eyes
 gets a black rectangle and a `<canvas>` element — a strange way to greet someone
 you claim is welcome.
 
-So add `?agent=1` to any page and the scene is replaced by a live text rendering
-of the same state. Not a static fallback: the actual current scene, in words.
+So add `?agent=1` to any page — or click **◫ text** in the nav — and the scene is
+replaced by a live text rendering of the same state. Not a static fallback: the
+actual current scene, in words. There's a link back, since the nav is hidden in
+that view.
 
 ```
 the reef — the live crypto market, as an ocean

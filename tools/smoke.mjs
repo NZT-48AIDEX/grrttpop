@@ -240,7 +240,7 @@ try {
         await agent.waitFor("window.__ready !== undefined", { label: "page scripts" });
         await agent.eval("await window.__ready; return 1");
         const text = await agent.waitFor(
-          `(() => { const t = document.getElementById("agent-view")?.textContent ?? ""; return ${JSON.stringify(spec.agentText)}.every(s => t.includes(s)) && t; })()`,
+          `(() => { const t = document.getElementById("agent-text")?.textContent ?? ""; return ${JSON.stringify(spec.agentText)}.every(s => t.includes(s)) && t; })()`,
           { timeout: 30_000, label: `the ${name} to describe itself` });
         row.agentView = { chars: text.length, lines: text.split("\n").length };
         row.checks.push({ label: "describes itself (?agent=1)", ok: true });

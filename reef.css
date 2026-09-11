@@ -404,3 +404,7 @@ a.sol-pill:hover { border-color: #14f195; color: #14f195; }
   .depth-rail span { display: none; }
   #band-labels span { font-size: .65rem; letter-spacing: .06em; }
 }
+
+/* the way into the text view — see styles.css for the reasoning */
+.nav-agent { opacity: .6; }
+.nav-agent:hover { opacity: 1; color: var(--acid); border-color: var(--acid); }

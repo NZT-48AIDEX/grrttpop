@@ -280,3 +280,14 @@ kbd {
   .nav nav { display: none; }
   section { padding: 5rem 1.4rem; }
 }
+
+/* ---------- the text view ---------- */
+/* every page can describe itself in words; this is the way in. quiet by
+   default, because it is a door most visitors will not need. */
+.nav-agent {
+  opacity: .55;
+  font-family: var(--mono);
+  font-size: .82em;
+  letter-spacing: .02em;
+}
+.nav-agent:hover { opacity: 1; color: var(--acid); }

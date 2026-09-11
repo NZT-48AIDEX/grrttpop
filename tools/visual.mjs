@@ -40,6 +40,7 @@ export async function diffPng(page, a, b, channelTol = TOLERANCE.channel) {
     }
     let differing = 0, maxDelta = 0;
     let minX = A.w, minY = A.h, maxX = -1, maxY = -1;
+    const perRow = new Uint32Array(A.h);
     for (let i = 0; i < A.d.length; i += 4) {
       const dr = Math.abs(A.d[i] - B.d[i]);
       const dg = Math.abs(A.d[i+1] - B.d[i+1]);
@@ -49,15 +50,32 @@ export async function diffPng(page, a, b, channelTol = TOLERANCE.channel) {
       if (worst > ${channelTol}) {
         differing++;
         const px = (i / 4) % A.w, py = Math.floor((i / 4) / A.w);
+        perRow[py]++;
         if (px < minX) minX = px; if (px > maxX) maxX = px;
         if (py < minY) minY = py; if (py > maxY) maxY = py;
       }
     }
+
+    /* a bounding box is dominated by outliers: a header change plus a dozen
+       stray antialiasing pixels near the footer reads as "the whole page
+       moved". group the differing rows into contiguous bands instead, so
+       the report says where the mass actually is. */
+    const bands = [];
+    for (let y = 0; y < A.h; y++) {
+      if (!perRow[y]) continue;
+      const last = bands[bands.length - 1];
+      if (last && y === last.to + 1) { last.to = y; last.pixels += perRow[y]; }
+      else bands.push({ from: y, to: y, pixels: perRow[y] });
+    }
+    bands.sort((a, b) => b.pixels - a.pixels);
+
     const total = A.w * A.h;
     return {
       differing, total, maxDelta,
       percent: +(100 * differing / total).toFixed(4),
       box: maxX < 0 ? null : [minX, minY, maxX, maxY],
+      bands: bands.slice(0, 3),
+      bandCount: bands.length,
       size: [A.w, A.h],
     };`);
 }
@@ -83,6 +101,10 @@ export async function checkBaseline(page, dir, name, current, { update = false }
     message: ok
       ? `${result.differing} px differ (${result.percent}%) — within tolerance`
       : `${result.differing} px differ (${result.percent}%, max channel delta ${result.maxDelta})` +
-        (result.box ? ` in region x${result.box[0]}-${result.box[2]} y${result.box[1]}-${result.box[3]}` : ""),
+        (result.bands?.length
+          ? " — mostly " + result.bands
+              .map((b) => `rows ${b.from}-${b.to} (${b.pixels}px)`).join(", ") +
+            (result.bandCount > result.bands.length ? ` +${result.bandCount - result.bands.length} smaller bands` : "")
+          : ""),
   };
 }

@@ -191,14 +191,14 @@ const tools = [
     async run({ page: name, live = false, format = "text" }) {
       const page = await openPage(name, { live, settle: 60, extraQuery: live ? "?agent=1" : "&agent=1" });
       // the view repaints as data trickles in; wait for it to say something real
-      await page.waitFor(`(document.getElementById("agent-view")?.textContent ?? "").length > 200`,
+      await page.waitFor(`(document.getElementById("agent-text")?.textContent ?? "").length > 200`,
         { timeout: 30_000, label: "the page to describe itself" });
       if (format === "json") {
         return name === "index"
           ? await page.eval("return grrtt.state()")
           : await page.eval(`return ${GLOBALS[name]}.describe()`);
       }
-      return await page.eval(`return document.getElementById("agent-view").textContent`);
+      return await page.eval(`return document.getElementById("agent-text").textContent`);
     },
   },
 
