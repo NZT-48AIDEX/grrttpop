@@ -4,7 +4,7 @@ import diag from "./lib/diag.js";
 import {
   fetchMarkets, fetchGlobal, fetchFearGreed, fetchTrending as fetchTrendingIds,
   demoData, hash, sortCoins, sizeFor as sizeForCoin, packPositions as packCircles,
-  bagValue as sumBags, fmtPrice, fmtBig, pct, moodEmoji, describeReef,
+  bagValue as sumBags, fmtPrice, fmtBig, pct, moodEmoji, describeReef, diagnoseTicks,
   BAND_SPLIT as SPLIT, COINS as COIN_COUNT,
 } from "./lib/market.js";
 import { isAgentView, mountAgentView, reefToText } from "./lib/describe.js";
@@ -173,6 +173,7 @@ let lastDataAt = null;      // when coins last came back real
 let lastTickAt = null;      // last binance trade that moved a price
 let liveOn = false;         // websocket actually connected
 let wsFailures = 0;         // reconnect churn — a socket that never sticks
+let tickTrouble = null;     // { reason, detail } once we know why it won't connect
 let trending = new Set();
 let focus = null;          // { id } while camera is visiting a creature
 let bandFit = [16, 16, 16];
@@ -561,6 +562,28 @@ function setLive(on) {
   liveOn = on;
   liveDot.textContent = (on ? "●" : "○") + " live";
   liveDot.classList.toggle("on", on);
+  liveDot.title = on ? "realtime trade ticks"
+    : tickTrouble ? tickTrouble.detail
+    : "no realtime trade ticks — checking why…";
+  liveDot.classList.toggle("blocked", !on && !!tickTrouble);
+  if (on) { tickTrouble = null; liveDot.classList.remove("blocked"); }
+}
+
+/* a socket that fails twice isn't a blip. find out why, once, and say so —
+   a dim dot with no explanation is the reef being stoic at the reader's
+   expense, which is exactly what the trench refuses to do about wallets. */
+let diagnosing = false;
+async function explainQuietHeartbeat() {
+  if (tickTrouble || diagnosing || wsFailures < 2) return;
+  diagnosing = true;
+  try {
+    tickTrouble = await diagnoseTicks();
+    diag.track("ws", "diagnosed: " + tickTrouble.reason, { detail: tickTrouble.detail });
+    setLive(false);
+    if (!coins.length || demoMode) return;   // a louder problem already owns the note
+    note("🔇 " + tickTrouble.detail);
+    setTimeout(() => { if (!liveOn) note(""); }, 12_000);   // say it, then get out of the way
+  } finally { diagnosing = false; }
 }
 
 function connectTicks() {
@@ -579,7 +602,12 @@ function connectTicks() {
     if (!e.wasClean) { wsFailures++; diag.track("ws", `closed ${e.code}${e.reason ? " " + e.reason : ""}`, { streams: symbolMap.size }); }
     setLive(false); ws = null; setTimeout(connectTicks, 8000);
   };
-  ws.onerror = () => { wsFailures++; diag.track("ws", "socket error (blocked, offline, or geo-restricted)"); ws?.close(); };
+  ws.onerror = () => {
+    wsFailures++;
+    diag.track("ws", "socket error (blocked, offline, or geo-restricted)");
+    ws?.close();
+    explainQuietHeartbeat();
+  };
   ws.onmessage = (ev) => {
     try {
       const { data: d } = JSON.parse(ev.data);
@@ -860,6 +888,7 @@ window.reef = {
       },
       ws: {
         connected: liveOn,
+        trouble: tickTrouble,
         readyState: ["connecting", "open", "closing", "closed"][ws?.readyState] ?? "none",
         sinceLastTickMs: lastTickAt ? Date.now() - lastTickAt : null,
         streams: symbolMap.size,

@@ -23,74 +23,47 @@ Live at <https://nzt-48aidex.github.io/grrttpop/> · CI green on `darwin-arm64`
 
 ---
 
-## P0 — the reef's heartbeat is geo-blocked, and the UI doesn't say so
+## ~~P0 — the reef's heartbeat is geo-blocked, and the UI doesn't say so~~ — done
 
-**Evidence:** `https://api.binance.com/api/v3/ping` returns **HTTP 451
-(Unavailable For Legal Reasons)** from this network. The WebSocket closes `1006`
-immediately in every environment tried — in-app browser, headless Chrome, and
-the deployed github.io site. This is not a bug in the site and not a browser
-sandbox: Binance blocks the jurisdiction.
+`https://api.binance.com/api/v3/ping` returns **HTTP 451** from this network:
+Binance blocks the jurisdiction, which is why the socket closed `1006`
+everywhere. The reef now probes and explains itself instead of showing a dim dot
+(`diagnoseTicks` in [lib/market.js](lib/market.js), surfaced on `#live-dot` and
+in `state().ws.trouble`).
 
-I spent most of a session assuming this was environmental noise. It is, but for
-a reason worth surfacing rather than shrugging at.
+One thing worth knowing if you touch it: **a browser cannot read that 451.**
+A cross-origin error response carries no CORS headers, so `fetch` rejects before
+any status is visible and a geo-block looks identical to a dead network. The
+probe falls back to a `no-cors` request, which still resolves opaquely when the
+server answered *something* — enough to say "refused us" rather than "couldn't
+reach it". Node reads the 451 directly; the browser says "most likely a regional
+block". Both are covered by unit tests.
 
-**What's wrong:** the reef shows a dim `○ live` and says nothing else. `__diag`
-knows (`"socket error (blocked, offline, or geo-restricted)"`); the person
-looking at the page doesn't. For a site whose stated value is honest failure
-modes — the trench distinguishes a *gated* RPC method from a *dead* network and
-tells you which — the reef quietly failing is out of character.
+Still worth doing: **verify from an unblocked network.** If the heartbeat works
+elsewhere, everything here is correct. If it doesn't, the data source is the
+problem, not the disclosure.
 
-**Where to start:** a `fetch("https://api.binance.com/api/v3/ping")` probe
-distinguishes 451 (your region) from a genuinely dead socket; a WebSocket close
-code can't, it's always `1006`. Copy the disclosure pattern from
-`peekWallet`'s `partial`/`gated`/`reason` in [lib/solana.js](lib/solana.js).
+## ~~P1 — `lib/` has no unit tests~~ — done
 
-**Verify before changing anything:** test from a different network first. If the
-heartbeat works elsewhere, this is a disclosure problem, not a data-source one.
+39 tests over `market.js` and `solana.js` in `test/`, run by `npm run test:unit`
+(and `npm test`, and CI's fast job) in ~1.2s with no browser. They cover the
+branches a live run never reaches: blocked-vs-down against every phrasing the
+providers use, the jupiter→coingecko pricing fallback and its batch sizes, and
+both sides of the wallet peek.
 
-**Done when:** a visitor in a blocked region is told why the reef isn't pulsing,
-instead of being left with a dim dot.
+`check.mjs` fails if the suite disappears, since "lib/ is testable without a
+browser" stops being true the moment nobody tests it.
 
----
+## ~~P1 — the wallet peek's happy path has never been tested~~ — done in tests
 
-## P1 — `lib/` has no unit tests, which is what extracting it was *for*
+The happy path — token accounts returning, the school assembling, shares summing
+to 100%, the limit applied — is now covered by unit tests with an injected
+`rpc`. No public endpoint will ever let this run, so a test is the only place it
+can exist.
 
-`market.js` and `solana.js` are pure, node-runnable, and completely untested —
-`node --test` has nothing to run. Every assertion today goes through a browser.
-
-Cheap, high-value targets:
-
-| function | what to pin |
-|---|---|
-| `sizeFor` | log-scale mapping; the `bags` branch; `hi === lo` |
-| `bandOf` | boundaries at `BAND_SPLIT` (10 / 15) |
-| `packPositions` | same ids + sizes → same positions; nothing overlaps |
-| `sortCoins` | each mode, and that `watched`/`bags` filter rather than sort |
-| `isSolAddress` | base58 length bounds, the excluded characters |
-| `makeRpc` | **blocked vs down** — `BLOCKED_RE` is the distinction the trench is built on |
-| `fetchPrices` | jupiter → coingecko fallback, and amounts-only when both fail |
-| `peekWallet` | `partial`/`gated`/`reason` when token accounts refuse |
-
-These run in milliseconds with no browser. Add `npm run test:unit` and put it in
-CI's `check` job, which finishes in ~10s and would still be fast.
-
----
-
-## P1 — the wallet peek's happy path has never been tested
-
-Every recorded RPC response is a *refusal*. `getTokenAccountsByOwner` is stored
-as `{"__error": {"message": "Request blocked"}}` — correct, load-bearing, and
-covering only the degraded path. **The non-gated path — token accounts actually
-returning, the school of fish assembling, shares summing to 100% — has no
-coverage at all.** It's the headline feature of the trench and the only branch
-of it that's tested is the one where it doesn't work.
-
-Get a free Helius or QuickNode key, record a second fixture
-(`fixtures/solana-rpc-authed.json`) with a real success, and add a case that
-replays it. **Keep the key out of the repo** — the recorded response is the
-artifact, not the credential.
-
----
+Still open, and needs a human: **record a real fixture** with a free
+Helius/QuickNode key so the browser path is exercised end to end too. Keep the
+key out of the repo — the recorded response is the artifact, not the credential.
 
 ## P2 — scheduled drift detection
 

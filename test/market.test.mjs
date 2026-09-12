@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   bandOf, sizeFor, packPositions, sortCoins, demoData, bagValue,
-  fmtPrice, fmtBig, pct, moodEmoji, describeReef, hash, BAND_SPLIT,
+  fmtPrice, fmtBig, pct, moodEmoji, describeReef, hash, BAND_SPLIT, diagnoseTicks,
 } from "../lib/market.js";
 
 const coin = (id, over = {}) => ({
@@ -165,4 +165,43 @@ test("describeReef survives an empty market", () => {
   assert.equal(d.coins, 0);
   assert.equal(d.bands.length, 3);
   assert.equal(d.bands[0].medianChange24h, null, "no median of nothing");
+});
+
+/* ---------------- why the heartbeat is quiet ---------------- */
+
+test("diagnoseTicks reads a 451 when cors lets it", async () => {
+  const d = await diagnoseTicks({ fetch: async () => ({ ok: false, status: 451 }) });
+  assert.equal(d.reason, "geo-blocked");
+  assert.match(d.detail, /region/);
+  assert.match(d.detail, /unaffected/, "and reassures that the rest of the page is fine");
+});
+
+test("diagnoseTicks blames the socket when binance itself answers", async () => {
+  const d = await diagnoseTicks({ fetch: async () => ({ ok: true, status: 200 }) });
+  assert.equal(d.reason, "socket-blocked");
+  assert.match(d.detail, /websocket/i);
+});
+
+test("diagnoseTicks distinguishes refused from unreachable in a browser", async () => {
+  /* the case this exists for: cross-origin error responses carry no cors
+     headers, so a 451 throws before any status is readable and looks exactly
+     like a dead network. a no-cors probe still resolves when the server
+     answered something at all. */
+  const browserish = async (url, opts) => {
+    if (opts?.mode !== "no-cors") throw new TypeError("Failed to fetch");
+    return {};   // opaque: the server answered, we just can't read it
+  };
+  const refused = await diagnoseTicks({ fetch: browserish });
+  assert.equal(refused.reason, "refused");
+  assert.match(refused.detail, /regional block/);
+  assert.match(refused.detail, /prices still refresh/, "says what still works");
+
+  const offline = await diagnoseTicks({ fetch: async () => { throw new TypeError("Failed to fetch"); } });
+  assert.equal(offline.reason, "unreachable");
+});
+
+test("diagnoseTicks reports an unexpected status rather than guessing", async () => {
+  const d = await diagnoseTicks({ fetch: async () => ({ ok: false, status: 503 }) });
+  assert.equal(d.reason, "http-503");
+  assert.match(d.detail, /503/);
 });

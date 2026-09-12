@@ -408,3 +408,7 @@ a.sol-pill:hover { border-color: #14f195; color: #14f195; }
 /* the way into the text view — see styles.css for the reasoning */
 .nav-agent { opacity: .6; }
 .nav-agent:hover { opacity: 1; color: var(--acid); border-color: var(--acid); }
+
+/* a heartbeat that can't connect for a known reason reads differently from
+   one that's merely still trying — hover for the why */
+#live-dot.blocked { opacity: .75; text-decoration: underline dotted; cursor: help; }

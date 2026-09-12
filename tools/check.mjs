@@ -77,10 +77,18 @@ try {
    spelled exactly — a case-only typo works on this mac and 404s on a
    case-sensitive host. */
 const BARE_OK = new Set(["three"]);
-const IMPORT_RE = /(?:^|[\s;])(?:import|export)\s+(?:[\s\S]*?\sfrom\s*)?["']([^"']+)["']|import\s*\(\s*["']([^"']+)["']\s*\)/g;
+
+/* Scan for imports on comment-free source, anchored to the start of a line.
+   Scanning raw text matches prose: a comment containing `from "somewhere"`
+   reads as an import statement and gets reported as a missing module. Real
+   import statements begin a line; sentences almost never do. */
+const IMPORT_RE = /^\s*(?:import|export)\s+(?:[\s\S]*?\sfrom\s*)?["']([^"']+)["']|[^\w.]import\s*\(\s*["']([^"']+)["']\s*\)/gm;
+const stripComments = (src) => src
+  .replace(/\/\*[\s\S]*?\*\//g, "")      // block comments, glsl included
+  .replace(/(^|[^:"'`\\])\/\/[^\n]*/g, "$1");   // line comments, sparing urls
 
 for (const f of browserScripts) {
-  const src = readFileSync(f, "utf8");
+  const src = stripComments(readFileSync(f, "utf8"));
   for (const m of src.matchAll(IMPORT_RE)) {
     const spec = m[1] ?? m[2];
     if (!spec) continue;
@@ -90,9 +98,30 @@ for (const f of browserScripts) {
       continue;
     }
     const target = resolve(dirname(f), spec);
-    if (!existsSync(target)) fail(rel(f), `import not found: ${spec}`);
-    else if (!readdirSync(dirname(target)).includes(target.split("/").pop())) {
+    if (!existsSync(target)) { fail(rel(f), `import not found: ${spec}`); continue; }
+    if (!readdirSync(dirname(target)).includes(target.split("/").pop())) {
       fail(rel(f), `import case mismatch: ${spec} (breaks on case-sensitive hosts)`);
+    }
+
+    /* the path resolving is not the same as the names existing. a module
+       importing a name its target no longer exports fails at load with an
+       empty page — the exact shape of "the whole site is blank and the
+       static check was green". */
+    const wanted = m[0].match(/\{([^}]*)\}/)?.[1];
+    if (!wanted) continue;
+    const src2 = readFileSync(target, "utf8");
+    const exported = new Set([
+      ...[...src2.matchAll(/export\s+(?:async\s+)?(?:function|const|let|class)\s+([A-Za-z_$][\w$]*)/g)].map((x) => x[1]),
+      ...[...src2.matchAll(/export\s*\{([^}]*)\}/g)].flatMap((x) =>
+        x[1].split(",").map((n) => n.trim().split(/\s+as\s+/).pop().trim()).filter(Boolean)),
+    ]);
+    const star = /export\s+\*/.test(src2);
+    for (const piece of wanted.split(",")) {
+      const name = piece.trim().split(/\s+as\s+/)[0].trim();
+      if (!name || name === "default") continue;
+      if (!star && !exported.has(name)) {
+        fail(rel(f), `imports { ${name} } from ${spec}, which does not export it`);
+      }
     }
   }
 }
