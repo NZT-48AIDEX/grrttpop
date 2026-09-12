@@ -92,10 +92,41 @@ that moves pixels takes two rounds. This is the whole procedure:
 Say in the commit message that baselines were re-blessed and why. A silent
 baseline update is indistinguishable from hiding a regression.
 
-`fixtures/` are recorded API responses; `npm run record` refreshes them. They
-exist because CoinGecko rate-limits hard — a loop of live runs will spend its
-time fighting 429s. The recorded Solana RPC **refusals** are load-bearing: the
-gated-wallet path must stay exercisable offline.
+`fixtures/` are recorded API responses; `npm run record` refreshes them, and
+`fixtures/recorded-at.json` says when they were last captured. They exist
+because CoinGecko rate-limits hard — a loop of live runs will spend its time
+fighting 429s instead of finding bugs.
+
+The recorded Solana RPC **refusals** are load-bearing. `getTokenAccountsByOwner`
+is recorded as `{"__error": {"message": "Request blocked"}}`, because that is
+what free endpoints actually answer. Never "fix" a recorded refusal into a
+success: it would test a world that does not exist and the gated-wallet path —
+the most fragile code here — would stop being exercised.
+
+### Fixtures go stale, and the failure mode is silent
+
+A fixture freezes an API's *shape*, not just its numbers. When a provider
+changes its response format, **the site breaks in production while CI stays
+green**, because CI is replaying the old shape back to itself. That is the worst
+direction for a test suite to fail in: it does not go red, it goes confidently
+wrong. `npm run check` verifies the fixtures exist and that `solana-rpc.json`
+still has an entry per method — it cannot tell you the shape is out of date.
+
+Frozen values are the harmless half. Smoke output reads `epoch 1032 · 72%` and
+the same prices on every run, forever. That is expected; it is not live data and
+should never be quoted as if it were.
+
+**To check for drift:** `npm run smoke -- --live` hits the real APIs. Read a
+failure carefully before believing it — a CoinGecko 429 means you are rate
+limited, not that anything drifted. Chrome reports a 429 as a CORS error,
+because the error response carries no CORS headers, so the console will look
+like a bug in the page. It usually isn't. Wait and retry before investigating.
+
+**To refresh:** `npm run record`. Then be aware it moves the pixels — new prices
+mean new creature colours and sizes — so it triggers the full two-platform
+re-bless above. Refreshing fixtures is never a one-commit job. Diff the fixtures
+before blessing anything: if a field you rely on has been renamed or dropped,
+that is a real change to the site, not a baseline update.
 
 ## Things that must stay true
 
