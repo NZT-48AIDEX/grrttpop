@@ -1,6 +1,7 @@
 import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
+import { makeQualityGovernor } from "./lib/quality.js";
 import {
   makeRpc, fetchVitals as readVitals, fetchEcosystem, loadTokenList as loadJupList,
   peekWallet as readWallet, isSolAddress, hostOf,
@@ -121,7 +122,28 @@ const FRAG = /* glsl */ `
   }
 `;
 
-const sharedGeo = new THREE.IcosahedronGeometry(1, 5);
+/* every creature shares one geometry, so stepping detail down is a single
+   swap rather than N rebuilds. this page is heavier than the index — dozens
+   of shader meshes, not one — and had no fallback at all for a device that
+   can't keep up. */
+const DETAIL = [2, 3, 5];
+const RATIO = [1, Math.min(devicePixelRatio, 1.25), Math.min(devicePixelRatio, 1.75)];
+let sharedGeo = new THREE.IcosahedronGeometry(1, DETAIL[2]);
+let qualityTier = 2;
+
+const quality = makeQualityGovernor({
+  tiers: 3,
+  onChange: (tier) => {
+    qualityTier = tier;
+    renderer.setPixelRatio(RATIO[tier]);
+    const next = new THREE.IcosahedronGeometry(1, DETAIL[tier]);
+    const old = sharedGeo;
+    sharedGeo = next;
+    for (const b of blobs.values()) b.mesh.geometry = next;
+    old.dispose();
+    diag.track("quality", `stepped down to tier ${tier} — frames were slow`, { detail: DETAIL[tier] });
+  },
+});
 function makeCreature(seed) {
   return new THREE.Mesh(sharedGeo, new THREE.ShaderMaterial({
     uniforms: {
@@ -594,6 +616,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(rawDt, 0.05);
   const t = clock.elapsedTime;
   diag.frame(rawDt);
+  quality.frame(rawDt);
   const kCam = 1 - Math.exp(-3.2 * rawDt);
   const kLook = 1 - Math.exp(-5 * rawDt);
 
@@ -702,6 +725,7 @@ window.trench = {
       camZ: +camera.position.z.toFixed(2),
     },
     tokenList: tokenListSize,
+    quality: { tier: qualityTier, drops: quality.drops },
     reducedMotion,
     note: $("reef-note")?.hidden === false ? $("reef-note").textContent : null,
   }),

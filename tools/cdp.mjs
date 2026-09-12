@@ -194,6 +194,12 @@ async function makePage(send, listeners, { width, height }) {
         return seen;`);
     },
 
+    /** pretend to be a slower machine (1 = normal, 20 = 20x slower).
+        the only way to see adaptive quality actually engage. */
+    async throttleCpu(rate = 1) {
+      return s("Emulation.setCPUThrottlingRate", { rate });
+    },
+
     /** emulate media features — prefers-reduced-motion, prefers-color-scheme.
         the query-param overrides are a convenience; this exercises the path a
         real visitor's system preference takes. */

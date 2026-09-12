@@ -1,6 +1,7 @@
 import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
+import { makeQualityGovernor } from "./lib/quality.js";
 import {
   fetchMarkets, fetchGlobal, fetchFearGreed, fetchTrending as fetchTrendingIds,
   demoData, hash, sortCoins, sizeFor as sizeForCoin, packPositions as packCircles,
@@ -125,7 +126,28 @@ const FRAG = /* glsl */ `
   }
 `;
 
-const sharedGeo = new THREE.IcosahedronGeometry(1, 5);
+/* every creature shares one geometry, so stepping detail down is a single
+   swap rather than N rebuilds. this page is heavier than the index — dozens
+   of shader meshes, not one — and had no fallback at all for a device that
+   can't keep up. */
+const DETAIL = [2, 3, 5];
+const RATIO = [1, Math.min(devicePixelRatio, 1.25), Math.min(devicePixelRatio, 1.75)];
+let sharedGeo = new THREE.IcosahedronGeometry(1, DETAIL[2]);
+let qualityTier = 2;
+
+const quality = makeQualityGovernor({
+  tiers: 3,
+  onChange: (tier) => {
+    qualityTier = tier;
+    renderer.setPixelRatio(RATIO[tier]);
+    const next = new THREE.IcosahedronGeometry(1, DETAIL[tier]);
+    const old = sharedGeo;
+    sharedGeo = next;
+    for (const b of blobs.values()) b.mesh.geometry = next;
+    old.dispose();
+    diag.track("quality", `stepped down to tier ${tier} — frames were slow`, { detail: DETAIL[tier] });
+  },
+});
 
 function makeCreature(seed) {
   const mat = new THREE.ShaderMaterial({
@@ -795,6 +817,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(rawDt, 0.05);
   const t = clock.elapsedTime;
   diag.frame(rawDt);
+  quality.frame(rawDt);
   // frame-rate-independent smoothing for camera travel (works even at 1fps)
   const kCam = 1 - Math.exp(-3.2 * rawDt);
   const kLook = 1 - Math.exp(-5 * rawDt);
@@ -911,6 +934,7 @@ window.reef = {
       },
       bags: { count: bags.length, valueUsd: +bagValue().toFixed(2) },
       sound: { on: sound.on },
+      quality: { tier: qualityTier, drops: quality.drops },
       reducedMotion,
       note: document.getElementById("reef-note")?.hidden === false
         ? document.getElementById("reef-note").textContent : null,

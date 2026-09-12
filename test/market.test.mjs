@@ -205,3 +205,37 @@ test("diagnoseTicks reports an unexpected status rather than guessing", async ()
   assert.equal(d.reason, "http-503");
   assert.match(d.detail, /503/);
 });
+
+/* ---------------- quality governor ---------------- */
+
+test("the quality governor drops a tier only after a bad window", async () => {
+  const { makeQualityGovernor, SLOW_FRAME } = await import("../lib/quality.js");
+  const seen = [];
+  const g = makeQualityGovernor({ window: 10, onChange: (t) => seen.push(t) });
+
+  assert.equal(g.tier, 2, "starts at the top tier");
+  for (let i = 0; i < 9; i++) g.frame(0.2);   // slow, but the window isn't full
+  assert.equal(g.tier, 2, "no verdict mid-window");
+  g.frame(0.2);
+  assert.equal(g.tier, 1, "a full slow window costs a tier");
+  assert.deepEqual(seen, [1]);
+
+  for (let i = 0; i < 10; i++) g.frame(0.001);   // fast
+  assert.equal(g.tier, 1, "good frames never raise it back — that way lies oscillation");
+  assert.equal(g.drops, 1);
+});
+
+test("the quality governor tolerates the occasional slow frame", async () => {
+  const { makeQualityGovernor } = await import("../lib/quality.js");
+  const g = makeQualityGovernor({ window: 10 });
+  for (let i = 0; i < 30; i++) g.frame(i % 5 === 0 ? 0.2 : 0.001);   // 20% slow
+  assert.equal(g.tier, 2, "a fifth of frames slow is not a struggling device");
+});
+
+test("the quality governor bottoms out rather than going negative", async () => {
+  const { makeQualityGovernor } = await import("../lib/quality.js");
+  const g = makeQualityGovernor({ window: 5 });
+  for (let i = 0; i < 200; i++) g.frame(1);
+  assert.equal(g.tier, 0);
+  assert.equal(g.drops, 2, "three tiers means at most two drops");
+});

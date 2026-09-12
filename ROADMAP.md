@@ -88,11 +88,22 @@ it: the query param is a convenience, and testing only that would leave the real
 path — an actual system preference — unverified. I made exactly that mistake
 first; the check now emulates the media feature.
 
-## P2 — the reef and trench have no adaptive quality
+## ~~P2 — the reef and trench have no adaptive quality~~ — done
 
-`main.js` steps mesh detail and pixel ratio down on slow frames; `reef.js` and
-`trench.js` don't — and they're heavier (50 and 40 shader meshes). `state().fps`
-now makes this measurable, so the fix is finally verifiable.
+All three pages now share one governor ([lib/quality.js](lib/quality.js)): it
+watches frame times and says "go down a tier", and each page decides what a tier
+means. The reef and trench swap their shared geometry (detail 5 → 3 → 2) and
+step the pixel ratio down; the index moved onto the same policy instead of its
+own inline copy.
+
+It only ever steps *down*. Recovering upward oscillates: more detail makes
+frames slow again, which drops it, forever — a visitor on a weak device would
+watch the page pulse between two qualities.
+
+Verified under `Emulation.setCPUThrottlingRate`: at normal speed the reef finds a
+sustainable tier and stays there; at 20× slower it walks to the floor. Under the
+pumped clock the frame delta is a constant 16.67ms, so deterministic runs never
+trigger it and baselines are unaffected — which is what you want.
 
 ## P3 — public MCP
 

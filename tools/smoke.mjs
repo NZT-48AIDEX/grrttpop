@@ -76,6 +76,7 @@ const PAGES = {
     agentText: ["the live crypto market", "depth bands", "biggest movers", "not financial advice"],
     checks: [
       ["market data loaded", (s) => (s.data.coins > 0 ? null : "zero coins")],
+      ["adaptive quality wired", (s) => ([0, 1, 2].includes(s.quality?.tier) ? null : `tier=${s.quality?.tier}`)],
       ["creatures exist", (s) => (s.reef.blobs > 0 ? null : "no blobs built")],
       ["creatures visible", (s) => (s.reef.visible > 0 ? null : "every creature is hidden")],
       ["not silently in demo mode", (s, ctx) =>
@@ -109,6 +110,7 @@ const PAGES = {
     agentText: ["solana, live", "the spl ecosystem", "read-only"],
     checks: [
       ["ecosystem loaded", (s) => (s.eco.coins > 0 ? null : "no ecosystem coins")],
+      ["adaptive quality wired", (s) => ([0, 1, 2].includes(s.quality?.tier) ? null : `tier=${s.quality?.tier}`)],
       ["creatures exist", (s) => (s.scene.blobs > 0 ? null : "no blobs built")],
       ["chain reachable", (s) => (s.chain.connected ? null : "rpc never connected")],
       ["current driven by tps", (s) => (s.scene.currentSpeed > 0 ? null : "current is dead")],

@@ -1,6 +1,7 @@
 import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
+import { makeQualityGovernor } from "./lib/quality.js";
 import { isAgentView, mountAgentView, indexToText } from "./lib/describe.js";
 
 /* ================================================================
@@ -143,13 +144,17 @@ scene.add(creature);
 // adaptive quality — step down mesh detail + pixel ratio if frames are slow
 const DETAIL = [10, 24, 48];
 const RATIO = [1, Math.min(devicePixelRatio, 1.5), Math.min(devicePixelRatio, 2)];
-let quality = 2, frameCount = 0, slowFrames = 0;
+let quality = 2;
 function setQuality(q) {
   quality = q;
   renderer.setPixelRatio(RATIO[q]);
   creature.geometry.dispose();
   creature.geometry = new THREE.IcosahedronGeometry(1.6, DETAIL[q]);
 }
+
+// same policy as the reef and the trench — it lives in lib/quality.js so it
+// can be reasoned about without a gpu, and so all three pages agree
+const governor = makeQualityGovernor({ tiers: 3, onChange: setQuality });
 
 /* ---------------- starfield ---------------- */
 const starGeo = new THREE.BufferGeometry();
@@ -375,11 +380,7 @@ renderer.setAnimationLoop(() => {
   uniforms.uTime.value = t;
   diag.frame(rawDt);
 
-  if (rawDt > 0.045) slowFrames++;
-  if (++frameCount >= 60) {
-    if (slowFrames > 20 && quality > 0) setQuality(quality - 1);
-    frameCount = 0; slowFrames = 0;
-  }
+  governor.frame(rawDt);
 
   // ease uniforms toward the active mode
   for (const k of ["uAmp", "uFreq", "uSpeed", "uTwist", "uPartyRate", "uHue"]) {
@@ -445,6 +446,7 @@ window.grrtt = {
     mode: currentMode,
     reducedMotion,
     quality,
+    qualityDrops: governor.drops,
     wireframe: creatureMat.wireframe,
     uniforms: Object.fromEntries(
       Object.entries(uniforms)
