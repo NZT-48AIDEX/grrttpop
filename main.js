@@ -440,6 +440,23 @@ renderer.setAnimationLoop(() => {
 /* a hello for curious humans — the creature is yours to hack */
 window.grrtt = {
   uniforms, creature, setMode, pop, say, setQuality,
+  /* the creature in words, for anything without eyes — the same shape the
+     reef and trench return, so an agent can ask any page the same question */
+  describe: () => ({
+    page: "index",
+    what: "one creature: a noise-displaced blob with an iridescent fresnel shader",
+    mode: currentMode,
+    reducedMotion,
+    wireframe: creatureMat.wireframe,
+    quality: { tier: quality, drops: governor.drops },
+    companionTalking: !tipEl.hidden,
+    modes: Object.keys(MODES),
+    elsewhere: [
+      { name: "the reef", url: "market.html", what: "the live crypto market as an ocean" },
+      { name: "the trench", url: "solana.html", what: "solana mainnet, read-only" },
+    ],
+    note: "poke the creature. it pops.",
+  }),
   /* one structured snapshot, for anything without eyes */
   state: () => ({
     ...diag.snapshot(),
@@ -457,7 +474,7 @@ window.grrtt = {
 };
 /* a visitor with no eyes gets the creature described instead of a black canvas */
 if (isAgentView()) {
-  mountAgentView({ render: () => indexToText(window.grrtt.state()) });
+  mountAgentView({ render: () => indexToText(window.grrtt.describe(), window.grrtt.state()) });
 }
 
 console.log("%c🫧 grrttpop", "font-size:2rem;font-weight:900");

@@ -65,12 +65,16 @@ Still open, and needs a human: **record a real fixture** with a free
 Helius/QuickNode key so the browser path is exercised end to end too. Keep the
 key out of the repo — the recorded response is the artifact, not the credential.
 
-## P2 — scheduled drift detection
+## ~~P2 — scheduled drift detection~~ — done
 
-`smoke -- --live` passes reliably now, so a weekly `schedule:` job is finally
-meaningful. Make it non-blocking and have it open an issue rather than redden
-`main`. It must not cry wolf on rate limits — see CLAUDE.md on telling a
-CoinGecko 429 (which Chrome reports as a CORS error) from real shape drift.
+[.github/workflows/drift.yml](.github/workflows/drift.yml) runs `smoke --live`
+every Monday. Advisory only: it never blocks a push, and it opens (or comments
+on) a `drift`-labelled issue rather than reddening `main`.
+
+It distinguishes a rate limit from real drift before reporting, because
+CoinGecko's 429 arrives without CORS headers and reads in the console exactly
+like a broken page. A 429 gets "inconclusive, re-run"; anything else gets "a
+provider may have changed shape". It also prints the fixture age on the way past.
 
 ## ~~P2 — `prefers-reduced-motion`~~ — done
 
@@ -105,16 +109,18 @@ sustainable tier and stays there; at 20× slower it walks to the floor. Under th
 pumped clock the frame delta is a constant 16.67ms, so deterministic runs never
 trigger it and baselines are unaffected — which is what you want.
 
-## P3 — public MCP
+## P3 — public MCP — needs an account
 
 The MCP server is stdio-only, so it's for people who cloned the repo. A
-Cloudflare Worker over `lib/` would let any agent on the internet dive the reef.
-That's the version where "you are welcome here" has teeth.
+Cloudflare Worker over `lib/` would let any agent on the internet dive the reef —
+the version where "you are welcome here" has teeth. `lib/market.js` and
+`lib/solana.js` already run anywhere, so this is mostly a deploy target and a
+Worker entrypoint. **Blocked on a Cloudflare account**, which I can't create.
 
-## P3 — index's `describe()` is thinner than the others
+## ~~P3 — index's `describe()` is thinner than the others~~ — done
 
-`check.mjs` exempts `main.js` from the `describe()` rule and the index agent
-view renders from `state()`. Harmless; unify if it bothers you.
+All three pages now answer `describe()` with the same shape, so an agent can ask
+any of them the same question. `check.mjs` lost its `main.js` exemption.
 
 ---
 

@@ -1,0 +1,107 @@
+# Are the fixtures still telling the truth?
+#
+# Everything else in CI replays recorded API responses, which is what keeps it
+# fast and immune to rate limits — and also means a provider can change its
+# response shape without anything going red. CI would replay the old shape back
+# to itself and stay green while the live site broke.
+#
+# So once a week, hit the real APIs. This job is advisory: it must never block
+# a push, and a red run here means "go look", not "revert something".
+
+name: drift
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"      # monday morning, off the hour to dodge the stampede
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write               # to report, if something actually drifted
+
+jobs:
+  live:
+    name: smoke against the real apis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GRRTT_CHROME_FLAGS: --no-sandbox --disable-dev-shm-usage
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: locate chrome
+        run: |
+          for p in /usr/bin/google-chrome /usr/bin/google-chrome-stable /usr/bin/chromium; do
+            if [ -x "$p" ]; then echo "CHROME_PATH=$p" >> "$GITHUB_ENV"; exit 0; fi
+          done
+          echo "::error::no chrome on this runner"; exit 1
+
+      - name: how old are the fixtures
+        run: node tools/check.mjs   # prints the staleness warning past 90 days
+
+      # --live skips the baselines (the picture is whatever the market is doing
+      # today) and reports third-party console noise without failing: the
+      # trench's rpc failover is the design, not a regression.
+      - name: smoke against live apis
+        id: live
+        continue-on-error: true
+        run: npm run smoke -- --live 2>&1 | tee live.log
+
+      - name: upload the run
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: drift-run
+          path: |
+            live.log
+            .smoke/report.json
+            .smoke/*.png
+          include-hidden-files: true
+          retention-days: 30
+
+      # A failure here is usually a rate limit, not drift. Say so rather than
+      # crying wolf: CoinGecko answers 429 with no CORS headers, which Chrome
+      # reports as a CORS error and which reads exactly like a broken page.
+      - name: report
+        if: steps.live.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const log = fs.readFileSync('live.log', 'utf8').slice(-4000);
+            const rateLimited = /429|rate limit/i.test(log);
+            const title = rateLimited
+              ? 'drift check inconclusive — rate limited'
+              : 'drift check failed — an api may have changed shape';
+            const body = [
+              rateLimited
+                ? 'The live run failed in a way that looks like a **rate limit**, not drift. Chrome reports a 429 as a CORS error because the error response carries no CORS headers. Probably nothing is wrong; re-run to confirm.'
+                : 'The live run failed and it does **not** look like a rate limit. A provider may have changed its response shape, which fixtures-based CI cannot see — it replays the old shape and stays green.',
+              '',
+              'Before touching fixtures, read the Baselines and fixtures section of CLAUDE.md: `npm run record` moves the pixels and triggers a two-platform re-bless.',
+              '',
+              '<details><summary>tail of the run</summary>',
+              '', '```', log, '```', '', '</details>',
+              '', `[full run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+            ].join('\n');
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'drift',
+            });
+            if (existing.data.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.data[0].number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['drift'],
+              });
+            }

@@ -295,9 +295,7 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
   if (!src.includes("prefersReducedMotion")) {
     fail(js, "does not consult prefers-reduced-motion — the whole page is movement");
   }
-  if (js !== "main.js" && !/describe:\s*\(\)/.test(src)) {
-    fail(js, `no ${global}.describe() — nothing to render as text`);
-  }
+  if (!/describe:\s*\(\)/.test(src)) fail(js, `no ${global}.describe() — nothing to render as text`);
 }
 for (const page of ["index.html", "market.html", "solana.html"]) {
   const src = readFileSync(join(ROOT, page), "utf8");
