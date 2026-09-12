@@ -23,10 +23,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "fixtures");
 mkdirSync(OUT, { recursive: true });
 
-const CG = "https://api.coingecko.com/api/v3";
-const RPC = "https://solana-rpc.publicnode.com";
-const WALLET = "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9";   // binance hot wallet, public, read-only
-const SOL_MINT = "So11111111111111111111111111111111111111112";
+/* the url list is shared with tools/drift.mjs: if each kept its own copy
+   they would drift apart and the drift checker would compare the wrong url
+   to the wrong file */
+import { HTTP_FIXTURES, RPC_CALLS, RPC, SOL_MINT } from "./endpoints.mjs";
 
 const save = (name, data) => {
   writeFileSync(join(OUT, name), JSON.stringify(data, null, 1));
@@ -63,43 +63,28 @@ let failures = 0;
 
 console.log("recording fixtures from the live apis\n");
 
-await step("coingecko markets", async () =>
-  save("cg-markets.json", await get(`${CG}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&sparkline=true&price_change_percentage=1h,24h,7d`)));
-
-await step("coingecko global", async () => save("cg-global.json", await get(`${CG}/global`)));
-await step("coingecko trending", async () => save("cg-trending.json", await get(`${CG}/search/trending`)));
-
-await step("coingecko solana ecosystem", async () =>
-  save("cg-eco.json", await get(`${CG}/coins/markets?vs_currency=usd&category=solana-ecosystem&order=market_cap_desc&per_page=40&sparkline=true&price_change_percentage=1h,24h,7d`)));
-
-await step("coingecko token price", async () =>
-  save("cg-token-price.json", await get(`${CG}/simple/token_price/solana?contract_addresses=${SOL_MINT}&vs_currencies=usd&include_24hr_change=true`)));
-
-await step("fear & greed", async () => save("fng.json", await get("https://api.alternative.me/fng/")));
-
-await step("jupiter verified tokens", async () => {
-  const all = await get("https://lite-api.jup.ag/tokens/v2/tag?query=verified", 40_000);
-  // the real list is thousands of mints and megabytes; keep the shape,
-  // trim the volume, and make sure SOL survives the cut
-  const arr = Array.isArray(all) ? all : all?.tokens ?? [];
-  const sol = arr.filter((t) => (t.id ?? t.address) === SOL_MINT);
-  save("jup-tokens.json", [...sol, ...arr.filter((t) => (t.id ?? t.address) !== SOL_MINT).slice(0, 119)]);
-});
-
-await step("jupiter prices", async () =>
-  save("jup-price.json", await get(`https://lite-api.jup.ag/price/v3?ids=${SOL_MINT}`)));
+for (const { file, label, url, timeout, trimmed } of HTTP_FIXTURES) {
+  await step(label, async () => {
+    const data = await get(url, timeout ?? 25_000);
+    if (!trimmed) return save(file, data);
+    /* the verified token list is thousands of mints and megabytes. keep the
+       shape, trim the volume, and make sure SOL survives the cut. */
+    const arr = Array.isArray(data) ? data : data?.tokens ?? [];
+    const sol = arr.filter((t) => (t.id ?? t.address) === SOL_MINT);
+    save(file, [...sol, ...arr.filter((t) => (t.id ?? t.address) !== SOL_MINT).slice(0, 119)]);
+  });
+}
 
 await step("solana rpc", async () => {
   const out = {};
-  out.getRecentPerformanceSamples = await rpc("getRecentPerformanceSamples", [1]);
-  out.getEpochInfo = await rpc("getEpochInfo");
-  out.getBalance = await rpc("getBalance", [WALLET]);
-  out.getSlot = await rpc("getSlot");
-  // expected to come back as a refusal — that IS the fixture
-  out.getTokenAccountsByOwner = await rpc("getTokenAccountsByOwner",
-    [WALLET, { programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }, { encoding: "jsonParsed" }]);
-  const gated = out.getTokenAccountsByOwner?.__error;
-  console.log(`  · getTokenAccountsByOwner: ${gated ? "refused — " + gated.message : "allowed (unusual for a free endpoint)"}`);
+  for (const { method, params, expectRefusal } of RPC_CALLS) {
+    out[method] = await rpc(method, params);
+    // a refusal IS the fixture for the gated method — never "fix" it
+    if (expectRefusal) {
+      const gated = out[method]?.__error;
+      console.log(`  · ${method}: ${gated ? "refused — " + gated.message : "allowed (unusual for a free endpoint)"}`);
+    }
+  }
   save("solana-rpc.json", out);
 });
 

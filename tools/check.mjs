@@ -272,12 +272,22 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
   // github pages runs jekyll by default, and jekyll drops dotdirs from the
   // built site — without this file /.well-known/agent.json 404s in production
   // while working perfectly on every local server.
+  /* the recorder and the drift checker must fetch the same urls: if each
+     keeps its own list they diverge, and the drift checker ends up
+     confidently comparing the wrong url to the wrong file. */
+  for (const t of ["tools/record-fixtures.mjs", "tools/drift.mjs"]) {
+    const src = existsSync(join(ROOT, t)) ? readFileSync(join(ROOT, t), "utf8") : "";
+    if (src && !src.includes("endpoints.mjs")) {
+      fail(t, "does not use tools/endpoints.mjs — the recorder and the drift checker must share one url list");
+    }
+  }
+
   if (!existsSync(join(ROOT, ".nojekyll"))) {
     fail(".nojekyll", "missing — jekyll will strip /.well-known/ and the agent card 404s once deployed");
   }
   /* lib/ was extracted so node could test it without a browser. if the
      tests disappear, that reason quietly stops being true. */
-  const unit = ["test/market.test.mjs", "test/solana.test.mjs"];
+  const unit = ["test/market.test.mjs", "test/solana.test.mjs", "test/shape.test.mjs"];
   for (const t of unit) {
     if (!existsSync(join(ROOT, t))) fail(t, "missing — lib/ is extracted precisely so it can be tested without a browser");
   }

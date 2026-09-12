@@ -6,6 +6,7 @@
     "check": "node tools/check.mjs",
     "test:unit": "node --test",
     "smoke": "node tools/smoke.mjs",
+    "drift": "node tools/drift.mjs",
     "record": "node tools/record-fixtures.mjs",
     "mcp": "node mcp/server.mjs",
     "mcp:test": "node tools/mcp-test.mjs",

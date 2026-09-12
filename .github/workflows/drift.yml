@@ -44,9 +44,17 @@ jobs:
       - name: how old are the fixtures
         run: node tools/check.mjs   # prints the staleness warning past 90 days
 
-      # --live skips the baselines (the picture is whatever the market is doing
-      # today) and reports third-party console noise without failing: the
-      # trench's rpc failover is the design, not a regression.
+      # the quiet half: compare recorded SHAPES against live ones and name the
+      # field that moved. a page can keep rendering perfectly while a field it
+      # reads is renamed underneath it, and smoke would never notice.
+      - name: compare fixture shapes to live
+        id: shapes
+        continue-on-error: true
+        run: npm run drift 2>&1 | tee drift.log
+
+      # the loud half: --live skips the baselines (the picture is whatever the
+      # market is doing today) and reports third-party console noise without
+      # failing, since the trench's rpc failover is the design.
       - name: smoke against live apis
         id: live
         continue-on-error: true
@@ -59,6 +67,7 @@ jobs:
           name: drift-run
           path: |
             live.log
+            drift.log
             .smoke/report.json
             .smoke/*.png
           include-hidden-files: true
@@ -68,20 +77,32 @@ jobs:
       # crying wolf: CoinGecko answers 429 with no CORS headers, which Chrome
       # reports as a CORS error and which reads exactly like a broken page.
       - name: report
-        if: steps.live.outcome == 'failure'
+        if: steps.live.outcome == 'failure' || steps.shapes.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const log = fs.readFileSync('live.log', 'utf8').slice(-4000);
-            const rateLimited = /429|rate limit/i.test(log);
-            const title = rateLimited
-              ? 'drift check inconclusive — rate limited'
-              : 'drift check failed — an api may have changed shape';
+            const read = (f) => { try { return fs.readFileSync(f, 'utf8'); } catch { return ''; } };
+            const drift = read('drift.log');
+            const log = read('live.log').slice(-3000);
+
+            // the shape check names the field, so prefer its verdict when it has one
+            const shapesFailed = /field\(s\) the code reads have changed/.test(drift);
+            const named = drift.split('\n').filter((l) => l.includes('read by')).join('\n');
+            const rateLimited = !shapesFailed && /429|rate limit/i.test(log + drift);
+
+            const title = shapesFailed
+              ? 'an api changed shape under a field the code reads'
+              : rateLimited
+                ? 'drift check inconclusive — rate limited'
+                : 'drift check failed — an api may have changed shape';
             const body = [
-              rateLimited
-                ? 'The live run failed in a way that looks like a **rate limit**, not drift. Chrome reports a 429 as a CORS error because the error response carries no CORS headers. Probably nothing is wrong; re-run to confirm.'
-                : 'The live run failed and it does **not** look like a rate limit. A provider may have changed its response shape, which fixtures-based CI cannot see — it replays the old shape and stays green.',
+              shapesFailed
+                ? ['A recorded fixture no longer matches the live api, in a field the code actually reads:',
+                   '', '```', named || drift.slice(-1500), '```'].join('\n')
+                : rateLimited
+                  ? 'This looks like a **rate limit**, not drift. CoinGecko answers 429 with no CORS headers, which Chrome reports as a CORS error. Probably nothing is wrong; re-run to confirm.'
+                  : 'The live run failed and it does **not** look like a rate limit. A provider may have changed its response shape, which fixtures-based CI cannot see — it replays the old shape and stays green.',
               '',
               'Before touching fixtures, read the Baselines and fixtures section of CLAUDE.md: `npm run record` moves the pixels and triggers a two-platform re-bless.',
               '',

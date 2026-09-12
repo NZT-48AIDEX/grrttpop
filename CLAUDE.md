@@ -132,7 +132,31 @@ Frozen values are the harmless half. Smoke output reads `epoch 1032 · 72%` and
 the same prices on every run, forever. That is expected; it is not live data and
 should never be quoted as if it were.
 
-**To check for drift:** `npm run smoke -- --live` hits the real APIs. Read a
+**To check for drift:** two commands, for two halves of the problem.
+
+`npm run drift` catches the quiet half. It re-fetches each fixture's live
+counterpart and compares *shapes* — key paths and types, not values — then says
+which field moved and, crucially, whether anything reads it:
+
+```
+❌ fng.json
+     ❌ gone: data[].value_classification  — read by lib/market.js
+⚠️  cg-eco.json
+     ⚠️  gone: [].roi  (nothing reads it)
+```
+
+It fails only on fields the code reads; a provider adding or dropping something
+nobody touches is a line of output, not a fire. `DRIFT_LIVE_DIR=<dir>` makes it
+read "live" responses from files instead of fetching, which is how it is tested
+— a drift checker that needs a cooperative rate-limited API to exercise is a
+drift checker nobody exercises.
+
+`tools/endpoints.mjs` is the single list of what gets recorded, shared by the
+recorder and the checker. Keep it that way: two copies would drift apart and the
+checker would compare the wrong URL to the wrong file. `check.mjs` enforces it.
+
+**`npm run smoke -- --live`** catches the loud half — a response that actually
+breaks a page. Read a
 failure carefully before believing it — a CoinGecko 429 means you are rate
 limited, not that anything drifted. Chrome reports a 429 as a CORS error,
 because the error response carries no CORS headers, so the console will look
