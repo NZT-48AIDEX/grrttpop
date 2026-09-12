@@ -3,6 +3,8 @@
 A personal site that is also an experiment: a living organism rather than a
 brochure. Keep it weird, keep it warm, keep it honest.
 
+Conventions and traps are below. What's *left to do* is in [ROADMAP.md](ROADMAP.md).
+
 ## Shape of the thing
 
 No build step. No framework. No bundler. Vanilla ES modules served straight
