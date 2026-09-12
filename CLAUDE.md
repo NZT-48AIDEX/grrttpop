@@ -136,6 +136,13 @@ limited, not that anything drifted. Chrome reports a 429 as a CORS error,
 because the error response carries no CORS headers, so the console will look
 like a bug in the page. It usually isn't. Wait and retry before investigating.
 
+Live runs print third-party console noise without failing on it: the trench
+talks to four public RPCs of which several always refuse, and that failover *is*
+the design. Failing on it would mean `--live` could never pass. Real drift still
+fails, in both modes — a response whose shape changed under the parser raises a
+js error, which `no page errors` catches. Fixtures mode stays strict, since
+there is no network variance to excuse.
+
 **To refresh:** `npm run record`. Then be aware it moves the pixels — new prices
 mean new creature colours and sizes — so it triggers the full two-platform
 re-bless above. Refreshing fixtures is never a one-commit job. Diff the fixtures

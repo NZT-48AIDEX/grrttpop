@@ -213,6 +213,13 @@ async function makePage(send, listeners, { width, height }) {
     },
 
     /** capture the viewport, or a {x,y,width,height} region of it */
+    /** close this tab. a page left open keeps rendering: under software
+        webgl a handful of abandoned scenes will starve the one you are
+        actually measuring. */
+    async close() {
+      try { await send("Target.closeTarget", { targetId }); } catch {}
+    },
+
     async screenshot(path, clip) {
       const { data } = await s("Page.captureScreenshot",
         clip ? { format: "png", clip: { ...clip, scale: 1 } } : { format: "png" });
