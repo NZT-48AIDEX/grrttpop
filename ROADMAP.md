@@ -1,6 +1,6 @@
 # Roadmap — handoff
 
-Last updated 2026-09-12 at `3ec5ab7`, after 21 commits. Conventions and traps
+Last updated 2026-09-12 at `f2d4157`, after 23 commits. Conventions and traps
 live in [CLAUDE.md](CLAUDE.md) — read that before touching anything; this file
 is state and what's next.
 
@@ -62,8 +62,8 @@ resilience work it was missing.
 ```sh
 npm run check      # static: parses, imports + named exports, dom ids,
                    # agent-card promises, fixture age. seconds.
-npm run test:unit  # 42 tests over lib/, ~1.2s, no browser
-npm run smoke      # 3 pages headless: 12-14 checks each + pixel baselines
+npm run test:unit  # 48 tests over lib/, ~1.2s, no browser
+npm run smoke      # 3 pages headless: 12-15 checks each + pixel baselines
 npm test           # check + unit + smoke — the gate
 npm run mcp:test   # 22 protocol + tool checks (--slow)
 npm run record     # re-capture fixtures (read CLAUDE.md — never one commit)
@@ -82,6 +82,7 @@ reports rather than blocks.
 | | `harness.js` — seeded rng, stepped clock, fixture replay, reduced motion |
 | | `describe.js` — the organism in words (`?agent=1`) |
 | | `quality.js` — when to shed detail (pure policy, no three.js) |
+| | `keyboard.js` — reading order and directional neighbour, no DOM |
 | `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `visual.mjs` `record-fixtures.mjs` `mcp-test.mjs` |
 | `mcp/` | `server.mjs` (9 read-only tools) · `protocol.mjs` (MCP over stdio, by hand) |
 | `test/` | `market.test.mjs` `solana.test.mjs` |
