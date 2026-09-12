@@ -232,6 +232,28 @@ try {
         if (problem) row.failures.push(`${label} — ${problem}`);
       }
 
+      /* someone with vestibular sensitivity saying "please stop moving" is
+         the one preference this site most needs to honour, and it is
+         invisible unless emulated — no amount of looking at the page finds
+         a regression here. */
+      try {
+        const still = await browser.newPage();
+        await still.emulateMedia({ "prefers-reduced-motion": "reduce" });
+        await still.goto(`http://localhost:${PORT}/${spec.url}?seed=42&freeze=1&fixtures=1`);
+        await still.waitFor("window.__ready !== undefined", { label: "page scripts" });
+        await still.eval("await window.__ready; return 1");
+        await still.eval("return __harness.step(60)");
+        const st = await still.eval(`return ${spec.global}.state()`);
+        if (st.reducedMotion !== true) throw new Error("page ignores prefers-reduced-motion");
+        if (!(st.gl?.calls > 0)) throw new Error("nothing rendered — stillness should not mean blankness");
+        row.reducedMotion = { honoured: true, drawCalls: st.gl.calls };
+        row.checks.push({ label: "honours prefers-reduced-motion", ok: true });
+        await still.close();
+      } catch (e) {
+        row.checks.push({ label: "honours prefers-reduced-motion", ok: false });
+        row.failures.push(`reduced motion — ${e.message}`);
+      }
+
       // ?agent=1 is the only thing a visitor with no eyes gets — check it
       // renders, and that it renders the real state rather than an empty shell
       try {
@@ -297,6 +319,7 @@ try {
       console.log(`   ↳ ${row.consoleNotes.count} console error(s) from third-party endpoints (expected live, not failed):`);
       console.log(`      ${row.consoleNotes.summary.slice(0, 160)}`);
     }
+    if (row.reducedMotion) console.log(`   ↳ reduced motion: honoured, still drawing (${row.reducedMotion.drawCalls} calls)`);
     if (row.agentView) console.log(`   ↳ ?agent=1: ${row.agentView.lines} lines, ${row.agentView.chars} chars of description`);
     if (row.visual) {
       console.log(row.visual.status === "created"

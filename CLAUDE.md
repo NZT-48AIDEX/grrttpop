@@ -161,6 +161,13 @@ that is a real change to the site, not a baseline update.
 - **A partial read is never presented as whole.** This is the trench's central
   honesty and there is a smoke check guarding it.
 - Bags and watchlists live in localStorage and never leave the browser.
+- **`prefers-reduced-motion` is honoured on every page.** This site is made of
+  movement; for someone with vestibular sensitivity that is a reason to close
+  the tab, not a delight. The answer is stillness, not absence — the creature,
+  the colours and the live data all stay, they just stop lurching. `?motion=full`
+  overrides for anyone who wants it anyway. There is a smoke check per page, and
+  it needs CDP media emulation to see: no amount of looking at the page finds a
+  regression here.
 
 ## Voice
 

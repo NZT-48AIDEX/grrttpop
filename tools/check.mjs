@@ -292,6 +292,9 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
 for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.js", "trench"]]) {
   const src = readFileSync(join(ROOT, js), "utf8");
   if (!src.includes("isAgentView()")) fail(js, "no ?agent=1 view — an eyeless visitor gets a black canvas");
+  if (!src.includes("prefersReducedMotion")) {
+    fail(js, "does not consult prefers-reduced-motion — the whole page is movement");
+  }
   if (js !== "main.js" && !/describe:\s*\(\)/.test(src)) {
     fail(js, `no ${global}.describe() — nothing to render as text`);
   }

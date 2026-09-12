@@ -291,3 +291,15 @@ kbd {
   letter-spacing: .02em;
 }
 .nav-agent:hover { opacity: 1; color: var(--acid); }
+
+/* ---------- reduced motion ---------- */
+/* css animations run on the compositor, outside everything the js clock
+   controls — they have to be asked separately. the scroll cue and the companion bob */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

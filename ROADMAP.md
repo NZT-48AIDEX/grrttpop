@@ -72,11 +72,21 @@ meaningful. Make it non-blocking and have it open an issue rather than redden
 `main`. It must not cry wolf on rate limits — see CLAUDE.md on telling a
 CoinGecko 429 (which Chrome reports as a CORS error) from real shape drift.
 
-## P2 — `prefers-reduced-motion`
+## ~~P2 — `prefers-reduced-motion`~~ — done
 
-A site made entirely of motion, with no reduced-motion path at all. The `calm`
-mode and `setQuality` already exist to build on. This is the most obvious
-accessibility gap and it's mostly wiring.
+Honoured on all three pages: the creature's displacement and scroll speed drop,
+the companion stops spinning, camera parallax and star drift stop, creature bob
+and spin stop, the trench's current crawls instead of streaming, trade pulses
+soften to a quarter, and both stylesheets collapse CSS animations (which run on
+the compositor and ignore the JS clock entirely).
+
+Stillness, not absence — everything stays visible and the data stays live.
+`?motion=reduced` / `?motion=full` override the system preference either way.
+
+Smoke checks it per page via CDP media emulation, which is the only way to see
+it: the query param is a convenience, and testing only that would leave the real
+path — an actual system preference — unverified. I made exactly that mistake
+first; the check now emulates the media feature.
 
 ## P2 — the reef and trench have no adaptive quality
 

@@ -1,4 +1,4 @@
-import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
+import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
 import { isAgentView, mountAgentView, indexToText } from "./lib/describe.js";
@@ -263,6 +263,12 @@ const MODES = {
 const target = { ...MODES.calm }; // lerped toward each frame
 let currentMode = "calm";
 
+/* stillness, not absence: the creature stays, it just stops lurching */
+const reducedMotion = prefersReducedMotion();
+if (reducedMotion) {
+  Object.assign(target, { uAmp: 0.12, uSpeed: 0.12, uFreq: 1.1, uTwist: 0, uPartyRate: 0 });
+}
+
 function setMode(name) {
   const m = MODES[name];
   if (!m) return;
@@ -406,15 +412,18 @@ renderer.setAnimationLoop(() => {
   }
 
   // parallax camera + slow stars
-  camera.position.x = lerp(camera.position.x, mouseNDC.x * 0.4, 0.03);
-  camera.position.y = lerp(camera.position.y, mouseNDC.y * 0.3, 0.03);
+  const parallax = reducedMotion ? 0 : 1;   // no camera drift under reduced motion
+  camera.position.x = lerp(camera.position.x, mouseNDC.x * 0.4 * parallax, 0.03);
+  camera.position.y = lerp(camera.position.y, mouseNDC.y * 0.3 * parallax, 0.03);
   camera.lookAt(creature.position.x * 0.5, 0, 0);
-  stars.rotation.y = t * 0.008;
+  if (!reducedMotion) stars.rotation.y = t * 0.008;
 
-  // companion chases the cursor, wobbling
-  companion.position.lerp(companionTarget, 0.08);
-  companion.rotation.x = t * 2;
-  companion.rotation.y = t * 3;
+  // companion chases the cursor, wobbling — unless asked to sit still
+  companion.position.lerp(companionTarget, reducedMotion ? 0.02 : 0.08);
+  if (!reducedMotion) {
+    companion.rotation.x = t * 2;
+    companion.rotation.y = t * 3;
+  }
 
   // keep the speech bubble pinned to the companion
   if (!tipEl.hidden) {
@@ -434,6 +443,7 @@ window.grrtt = {
   state: () => ({
     ...diag.snapshot(),
     mode: currentMode,
+    reducedMotion,
     quality,
     wireframe: creatureMat.wireframe,
     uniforms: Object.fromEntries(

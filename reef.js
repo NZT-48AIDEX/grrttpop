@@ -1,4 +1,4 @@
-import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
+import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
 import {
@@ -174,6 +174,10 @@ let lastTickAt = null;      // last binance trade that moved a price
 let liveOn = false;         // websocket actually connected
 let wsFailures = 0;         // reconnect churn — a socket that never sticks
 let tickTrouble = null;     // { reason, detail } once we know why it won't connect
+/* the reef is a lot of motion: 50 twitching creatures, drifting dust, a
+   camera that swims between bands. reduced motion keeps all of it visible
+   and takes the lurch out. */
+const reducedMotion = prefersReducedMotion();
 let trending = new Set();
 let focus = null;          // { id } while camera is visiting a creature
 let bandFit = [16, 16, 16];
@@ -622,7 +626,7 @@ function connectTicks() {
       if (rel > 0.00008) {
         const b = blobs.get(id);
         if (b?.mesh.visible) {
-          b.springVel += Math.min(rel * 9000, 5);   // heartbeat on real movement
+          b.springVel += Math.min(rel * 9000, 5) * (reducedMotion ? 0.25 : 1);   // heartbeat on real movement
           sound.pluck(Math.min(rel * 4000, 1));
         }
         if (selectedId === id) $("card-price").textContent = fmtPrice(nu);
@@ -814,7 +818,8 @@ renderer.setAnimationLoop(() => {
     if (!b.mesh.visible) continue;
     const u = b.mesh.material.uniforms;
     u.uTime.value = t;
-    const bobY = Math.sin(t * 0.6 + u.uSeed.value) * 0.12;
+    // bob and spin are pure decoration; the pulse is data, so it stays
+    const bobY = reducedMotion ? 0 : Math.sin(t * 0.6 + u.uSeed.value) * 0.12;
     b.mesh.position.x = lerp(b.mesh.position.x, b.target.x, 0.04);
     b.mesh.position.y = lerp(b.mesh.position.y, b.target.y + bobY, 0.04);
     b.mesh.position.z = lerp(b.mesh.position.z, b.target.z, 0.04);
@@ -826,7 +831,7 @@ renderer.setAnimationLoop(() => {
     b.mesh.scale.setScalar(lerp(b.mesh.scale.x, b.size * hovBoost, 0.12));
     u.uGlow.value = lerp(u.uGlow.value, id === selectedId ? 0.9 : id === hoveredId ? 0.45 : 0, 0.1);
     u.uDim.value = lerp(u.uDim.value, b.mesh.userData.dimTarget ?? 1, 0.08);
-    b.mesh.rotation.y = t * 0.1 + u.uSeed.value;
+    b.mesh.rotation.y = reducedMotion ? u.uSeed.value : t * 0.1 + u.uSeed.value;
   }
 
   /* camera: focused visit, or free dive */
@@ -848,7 +853,7 @@ renderer.setAnimationLoop(() => {
     lookTarget.lerp(new THREE.Vector3(camera.position.x * 0.5, camera.position.y * 0.5, camera.position.z - 12), kLook);
   }
   camera.lookAt(lookTarget);
-  dust.rotation.z = t * 0.004;
+  dust.rotation.z = t * (reducedMotion ? 0.0004 : 0.004);
 
   /* depth rail + band labels */
   const active = currentBand();
@@ -906,6 +911,7 @@ window.reef = {
       },
       bags: { count: bags.length, valueUsd: +bagValue().toFixed(2) },
       sound: { on: sound.on },
+      reducedMotion,
       note: document.getElementById("reef-note")?.hidden === false
         ? document.getElementById("reef-note").textContent : null,
     };

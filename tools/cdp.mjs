@@ -194,6 +194,15 @@ async function makePage(send, listeners, { width, height }) {
         return seen;`);
     },
 
+    /** emulate media features — prefers-reduced-motion, prefers-color-scheme.
+        the query-param overrides are a convenience; this exercises the path a
+        real visitor's system preference takes. */
+    async emulateMedia(features = {}) {
+      return s("Emulation.setEmulatedMedia", {
+        features: Object.entries(features).map(([name, value]) => ({ name, value })),
+      });
+    },
+
     /** pause css animations/transitions — they run on the compositor's own
         clock and will smear a screenshot that is otherwise reproducible */
     async freezeCss() {

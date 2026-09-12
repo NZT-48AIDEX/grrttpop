@@ -1,4 +1,4 @@
-import "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
+import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
 import {
@@ -161,6 +161,9 @@ let lastRpcAt = null;
 let vitals = { tps: null, epoch: null, epochPct: null };
 let walletMeta = { addr: "", partial: false, gated: false, at: null };
 let tokenListSize = null;   // how many verified mints jupiter gave us
+/* the current here is driven by live tps, which is the point of the page —
+   under reduced motion it keeps its colour and its reading, and stops moving */
+const reducedMotion = prefersReducedMotion();
 let selectedId = null;
 let hoveredId = null;
 let focus = null;
@@ -612,7 +615,7 @@ renderer.setAnimationLoop(() => {
     if (!b.mesh.visible) continue;
     const u = b.mesh.material.uniforms;
     u.uTime.value = t;
-    const bobY = Math.sin(t * 0.6 + u.uSeed.value) * 0.12;
+    const bobY = reducedMotion ? 0 : Math.sin(t * 0.6 + u.uSeed.value) * 0.12;
     b.mesh.position.x = lerp(b.mesh.position.x, b.target.x, 0.04);
     b.mesh.position.y = lerp(b.mesh.position.y, b.target.y + bobY, 0.04);
     b.mesh.position.z = lerp(b.mesh.position.z, b.target.z, 0.04);
@@ -644,7 +647,9 @@ renderer.setAnimationLoop(() => {
     lookTarget.lerp(new THREE.Vector3(camera.position.x * 0.5, camera.position.y * 0.5, camera.position.z - 12), kLook);
   }
   camera.lookAt(lookTarget);
-  dust.rotation.z += currentSpeed * 0.004 * (dt / 0.016);   // the current IS the tps
+  // the current IS the tps — under reduced motion the number still drives it,
+  // it just crawls instead of streaming past
+  dust.rotation.z += currentSpeed * (reducedMotion ? 0.0004 : 0.004) * (dt / 0.016);
 
   renderer.render(scene, camera);
   if (ecoCoins.length) diag.ready({ page: "trench" });   // alive = painted, with data
@@ -697,6 +702,7 @@ window.trench = {
       camZ: +camera.position.z.toFixed(2),
     },
     tokenList: tokenListSize,
+    reducedMotion,
     note: $("reef-note")?.hidden === false ? $("reef-note").textContent : null,
   }),
 };
