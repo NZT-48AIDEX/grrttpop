@@ -112,6 +112,20 @@ direction for a test suite to fail in: it does not go red, it goes confidently
 wrong. `npm run check` verifies the fixtures exist and that `solana-rpc.json`
 still has an entry per method — it cannot tell you the shape is out of date.
 
+What it *can* do is say how old the recording is. Past 90 days it prints a
+warning (and still passes — staleness is a thing to know, not a reason to stop):
+
+```
+⚠️  fixtures/
+    recorded 131 days ago (2026-05-04). an api may have changed shape since,
+    which this suite cannot see — it would replay the old shape and stay green.
+    check with: npm run smoke -- --live
+```
+
+Age is a proxy, not evidence: fresh fixtures can already be wrong if a provider
+shipped a change yesterday, and year-old ones can be perfectly accurate. The
+warning is a nudge to go look, nothing more.
+
 Frozen values are the harmless half. Smoke output reads `epoch 1032 · 72%` and
 the same prices on every run, forever. That is expected; it is not live data and
 should never be quoted as if it were.

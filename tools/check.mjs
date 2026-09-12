@@ -20,7 +20,11 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SKIP = new Set(["node_modules", ".git", "vendor", ".claude"]);
 
 const problems = [];
+const warnings = [];
 const fail = (file, msg) => problems.push({ file, msg });
+/* a warning is something to know, not something to stop for: it prints and
+   the check still passes. reserve it for things that go wrong slowly. */
+const warn = (file, msg) => warnings.push({ file, msg });
 const rel = (p) => relative(ROOT, p) || p;
 
 /* ---------------- walk the tree ---------------- */
@@ -273,6 +277,30 @@ else {
   for (const f of FIXTURES) {
     if (!existsSync(join(fixDir, f))) fail("fixtures/" + f, "missing — run: npm run record");
   }
+  /* fixtures freeze an api's shape. when a provider changes format, the
+     site breaks in production while this suite stays green, replaying the
+     old shape back to itself. nothing here can detect that — but it can at
+     least say out loud how old the recording is. */
+  const STALE_DAYS = 90;
+  const stamp = join(fixDir, "recorded-at.json");
+  if (!existsSync(stamp)) {
+    warn("fixtures/recorded-at.json", "missing — no way to tell how old the recordings are. `npm run record`");
+  } else {
+    try {
+      const at = new Date(JSON.parse(readFileSync(stamp, "utf8")).at);
+      const days = Math.floor((Date.now() - at.getTime()) / 86_400_000);
+      if (Number.isNaN(days)) {
+        warn("fixtures/recorded-at.json", "unreadable timestamp");
+      } else if (days < 0) {
+        warn("fixtures/", `recorded ${-days} day(s) in the future — check the clock that wrote this`);
+      } else if (days >= STALE_DAYS) {
+        warn("fixtures/", `recorded ${days} days ago (${at.toISOString().slice(0, 10)}). ` +
+          `an api may have changed shape since, which this suite cannot see — it would replay the old shape and stay green. ` +
+          `check with: npm run smoke -- --live`);
+      }
+    } catch (e) { warn("fixtures/recorded-at.json", "invalid JSON: " + e.message); }
+  }
+
   const rpcPath = join(fixDir, "solana-rpc.json");
   if (existsSync(rpcPath)) {
     const rpcFix = JSON.parse(readFileSync(rpcPath, "utf8"));
@@ -284,8 +312,12 @@ else {
 
 /* ---------------- report ---------------- */
 const n = scripts.length + pages.length + jsons.length;
+
+for (const w of warnings) console.warn(`⚠️  ${w.file}\n    ${w.msg}\n`);
+
 if (!problems.length) {
-  console.log(`✅ check passed — ${scripts.length} scripts, ${pages.length} pages, ${jsons.length} json, ${n} files total`);
+  console.log(`✅ check passed — ${scripts.length} scripts, ${pages.length} pages, ${jsons.length} json, ${n} files total` +
+    (warnings.length ? ` · ${warnings.length} warning${warnings.length > 1 ? "s" : ""}` : ""));
   process.exit(0);
 }
 console.error(`❌ ${problems.length} problem${problems.length > 1 ? "s" : ""}:\n`);
