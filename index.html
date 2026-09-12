@@ -14,7 +14,9 @@
   </script>
 </head>
 <body>
-  <canvas id="scene"></canvas>
+  <a class="skip" href="#scene">skip to the scene</a>
+  <canvas id="scene" tabindex="0" role="application" aria-label="the creature — press enter to poke it"></canvas>
+  <p id="scene-status" class="sr-only" role="status" aria-live="polite"></p>
 
   <header class="nav">
     <a class="logo" href="#top">grrtt<span>pop</span></a>
@@ -27,7 +29,7 @@
       <a href="#contact">say hi</a>
       <a href="?agent=1" class="nav-agent" title="this page, described in words — no webgl required">◫ text</a>
     </nav>
-    <button class="palette-hint" id="palette-open" title="command palette">⌘K</button>
+    <button class="palette-hint" id="palette-open" aria-label="open command palette" title="command palette">⌘K</button>
   </header>
 
   <main>

@@ -73,6 +73,7 @@ const PAGES = {
 
   reef: {
     url: "market.html", global: "reef",
+    keyboard: true,
     agentText: ["the live crypto market", "depth bands", "biggest movers", "not financial advice"],
     checks: [
       ["market data loaded", (s) => (s.data.coins > 0 ? null : "zero coins")],
@@ -107,6 +108,7 @@ const PAGES = {
 
   trench: {
     url: "solana.html", global: "trench",
+    keyboard: true,
     agentText: ["solana, live", "the spl ecosystem", "read-only"],
     checks: [
       ["ecosystem loaded", (s) => (s.eco.coins > 0 ? null : "no ecosystem coins")],
@@ -234,6 +236,59 @@ try {
         if (problem) row.failures.push(`${label} — ${problem}`);
       }
 
+      /* the creatures are the whole point of these pages and used to be
+         pointer-only: you could tab to the sort buttons and never touch a
+         coin. this drives the scene by keyboard the way someone without a
+         mouse would, and checks that every move is actually announced. */
+      if (spec.keyboard) {
+        try {
+          const press = (key) => page.eval(`
+            document.getElementById("scene").dispatchEvent(new KeyboardEvent(
+              "keydown", { key: ${JSON.stringify(key)}, bubbles: true, cancelable: true }));
+            return 1;`);
+          const said = () => page.eval(`return document.getElementById("scene-status").textContent`);
+
+          await page.eval(`document.getElementById("scene").focus(); return document.activeElement.id`);
+          const intro = await said();
+          if (!intro) throw new Error("focusing the scene announces nothing");
+
+          await press("ArrowRight");
+          await advance(4);
+          const first = await said();
+          if (!first || first === intro) throw new Error("arrowing announces nothing new");
+
+          await press("ArrowDown");
+          await advance(4);
+          const second = await said();
+          if (second === first) throw new Error("a second arrow moved nowhere");
+
+          await press("Enter");
+          await advance(8);
+          const opened = await page.eval(`return { sel: ${spec.global}.state().keyboardFocus,
+            focus: document.activeElement.id }`);
+          if (!opened.sel) throw new Error("enter selected nothing");
+          if (opened.focus !== "card-close") throw new Error(`focus did not follow into the card (went to "${opened.focus}")`);
+
+          await page.eval(`document.getElementById("card-close").click(); return 1`);
+          await advance(4);
+          const back = await page.eval(`return document.activeElement.id`);
+          if (back !== "scene") throw new Error(`focus was dropped on close (went to "${back}")`);
+
+          // the ring has to be visible, or none of the above helps
+          const ring = await page.eval(`
+            const c = document.getElementById("scene"); c.focus();
+            const s = getComputedStyle(c);
+            return s.outlineStyle !== "none" && parseFloat(s.outlineWidth) >= 2;`);
+          if (!ring) throw new Error("the focused scene has no visible focus ring");
+
+          row.keyboard = { announced: second.slice(0, 60) };
+          row.checks.push({ label: "usable by keyboard", ok: true });
+        } catch (e) {
+          row.checks.push({ label: "usable by keyboard", ok: false });
+          row.failures.push(`keyboard — ${e.message}`);
+        }
+      }
+
       /* someone with vestibular sensitivity saying "please stop moving" is
          the one preference this site most needs to honour, and it is
          invisible unless emulated — no amount of looking at the page finds
@@ -321,6 +376,7 @@ try {
       console.log(`   ↳ ${row.consoleNotes.count} console error(s) from third-party endpoints (expected live, not failed):`);
       console.log(`      ${row.consoleNotes.summary.slice(0, 160)}`);
     }
+    if (row.keyboard) console.log(`   ↳ keyboard: creatures reachable, announced "${row.keyboard.announced}…"`);
     if (row.reducedMotion) console.log(`   ↳ reduced motion: honoured, still drawing (${row.reducedMotion.drawCalls} calls)`);
     if (row.agentView) console.log(`   ↳ ?agent=1: ${row.agentView.lines} lines, ${row.agentView.chars} chars of description`);
     if (row.visual) {

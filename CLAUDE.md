@@ -161,6 +161,15 @@ that is a real change to the site, not a baseline update.
 - **A partial read is never presented as whole.** This is the trench's central
   honesty and there is a smoke check guarding it.
 - Bags and watchlists live in localStorage and never leave the browser.
+- **Every page is usable by keyboard**, including the creatures. The scenes are
+  `<canvas>`, which has no children to tab through, so each canvas takes focus
+  once and arrow keys move a selection *inside* it — the standard composite
+  widget arrangement. Every move is announced through a live region, because a
+  glowing blob tells a screen reader nothing. Focus follows into an opened card
+  and returns to the scene on close. **Never add `outline: none` without a
+  `:focus-visible` replacement** — five of those had removed the focus ring from
+  every text input with nothing in its place. Smoke drives the reef and the
+  trench by keyboard on every run.
 - **`prefers-reduced-motion` is honoured on every page.** This site is made of
   movement; for someone with vestibular sensitivity that is a reason to close
   the tab, not a delight. The answer is stillness, not absence — the creature,

@@ -2,6 +2,7 @@ import { prefersReducedMotion } from "./lib/harness.js";   // must be first: pat
 import * as THREE from "three";
 import diag from "./lib/diag.js";
 import { makeQualityGovernor } from "./lib/quality.js";
+import { mountSceneKeyboard } from "./lib/keyboard.js";
 import {
   makeRpc, fetchVitals as readVitals, fetchEcosystem, loadTokenList as loadJupList,
   peekWallet as readWallet, isSolAddress, hostOf,
@@ -497,6 +498,42 @@ canvas.addEventListener("pointerup", (e) => {
   fillCard(b);
 });
 
+/* same arrangement as the reef: the canvas takes focus once, arrows move
+   between creatures inside it, every move announced. */
+let keyFocusId = null;
+const sceneKeys = mountSceneKeyboard(canvas, {
+  // getElementById, not $: this runs at module scope and reef.js defines
+  // its $ helper further down — a temporal dead zone, and a blank page
+  status: document.getElementById("scene-status"),
+  items: () => [...blobs.entries()]
+    .filter(([, b]) => b.mesh.visible)
+    .map(([id, b]) => ({ id, x: b.mesh.position.x, y: b.mesh.position.y })),
+  onFocus: (id) => {
+    keyFocusId = id;
+    hoveredId = id;
+    const b = blobs.get(id);
+    if (b) targetCamZ = b.mesh.position.z + fitDist(6);
+  },
+  onActivate: (id) => {
+    const b = blobs.get(id);
+    if (!b) return;
+    fillCard(b);
+    selectedId = id;
+    $("card-close")?.focus();
+  },
+  describe: (id) => {
+    const b = blobs.get(id);
+    if (!b) return "";
+    if (b.coin) {
+      return `${b.coin.name}, ${fmtPrice(b.coin.current_price)}, ` +
+        `${pct(b.coin.price_change_percentage_24h_in_currency)} over 24 hours.`;
+    }
+    return `${b.item.symbol}, ${fmtAmt(b.item.amount)} held, ` +
+      `${b.item.usd ? fmtBig(b.item.usd) : "unpriced"}.`;
+  },
+  onEscape: () => { closeCard(); keyFocusId = null; hoveredId = null; },
+});
+
 function pickBlob() {
   if (!pointerActive) return null;
   raycaster.setFromCamera(mouseNDC, camera);
@@ -568,7 +605,10 @@ function drawSpark(c) {
   ctx.stroke();
 }
 
-function closeCard() { card.hidden = true; selectedId = null; focus = null; }
+function closeCard() {
+  if (card.contains(document.activeElement)) canvas.focus();   // don't drop focus
+  card.hidden = true; selectedId = null; focus = null;
+}
 $("card-close").addEventListener("click", closeCard);
 addEventListener("keydown", (e) => {
   if (e.key === "Escape") { closeCard(); $("wallet-panel").hidden = true; }
@@ -620,7 +660,7 @@ renderer.setAnimationLoop(() => {
   const kCam = 1 - Math.exp(-3.2 * rawDt);
   const kLook = 1 - Math.exp(-5 * rawDt);
 
-  const hovId = pickBlob();
+  const hovId = pickBlob() ?? keyFocusId;
   if (hovId !== hoveredId) {
     hoveredId = hovId;
     canvas.style.cursor = hovId ? "pointer" : "default";
@@ -725,6 +765,7 @@ window.trench = {
       camZ: +camera.position.z.toFixed(2),
     },
     tokenList: tokenListSize,
+    keyboardFocus: keyFocusId,
     quality: { tier: qualityTier, drops: quality.drops },
     reducedMotion,
     note: $("reef-note")?.hidden === false ? $("reef-note").textContent : null,

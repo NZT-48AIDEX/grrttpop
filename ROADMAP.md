@@ -130,6 +130,13 @@ heartbeat is quiet instead of showing a dim dot and leaving you to guess.
 **Adaptive quality** on every page from one shared policy. It only steps down;
 recovering upward oscillates.
 
+**Keyboard navigation.** The creatures were pointer-only — you could tab to the
+sort buttons and never touch a coin. Each canvas now takes focus and arrow keys
+move between creatures inside it, announced through a live region; enter opens
+the details and focus follows, escape closes and hands focus back. Plus visible
+`:focus-visible` rings (five `outline: none` rules had removed them with nothing
+in their place), skip links, and accessible names on the icon-only controls.
+
 ---
 
 ## Deliberately not done — don't "fix" these
@@ -153,9 +160,6 @@ recovering upward oscillates.
 Nothing here is needed — the list above is the honest end of the plan. These are
 the next things I'd reach for.
 
-- **Keyboard navigation.** Reduced motion is handled; focus order, visible focus
-  rings, and keyboard access to the toybox and the depth rail are not. This is
-  the biggest remaining accessibility gap.
 - **`describe()` could carry the sparklines**, so an agent gets the shape of a
   trend and not only the latest number.
 - **Drift is detected but never diagnosed.** `drift.yml` says "something moved";

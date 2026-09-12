@@ -437,6 +437,19 @@ renderer.setAnimationLoop(() => {
   diag.ready({ page: "index" });   // first painted frame = the site is alive
 });
 
+/* the creature was pokeable only by pointer. it is the entire page. */
+canvas.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  e.preventDefault();
+  pop();
+  const status = document.getElementById("scene-status");
+  if (status) status.textContent = `popped. mode ${currentMode}.`;
+});
+canvas.addEventListener("focus", () => {
+  const status = document.getElementById("scene-status");
+  if (status) status.textContent = "the creature. press enter to poke it.";
+});
+
 /* a hello for curious humans — the creature is yours to hack */
 window.grrtt = {
   uniforms, creature, setMode, pop, say, setQuality,

@@ -15,7 +15,9 @@
   </script>
 </head>
 <body class="reef-body trench-body">
-  <canvas id="scene"></canvas>
+  <a class="skip" href="#scene">skip to the scene</a>
+  <canvas id="scene" tabindex="0" role="application" aria-label="the trench — arrow keys move between creatures, enter opens details"></canvas>
+  <p id="scene-status" class="sr-only" role="status" aria-live="polite"></p>
 
   <header class="reef-top">
     <a class="logo" href="index.html">grrtt<span>pop</span></a>
@@ -31,7 +33,7 @@
   <div class="reef-tooltip" id="tooltip" hidden></div>
 
   <aside class="coin-card" id="coin-card" hidden>
-    <button class="card-close" id="card-close" title="close (esc)">×</button>
+    <button class="card-close" id="card-close" aria-label="close details" title="close (esc)">×</button>
     <div class="card-head">
       <img id="card-img" alt="" width="36" height="36" />
       <div>
@@ -60,7 +62,7 @@
   </aside>
 
   <aside class="bags-panel" id="wallet-panel" hidden>
-    <button class="card-close" id="wallet-close" title="close">×</button>
+    <button class="card-close" id="wallet-close" aria-label="close wallet panel" title="close">×</button>
     <h3>🔭 wallet peek</h3>
     <p class="bags-sub" id="wallet-sub">read-only view of any public address</p>
     <ul id="wallet-list"></ul>

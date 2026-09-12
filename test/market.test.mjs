@@ -239,3 +239,63 @@ test("the quality governor bottoms out rather than going negative", async () => 
   assert.equal(g.tier, 0);
   assert.equal(g.drops, 2, "three tiers means at most two drops");
 });
+
+/* ---------------- keyboard navigation ---------------- */
+
+test("readingOrder goes left-to-right, top-to-bottom", async () => {
+  const { readingOrder } = await import("../lib/keyboard.js");
+  // world space: +y is up, so the top row is the higher y
+  const items = [
+    { id: "bottom-right", x: 5, y: -5 },
+    { id: "top-right", x: 5, y: 5 },
+    { id: "top-left", x: -5, y: 5 },
+    { id: "bottom-left", x: -5, y: -5 },
+  ];
+  assert.deepEqual(readingOrder(items).map((i) => i.id),
+    ["top-left", "top-right", "bottom-left", "bottom-right"]);
+});
+
+test("readingOrder treats a slightly uneven row as one row", async () => {
+  const { readingOrder } = await import("../lib/keyboard.js");
+  const items = [{ id: "b", x: 2, y: 0.4 }, { id: "a", x: 1, y: 0 }, { id: "c", x: 3, y: -0.3 }];
+  assert.deepEqual(readingOrder(items).map((i) => i.id), ["a", "b", "c"],
+    "creatures bob, so a strict y sort would scramble a row");
+});
+
+test("neighbour only moves the way you asked", async () => {
+  const { neighbour } = await import("../lib/keyboard.js");
+  const here = { id: "here", x: 0, y: 0 };
+  const items = [here,
+    { id: "right", x: 3, y: 0 },
+    { id: "left", x: -3, y: 0 },
+    { id: "up", x: 0, y: 3 },
+    { id: "down", x: 0, y: -3 }];
+
+  assert.equal(neighbour(items, here, "right").id, "right");
+  assert.equal(neighbour(items, here, "left").id, "left");
+  assert.equal(neighbour(items, here, "up").id, "up");
+  assert.equal(neighbour(items, here, "down").id, "down");
+});
+
+test("neighbour prefers straight ahead over merely close", async () => {
+  const { neighbour } = await import("../lib/keyboard.js");
+  const here = { id: "here", x: 0, y: 0 };
+  const items = [here,
+    { id: "far-but-straight", x: 6, y: 0 },
+    { id: "near-but-sideways", x: 1.5, y: 6 }];
+  assert.equal(neighbour(items, here, "right").id, "far-but-straight",
+    "drifting sideways costs more than distance");
+});
+
+test("neighbour returns null at the edge", async () => {
+  const { neighbour } = await import("../lib/keyboard.js");
+  const here = { id: "here", x: 0, y: 0 };
+  assert.equal(neighbour([here, { id: "left", x: -3, y: 0 }], here, "right"), null,
+    "nothing to the right means nothing happens, not a wrap-around");
+});
+
+test("neighbour never returns the creature you're on", async () => {
+  const { neighbour } = await import("../lib/keyboard.js");
+  const here = { id: "here", x: 0, y: 0 };
+  assert.equal(neighbour([here, { id: "same-spot", x: 0, y: 0 }], here, "right"), null);
+});

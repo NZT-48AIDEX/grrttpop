@@ -424,3 +424,46 @@ a.sol-pill:hover { border-color: #14f195; color: #14f195; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- focus ---------- */
+/* Five `outline: none` rules removed the focus ring from every text input and
+   nothing replaced it, so a keyboard user had no idea where they were. These
+   carry !important deliberately: a focus ring is an accessibility guarantee,
+   not a style preference, and it should not be possible to remove one by
+   tweaking a component later.
+   :focus-visible, not :focus — a mouse click shouldn't leave a ring behind. */
+:focus-visible {
+  outline: 2px solid var(--acid) !important;
+  outline-offset: 3px !important;
+  border-radius: 3px;
+}
+/* the canvas ring hugs the viewport edge, so pull it inside */
+#scene:focus-visible { outline-offset: -4px !important; }
+
+/* ---------- skip link ---------- */
+/* out of the way until tabbed to, then unmissable */
+.skip {
+  position: fixed;
+  top: .5rem;
+  left: .5rem;
+  z-index: 999;
+  padding: .5rem .9rem;
+  border-radius: 999px;
+  background: var(--acid);
+  color: #05060e;
+  font: 600 .85rem var(--mono);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+
+/* a live region that only screen readers hear */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

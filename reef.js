@@ -2,6 +2,7 @@ import { prefersReducedMotion } from "./lib/harness.js";   // must be first: pat
 import * as THREE from "three";
 import diag from "./lib/diag.js";
 import { makeQualityGovernor } from "./lib/quality.js";
+import { mountSceneKeyboard } from "./lib/keyboard.js";
 import {
   fetchMarkets, fetchGlobal, fetchFearGreed, fetchTrending as fetchTrendingIds,
   demoData, hash, sortCoins, sizeFor as sizeForCoin, packPositions as packCircles,
@@ -406,6 +407,47 @@ canvas.addEventListener("pointerup", (e) => {
   fillCard(b.coin);
 });
 
+/* the creatures are the page, and they were pointer-only: you could tab to
+   the sort buttons and never touch a single coin. the canvas takes focus
+   once and arrows move between creatures inside it, announced aloud because
+   a glowing blob tells a screen reader nothing. */
+let keyFocusId = null;
+const sceneKeys = mountSceneKeyboard(canvas, {
+  // getElementById, not $: this runs at module scope and reef.js defines
+  // its $ helper further down — a temporal dead zone, and a blank page
+  status: document.getElementById("scene-status"),
+  items: () => [...blobs.entries()]
+    .filter(([, b]) => b.mesh.visible)
+    .map(([id, b]) => ({ id, x: b.mesh.position.x, y: b.mesh.position.y })),
+  onFocus: (id) => {
+    keyFocusId = id;
+    hoveredId = id;                     // reuse the hover glow as the cursor
+    const b = blobs.get(id);
+    if (b) { targetCamZ = b.mesh.position.z + fitDist(b.size * 6); markDove(); }
+  },
+  onActivate: (id) => {
+    const b = blobs.get(id);
+    if (!b) return;
+    b.springVel = 8;
+    sound.blip();
+    selectedId = id;
+    focus = { id };
+    fillCard(b.coin);
+    $("card-close")?.focus();           // the details are the new context
+  },
+  describe: (id) => {
+    const c = blobs.get(id)?.coin;
+    if (!c) return "";
+    const chg = c.price_change_percentage_24h_in_currency;
+    // the creature's own band, not currentBand() — that follows the camera,
+    // so arrowing around made the same coin report a different depth
+    const band = BAND_NAMES[blobs.get(id)?.band];
+    return `${c.name}, ${fmtPrice(c.current_price)}, ${pct(chg)} over 24 hours, ` +
+      `rank ${c.market_cap_rank}${band ? `, in ${band}` : ""}.`;
+  },
+  onEscape: () => { closeCard(); keyFocusId = null; hoveredId = null; },
+});
+
 function pickBlob() {
   if (!pointerActive) return null;
   raycaster.setFromCamera(mouseNDC, camera);
@@ -467,6 +509,8 @@ function drawSpark(c) {
 }
 
 function closeCard() {
+  // hand focus back to the scene rather than dropping it at the document top
+  if (card.contains(document.activeElement)) canvas.focus();
   card.hidden = true;
   selectedId = null;
   focus = null;
@@ -823,7 +867,7 @@ renderer.setAnimationLoop(() => {
   const kLook = 1 - Math.exp(-5 * rawDt);
 
   /* hover */
-  const hovId = pickBlob();
+  const hovId = pickBlob() ?? keyFocusId;
   if (hovId !== hoveredId) {
     hoveredId = hovId;
     canvas.style.cursor = hovId ? "pointer" : "default";
@@ -934,6 +978,7 @@ window.reef = {
       },
       bags: { count: bags.length, valueUsd: +bagValue().toFixed(2) },
       sound: { on: sound.on },
+      keyboardFocus: keyFocusId,
       quality: { tier: qualityTier, drops: quality.drops },
       reducedMotion,
       note: document.getElementById("reef-note")?.hidden === false
