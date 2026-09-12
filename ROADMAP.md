@@ -1,8 +1,10 @@
 # Roadmap — handoff
 
-Last updated 2026-09-12 at `f2d4157`, after 23 commits. Conventions and traps
-live in [CLAUDE.md](CLAUDE.md) — read that before touching anything; this file
-is state and what's next.
+Current as of the keyboard-navigation work, 2026-09-12. (No sha here on
+purpose: recording one is itself a commit, so it is wrong the moment it lands —
+`git log -- ROADMAP.md` is the honest answer.) Conventions and traps live in
+[CLAUDE.md](CLAUDE.md) — read that before touching anything; this file is state
+and what's next.
 
 **Two things are left, and both need an account I can't create.** Everything
 else on the original list is done.
