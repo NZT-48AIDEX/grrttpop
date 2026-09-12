@@ -1,44 +1,27 @@
 # Roadmap — handoff
 
-Started 2026-09-12; everything below the line got done in the same stretch.
-Conventions and traps live in [CLAUDE.md](CLAUDE.md).
+Last updated 2026-09-12 at `3ec5ab7`, after 21 commits. Conventions and traps
+live in [CLAUDE.md](CLAUDE.md) — read that before touching anything; this file
+is state and what's next.
 
-**What's actually left is two items, and both need a human with an account** —
-see *Blocked on you* immediately below. Everything else is struck through.
-
-## Where things stand
-
-The site got a feedback loop. It reports its own health (`state()`), replays
-recorded APIs on a seeded stepped clock so runs repeat, boots headless in CI
-with pixel comparison on two platforms, exposes itself to agents over MCP, and
-describes itself in words at `?agent=1` for anything that can't run WebGL.
-
-```sh
-npm run check     # static: parses, imports, dom ids, agent-card promises. seconds.
-npm run smoke     # boots all 3 pages headless, asserts state(), diffs baselines
-npm test          # check + smoke — the gate
-npm run mcp:test  # protocol conformance (--slow adds browser tools)
-npm run record    # re-capture fixtures (read CLAUDE.md first — it's never one commit)
-```
-
-Live at <https://nzt-48aidex.github.io/grrttpop/> · CI green on `darwin-arm64`
-(local) and `linux-x64` (every push).
+**Two things are left, and both need an account I can't create.** Everything
+else on the original list is done.
 
 ---
 
-## Blocked on you
+## What's left
 
-### Record a real wallet fixture (needs a free RPC key)
+### 1. Record a real wallet fixture — needs a free RPC key
 
-Every recorded Solana response is a *refusal*, so the browser only ever
-exercises the degraded path. The happy path — token accounts returning, the
-school assembling — is covered by unit tests with an injected `rpc`, but never
-end to end in a page.
+Every recorded Solana response is a *refusal*, because that's what free public
+endpoints actually answer. So in a browser the wallet peek only ever exercises
+the degraded path. The happy path — token accounts returning, the school
+assembling, shares summing to 100% — is covered by unit tests with an injected
+`rpc`, but never end to end in a page.
 
 Get a free Helius or QuickNode endpoint, then:
 
 ```sh
-# paste the endpoint into the trench's wallet panel, or:
 node -e 'import("./lib/solana.js").then(async m => {
   const rpc = m.makeRpc({ custom: "https://YOUR-ENDPOINT" });
   console.log(JSON.stringify(await rpc("getTokenAccountsByOwner",
@@ -49,142 +32,134 @@ node -e 'import("./lib/solana.js").then(async m => {
 ```
 
 **Keep the key out of the repo** — the recorded response is the artifact, not
-the credential. Then teach `lib/harness.js` to serve it under a flag
-(`?fixtures=authed`) and add a smoke case.
+the credential. Then teach [lib/harness.js](lib/harness.js) to serve it behind a
+flag (`?fixtures=authed`) and add a smoke case that asserts a full school.
 
-### Publish the MCP server (needs a Cloudflare account)
+### 2. Publish the MCP server — needs a Cloudflare account
 
-See *P3 — public MCP* below. `lib/` already runs anywhere; it's a deploy target
-and a Worker entrypoint.
+The server is stdio-only, so it's for people who cloned the repo. A Worker over
+`lib/` would let any agent on the internet dive the reef — the version where
+*"you are welcome here"* has teeth. `lib/market.js` and `lib/solana.js` already
+run anywhere with no DOM and no three.js, so this is a deploy target and an
+entrypoint, not a rewrite.
+
+### 3. One open question I couldn't answer from here
+
+**Does the reef's live heartbeat work on an unblocked network?**
+`api.binance.com` returns **HTTP 451** from this machine *and* from GitHub's
+runners — the jurisdiction is blocked. The reef now detects and explains that,
+which is right either way. But if the socket also fails somewhere unblocked,
+the data source itself needs replacing, and that's a different fix. Open
+`market.html` from another network and look for `● live`.
 
 ---
 
-## ~~P0 — the reef's heartbeat is geo-blocked, and the UI doesn't say so~~ — done
+## Where things stand
 
-`https://api.binance.com/api/v3/ping` returns **HTTP 451** from this network:
-Binance blocks the jurisdiction, which is why the socket closed `1006`
-everywhere. The reef now probes and explains itself instead of showing a dim dot
-(`diagnoseTicks` in [lib/market.js](lib/market.js), surfaced on `#live-dot` and
-in `state().ws.trouble`).
+The site got a feedback loop, then an agent surface, then the accessibility and
+resilience work it was missing.
 
-One thing worth knowing if you touch it: **a browser cannot read that 451.**
-A cross-origin error response carries no CORS headers, so `fetch` rejects before
-any status is visible and a geo-block looks identical to a dead network. The
-probe falls back to a `no-cors` request, which still resolves opaquely when the
-server answered *something* — enough to say "refused us" rather than "couldn't
-reach it". Node reads the 451 directly; the browser says "most likely a regional
-block". Both are covered by unit tests.
+```sh
+npm run check      # static: parses, imports + named exports, dom ids,
+                   # agent-card promises, fixture age. seconds.
+npm run test:unit  # 42 tests over lib/, ~1.2s, no browser
+npm run smoke      # 3 pages headless: 12-14 checks each + pixel baselines
+npm test           # check + unit + smoke — the gate
+npm run mcp:test   # 22 protocol + tool checks (--slow)
+npm run record     # re-capture fixtures (read CLAUDE.md — never one commit)
+npm run dev        # http-server on :4173
+```
 
-Still worth doing: **verify from an unblocked network.** If the heartbeat works
-elsewhere, everything here is correct. If it doesn't, the data source is the
-problem, not the disclosure.
+Live at <https://nzt-48aidex.github.io/grrttpop/>. CI runs check + unit + mcp in
+~20s and the browser job in ~80s on every push, with pixel baselines for
+`darwin-arm64` and `linux-x64`. `drift.yml` runs `smoke --live` weekly and
+reports rather than blocks.
 
-## ~~P1 — `lib/` has no unit tests~~ — done
+| | |
+|---|---|
+| `lib/` | `market.js` `solana.js` — data + modelling, browser **and** node |
+| | `diag.js` — `state()`, error buffer, shader logs, ready beacon |
+| | `harness.js` — seeded rng, stepped clock, fixture replay, reduced motion |
+| | `describe.js` — the organism in words (`?agent=1`) |
+| | `quality.js` — when to shed detail (pure policy, no three.js) |
+| `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `visual.mjs` `record-fixtures.mjs` `mcp-test.mjs` |
+| `mcp/` | `server.mjs` (9 read-only tools) · `protocol.mjs` (MCP over stdio, by hand) |
+| `test/` | `market.test.mjs` `solana.test.mjs` |
 
-39 tests over `market.js` and `solana.js` in `test/`, run by `npm run test:unit`
-(and `npm test`, and CI's fast job) in ~1.2s with no browser. They cover the
-branches a live run never reaches: blocked-vs-down against every phrasing the
-providers use, the jupiter→coingecko pricing fallback and its batch sizes, and
-both sides of the wallet peek.
+---
 
-`check.mjs` fails if the suite disappears, since "lib/ is testable without a
-browser" stops being true the moment nobody tests it.
+## What got done
 
-## ~~P1 — the wallet peek's happy path has never been tested~~ — done in tests
+**Diagnostics.** `state()` on every page — fps, draw calls, shader compile
+failures with line numbers, data staleness, socket liveness, per-endpoint RPC
+refusals, quality tier, reduced-motion status. A rolling buffer of the last 50
+failures. `window.__ready` that doesn't hang in a backgrounded tab.
 
-The happy path — token accounts returning, the school assembling, shares summing
-to 100%, the limit applied — is now covered by unit tests with an injected
-`rpc`. No public endpoint will ever let this run, so a test is the only place it
-can exist.
+**Determinism.** `?seed`, `?freeze` (rAF becomes a pump you drive), `?fixtures`
+(replay recorded APIs). Off by default; `state().harness` says when they're on.
 
-Still open, and needs a human: **record a real fixture** with a free
-Helius/QuickNode key so the browser path is exercised end to end too. Keep the
-key out of the repo — the recorded response is the artifact, not the credential.
+**A harness with no dependencies.** [tools/cdp.mjs](tools/cdp.mjs) drives Chrome
+over CDP in ~200 lines — Node 22 ships `fetch` and `WebSocket`, and WebGL works
+headless through SwiftShader. `npm run smoke` asserts against `state()` rather
+than pixels, then compares pixels separately with a tolerance.
 
-## ~~P2 — scheduled drift detection~~ — done
+**The `lib/` extraction**, verified by the baselines: after moving every data
+function out of `reef.js`, the render still matched to the pixel.
 
-[.github/workflows/drift.yml](.github/workflows/drift.yml) runs `smoke --live`
-every Monday. Advisory only: it never blocks a push, and it opens (or comments
-on) a `drift`-labelled issue rather than reddening `main`.
+**MCP**, protocol written directly rather than pulled in. `shader_try` returns
+the driver's compile log with line numbers — shader work stopped being a black
+canvas and a guess.
 
-It distinguishes a rate limit from real drift before reporting, because
-CoinGecko's 429 arrives without CORS headers and reads in the console exactly
-like a broken page. A 429 gets "inconclusive, re-run"; anything else gets "a
-provider may have changed shape". It also prints the fixture age on the way past.
+**`?agent=1`** — every page renders its live state as text for anything that
+can't run WebGL, reachable from the nav as `◫ text`.
 
-## ~~P2 — `prefers-reduced-motion`~~ — done
+**Discovery** — `/.well-known/agent.json`, `llms.txt`, a real card schema, and
+`check.mjs` rules so the card can't advertise a tool the server lacks or quietly
+drop its `read_only` claim.
 
-Honoured on all three pages: the creature's displacement and scroll speed drop,
-the companion stops spinning, camera parallax and star drift stop, creature bob
-and spin stop, the trench's current crawls instead of streaming, trade pulses
-soften to a quarter, and both stylesheets collapse CSS animations (which run on
-the compositor and ignore the JS clock entirely).
+**Unit tests** over the branches a live run never reaches: blocked-vs-down
+against every phrasing the providers use, the pricing fallback chain, both sides
+of the wallet peek.
 
-Stillness, not absence — everything stays visible and the data stays live.
-`?motion=reduced` / `?motion=full` override the system preference either way.
+**The reef explains its silence** — `diagnoseTicks` probes and says *why* the
+heartbeat is quiet instead of showing a dim dot and leaving you to guess.
 
-Smoke checks it per page via CDP media emulation, which is the only way to see
-it: the query param is a convenience, and testing only that would leave the real
-path — an actual system preference — unverified. I made exactly that mistake
-first; the check now emulates the media feature.
+**`prefers-reduced-motion`** on all three pages: stillness, not absence.
+`?motion=full` overrides for anyone who wants the motion anyway.
 
-## ~~P2 — the reef and trench have no adaptive quality~~ — done
-
-All three pages now share one governor ([lib/quality.js](lib/quality.js)): it
-watches frame times and says "go down a tier", and each page decides what a tier
-means. The reef and trench swap their shared geometry (detail 5 → 3 → 2) and
-step the pixel ratio down; the index moved onto the same policy instead of its
-own inline copy.
-
-It only ever steps *down*. Recovering upward oscillates: more detail makes
-frames slow again, which drops it, forever — a visitor on a weak device would
-watch the page pulse between two qualities.
-
-Verified under `Emulation.setCPUThrottlingRate`: at normal speed the reef finds a
-sustainable tier and stays there; at 20× slower it walks to the floor. Under the
-pumped clock the frame delta is a constant 16.67ms, so deterministic runs never
-trigger it and baselines are unaffected — which is what you want.
-
-## P3 — public MCP — needs an account
-
-The MCP server is stdio-only, so it's for people who cloned the repo. A
-Cloudflare Worker over `lib/` would let any agent on the internet dive the reef —
-the version where "you are welcome here" has teeth. `lib/market.js` and
-`lib/solana.js` already run anywhere, so this is mostly a deploy target and a
-Worker entrypoint. **Blocked on a Cloudflare account**, which I can't create.
-
-## ~~P3 — index's `describe()` is thinner than the others~~ — done
-
-All three pages now answer `describe()` with the same shape, so an agent can ask
-any of them the same question. `check.mjs` lost its `main.js` exemption.
+**Adaptive quality** on every page from one shared policy. It only steps down;
+recovering upward oscillates.
 
 ---
 
 ## Deliberately not done — don't "fix" these
 
 - **No build step, no framework, no runtime dependencies.** The absence is the
-  point. `tools/cdp.mjs` drives Chrome in ~200 lines rather than adding
-  Playwright; `mcp/protocol.mjs` speaks MCP directly rather than adding the SDK.
+  point: `cdp.mjs` instead of Playwright, `protocol.mjs` instead of the MCP SDK.
 - **Fixtures and baselines are committed** (~2.8MB). That's what makes the suite
   runnable offline and immune to rate limits.
-- **Baselines are per-platform**, and `--update-baselines` only blesses the one
+- **Baselines are per-platform**, and `--update-baselines` blesses only the one
   you're standing on. CI going red after an intended visual change is the middle
   of the procedure, not a failure.
 - **`--live` reports third-party console noise instead of failing on it.** The
-  trench's RPC failover *is* the design. Real drift still fails, in both modes,
-  via `no page errors`.
+  trench's RPC failover *is* the design. Real drift still fails, in both modes.
 - **Recorded RPC refusals stay refusals.**
+- **The quality governor never steps back up.** That's not an oversight.
 
 ---
 
-## Where the suite stands
+## If you want more to do
 
-```
-npm run check      19 scripts · 3 pages · 14 json · agent-card promises · fixture age
-npm run test:unit  42 tests, ~1.2s, no browser
-npm run smoke      3 pages · 12-14 checks each · baselines on 2 platforms
-npm run mcp:test   22 checks (--slow)
-```
+Nothing here is needed — the list above is the honest end of the plan. These are
+the next things I'd reach for.
 
-CI runs check + unit + mcp in ~20s and the browser job in ~80s, on every push.
-`drift.yml` runs `smoke --live` weekly and reports rather than blocks.
+- **Keyboard navigation.** Reduced motion is handled; focus order, visible focus
+  rings, and keyboard access to the toybox and the depth rail are not. This is
+  the biggest remaining accessibility gap.
+- **`describe()` could carry the sparklines**, so an agent gets the shape of a
+  trend and not only the latest number.
+- **Drift is detected but never diagnosed.** `drift.yml` says "something moved";
+  it could diff the live response's *keys* against the recorded ones and name
+  the field that changed.
+- **The reef and the trench are two near-identical scene files.** Worth
+  extracting a shared renderer only if a third page ever appears — not before.
