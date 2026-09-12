@@ -40,6 +40,10 @@ jobs:
       - run: npm ci
       - name: static check
         run: npm run check
+      # lib/ is pure and node-runnable; these cover the rpc failover and the
+      # pricing fallbacks without booting anything
+      - name: unit tests
+        run: npm run test:unit
       - name: mcp protocol conformance
         run: npm run mcp:test
 

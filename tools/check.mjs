@@ -44,7 +44,8 @@ const pages = files.filter((f) => extname(f) === ".html");
 const jsons = files.filter((f) => extname(f) === ".json");
 /* tooling runs in node, where bare specifiers are legal — the import-map
    rule below is about what the *browser* can resolve. */
-const browserScripts = scripts.filter((f) => !rel(f).startsWith("tools/") && !rel(f).startsWith("mcp/"));
+const NODE_ONLY = ["tools/", "mcp/", "test/"];
+const browserScripts = scripts.filter((f) => !NODE_ONLY.some((d) => rel(f).startsWith(d)));
 
 /* ---------------- 1. does every script parse? ---------------- */
 /* careful: `node --check foo.js` EXITS 0 on a broken file if the file
@@ -245,6 +246,13 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
   if (!existsSync(join(ROOT, ".nojekyll"))) {
     fail(".nojekyll", "missing — jekyll will strip /.well-known/ and the agent card 404s once deployed");
   }
+  /* lib/ was extracted so node could test it without a browser. if the
+     tests disappear, that reason quietly stops being true. */
+  const unit = ["test/market.test.mjs", "test/solana.test.mjs"];
+  for (const t of unit) {
+    if (!existsSync(join(ROOT, t))) fail(t, "missing — lib/ is extracted precisely so it can be tested without a browser");
+  }
+
   if (!existsSync(join(ROOT, "llms.txt"))) fail("llms.txt", "missing — the plain-language index for language models");
   if (!existsSync(join(ROOT, "CLAUDE.md"))) fail("CLAUDE.md", "missing — the conventions a fresh agent needs");
 }
