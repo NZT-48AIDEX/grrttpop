@@ -1,7 +1,10 @@
 # Roadmap — handoff
 
-Written 2026-09-12, at `028cf9c`. Conventions and traps live in
-[CLAUDE.md](CLAUDE.md); this file is only what's *left*.
+Started 2026-09-12; everything below the line got done in the same stretch.
+Conventions and traps live in [CLAUDE.md](CLAUDE.md).
+
+**What's actually left is two items, and both need a human with an account** —
+see *Blocked on you* immediately below. Everything else is struck through.
 
 ## Where things stand
 
@@ -20,6 +23,39 @@ npm run record    # re-capture fixtures (read CLAUDE.md first — it's never one
 
 Live at <https://nzt-48aidex.github.io/grrttpop/> · CI green on `darwin-arm64`
 (local) and `linux-x64` (every push).
+
+---
+
+## Blocked on you
+
+### Record a real wallet fixture (needs a free RPC key)
+
+Every recorded Solana response is a *refusal*, so the browser only ever
+exercises the degraded path. The happy path — token accounts returning, the
+school assembling — is covered by unit tests with an injected `rpc`, but never
+end to end in a page.
+
+Get a free Helius or QuickNode endpoint, then:
+
+```sh
+# paste the endpoint into the trench's wallet panel, or:
+node -e 'import("./lib/solana.js").then(async m => {
+  const rpc = m.makeRpc({ custom: "https://YOUR-ENDPOINT" });
+  console.log(JSON.stringify(await rpc("getTokenAccountsByOwner",
+    ["5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+     { programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" },
+     { encoding: "jsonParsed" }])));
+})' > fixtures/solana-rpc-authed.json
+```
+
+**Keep the key out of the repo** — the recorded response is the artifact, not
+the credential. Then teach `lib/harness.js` to serve it under a flag
+(`?fixtures=authed`) and add a smoke case.
+
+### Publish the MCP server (needs a Cloudflare account)
+
+See *P3 — public MCP* below. `lib/` already runs anywhere; it's a deploy target
+and a Worker entrypoint.
 
 ---
 
@@ -141,9 +177,14 @@ any of them the same question. `check.mjs` lost its `main.js` exemption.
 
 ---
 
-## Suggested first move
+## Where the suite stands
 
-Unit tests for `lib/`. Cheapest thing on the list, closes the loop on the
-extraction, and gives the RPC failover — the most fragile code in the repo —
-coverage that doesn't need a browser. Then the 451 disclosure, which is small
-and makes the site more honest.
+```
+npm run check      19 scripts · 3 pages · 14 json · agent-card promises · fixture age
+npm run test:unit  42 tests, ~1.2s, no browser
+npm run smoke      3 pages · 12-14 checks each · baselines on 2 platforms
+npm run mcp:test   22 checks (--slow)
+```
+
+CI runs check + unit + mcp in ~20s and the browser job in ~80s, on every push.
+`drift.yml` runs `smoke --live` weekly and reports rather than blocks.
