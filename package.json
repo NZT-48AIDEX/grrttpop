@@ -11,7 +11,7 @@
     "snapshot": "node tools/snapshot.mjs",
     "mcp": "node mcp/server.mjs",
     "mcp:test": "node tools/mcp-test.mjs",
-    "dev": "npx --yes http-server -p 4173 -c-1 .",
+    "dev": "node tools/serve.mjs --port=4173",
     "test": "node tools/check.mjs && node --test && node tools/smoke.mjs"
   },
   "keywords": [

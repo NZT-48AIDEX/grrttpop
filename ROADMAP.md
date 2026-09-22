@@ -245,8 +245,8 @@ drops ticks, so `data.asOf` is the only honest age.
 | | `provenance.js` — where the numbers came from, and whether they're real |
 | | `snapshot.js` — the published feed, and when to refuse to publish |
 | | `fixture-routes.js` — which recording answers which url (browser + node) |
-| `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `visual.mjs` `record-fixtures.mjs` `mcp-test.mjs`
-             `snapshot.mjs` `fixture-fetch.mjs` `drift.mjs` |
+| `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `serve.mjs` `visual.mjs` `record-fixtures.mjs`
+             `mcp-test.mjs` `snapshot.mjs` `fixture-fetch.mjs` `drift.mjs` |
 | `mcp/` | `server.mjs` (9 read-only tools) · `protocol.mjs` (MCP over stdio, by hand) |
 | `test/` | `market.test.mjs` `solana.test.mjs` `shape.test.mjs` `trend.test.mjs`
            `provenance.test.mjs` `snapshot.test.mjs` |

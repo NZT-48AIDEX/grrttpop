@@ -15,11 +15,11 @@
      npm run smoke -- --update-baselines
    ================================================================ */
 
-import { spawn } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { launch } from "./cdp.mjs";
+import { serve } from "./serve.mjs";
 import { checkBaseline } from "./visual.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -134,32 +134,14 @@ const PAGES = {
   },
 };
 
-/* ---------------- a static server, no deps ---------------- */
-function serve() {
-  const p = spawn("npx", ["--yes", "http-server", "-p", String(PORT), "-c-1", "--silent", ROOT], {
-    stdio: ["ignore", "ignore", "pipe"],
-  });
-  return {
-    proc: p,
-    async ready() {
-      for (let i = 0; i < 120; i++) {
-        try { const r = await fetch(`http://127.0.0.1:${PORT}/agent.json`); if (r.ok) return; } catch {}
-        await sleep(250);
-      }
-      throw new Error("static server never came up");
-    },
-    stop() { p.kill(); },
-  };
-}
-
 /* ---------------- run ---------------- */
 mkdirSync(SHOTS, { recursive: true });
-const server = serve();
+const server = await serve({ root: ROOT, port: PORT });   // in process: up when this resolves
 const results = [];
 let browser;
 
 try {
-  await server.ready();
+
   browser = await launch({ headless: !flag("head") });
   // a scratch page that only ever decodes and compares images
   const differ = await browser.newPage();
@@ -417,7 +399,7 @@ try {
   }
 } finally {
   await browser?.close();
-  server.stop();
+  await server.stop();
 }
 
 const report = {

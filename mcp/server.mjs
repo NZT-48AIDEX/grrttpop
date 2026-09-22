@@ -22,7 +22,6 @@
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFileSync, existsSync, mkdirSync } from "node:fs";
-import { spawn } from "node:child_process";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -35,6 +34,7 @@ import {
   makeRpc, fetchVitals, fetchEcosystem, peekWallet, describeTrench, isSolAddress,
 } from "../lib/solana.js";
 import { launch } from "../tools/cdp.mjs";
+import { serve } from "../tools/serve.mjs";
 import { checkBaseline, diffPng } from "../tools/visual.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,12 +55,11 @@ async function eyes() {
   if (rig) return rig;
   mkdirSync(SHOTS, { recursive: true });
 
-  const server = spawn("npx", ["--yes", "http-server", "-p", String(PORT), "-c-1", "--silent", ROOT],
-    { stdio: ["ignore", "ignore", "ignore"] });
-  for (let i = 0; i < 120; i++) {
-    try { if ((await fetch(`http://127.0.0.1:${PORT}/agent.json`)).ok) break; } catch {}
-    await sleep(250);
-  }
+  /* in process, so there is no window in which the browser can load a
+     port nothing is listening on — which used to surface twenty seconds
+     later as "timed out waiting for page scripts", blaming the page for
+     a server that was never there. */
+  const server = await serve({ root: ROOT, port: PORT });
 
   const browser = await launch({ headless: true });
   const differ = await browser.newPage();
@@ -336,10 +335,10 @@ const card = JSON.parse(readFileSync(join(ROOT, "agent.json"), "utf8"));
 const server = createServer({ name: "grrttpop", version: card.version ?? "1.0.0", tools });
 
 for (const sig of ["SIGINT", "SIGTERM"]) {
-  process.on(sig, async () => { await rig?.browser?.close(); rig?.server?.kill(); process.exit(0); });
+  process.on(sig, async () => { await rig?.browser?.close(); await rig?.server?.stop(); process.exit(0); });
 }
 
 log(`grrttpop mcp · ${tools.length} tools · read-only`);
 await server.listen();
 await rig?.browser?.close();
-rig?.server?.kill();
+await rig?.server?.stop();

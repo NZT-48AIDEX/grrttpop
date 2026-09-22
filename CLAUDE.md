@@ -28,7 +28,7 @@ browser run the same code. New data logic goes there, not in a page file.
 ## Running it
 
 ```sh
-npm run dev      # http-server on :4173 — NOT `serve`, which rewrites paths
+npm run dev      # our own static server on :4173 (tools/serve.mjs)
 npm run check    # static check, sub-second, run after every edit
 npm run smoke    # boot all three pages headless and assert they're alive
 npm test         # check + smoke
@@ -53,6 +53,15 @@ as done without it.
   one laptop for ten days; `tools/cdp.mjs` now waits for the real `exit` event
   and reaps on signals too. If a run ever feels absurdly slow, check
   `pgrep -fl "puppeteer/chrome"` before blaming the change.
+- **Killing a wrapper is not killing the process.** `npx`/`npm exec` spawns the
+  real binary as a child, so `kill` on what you spawned leaves it running. This
+  is why `tools/serve.mjs` exists: the harness used to shell out to
+  `npx --yes http-server`, and this laptop was found hosting http-servers on
+  :4179 and :4191 that had outlived their runs by **eleven days**, plus one that
+  survived its own preview being stopped. The server now runs in process, where
+  there is no wrapper and no orphan. Serving is deliberately literal — no spa
+  fallback, no extension guessing — because a harness that quietly serves
+  index.html for a missing module teaches you nothing.
 - **stdout is the MCP transport.** Anything printed there that isn't a JSON-RPC
   message corrupts the stream. Logs go to stderr.
 - **CSS animations ignore the virtual clock** — they run on the compositor's.

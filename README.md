@@ -429,6 +429,7 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `tools/check.mjs` | `npm run check` — parse, resolve, verify promises |
 | `tools/smoke.mjs` | `npm run smoke` — boot every page and assert it's alive |
 | `tools/cdp.mjs` | a browser driver in ~100 lines, zero dependencies |
+| `tools/serve.mjs` | a static server in ~100 lines, in process, zero dependencies |
 | `fixtures/` | one recorded response per api, refusals included |
 | `agent.json` | the agent-facing card |
 
