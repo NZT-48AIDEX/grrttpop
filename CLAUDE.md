@@ -189,6 +189,13 @@ force-pushes the result to the orphan **`data` branch** — never to `main`, who
 history is written by hand. `lib/snapshot.js` decides what goes in it and
 `agent.json` advertises the file names; `check.mjs` fails if those two disagree.
 
+**It needs the repo to stay awake.** GitHub switches off scheduled workflows in
+a public repo after 60 days without activity, and this job's own pushes go to
+`data` with `GITHUB_TOKEN`, which may not count. A disabled workflow cannot wake
+itself, so the job measures the age of `main` instead and opens a `keepalive`
+issue past 45 days. Any push resets the clock; `gh workflow enable snapshot.yml`
+turns it back on if it already stopped.
+
 **Nothing synthetic is ever published.** The demo reef and `?fixtures=1` both
 produce data that renders perfectly and means nothing, so `publishability()`
 refuses them and the tool exits non-zero rather than writing. A failed run

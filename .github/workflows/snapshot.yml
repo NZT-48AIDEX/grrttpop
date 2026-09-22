@@ -28,6 +28,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write            # to say so, before the schedule is switched off
 
 jobs:
   publish:
@@ -61,3 +62,60 @@ jobs:
               commit -qm "snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data
           echo "published $(ls | tr '\n' ' ')to the data branch"
+
+      # GitHub switches off scheduled workflows in a public repo after 60 days
+      # with no repository activity, and this job's own pushes go to `data` with
+      # GITHUB_TOKEN — which may well not count. Nothing automated commits to
+      # main, so the tip of main is the last time a person touched this repo.
+      #
+      # There is no way for a disabled workflow to wake itself up, so the only
+      # honest move is to say something while it can still run.
+      - name: will this still be running next month
+        id: clock
+        run: |
+          last=$(git log -1 --format=%ct)
+          days=$(( ( $(date -u +%s) - last ) / 86400 ))
+          echo "days=$days" >> "$GITHUB_OUTPUT"
+          echo "::notice::$days days since the last push to main — the schedule is switched off at 60"
+
+      - name: warn before the feed goes quiet
+        if: fromJSON(steps.clock.outputs.days) >= 45
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const days = ${{ steps.clock.outputs.days }};
+            const left = 60 - days;
+            const title = `the snapshot feed stops in ~${left} days unless someone pushes`;
+            const body = [
+              `It has been **${days} days** since the last commit on \`main\`. GitHub disables`,
+              'scheduled workflows in a public repository after 60 days of inactivity, so the',
+              `snapshot job has about **${left} days** left before it stops on its own.`,
+              '',
+              'Any push to `main` resets the clock. If it has already been disabled:',
+              '',
+              '```sh',
+              'gh workflow enable snapshot.yml',
+              '```',
+              '',
+              'Nothing is broken — the last published snapshot stays where it is, and it keeps',
+              'carrying its own `data.asOf`, so anything reading it can see for itself how old',
+              'it has become. But the corpus the next stage depends on stops growing here.',
+              '',
+              `[the run that noticed](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+            ].join('\n');
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'keepalive',
+            });
+            if (existing.data.length) {
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.data[0].number, title, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['keepalive'],
+              });
+            }
