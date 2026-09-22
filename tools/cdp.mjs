@@ -50,11 +50,23 @@ export function findChrome() {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function until(fn, ms, label) {
+/* `detail` is called only when giving up: a harness that fails without
+   saying what the process said sends you reading the wrong subsystem. */
+async function until(fn, ms, label, detail = null) {
   const t = Date.now();
   for (;;) {
     try { return await fn(); }
-    catch (e) { if (Date.now() - t > ms) throw new Error(`${label}: ${e.message}`); await sleep(120); }
+    catch (e) {
+      /* some failures are not worth retrying: a process that has already
+         exited will not come back, and waiting out the budget to say so
+         is a minute spent proving something known in the first second. */
+      if (e.fatal || Date.now() - t > ms) {
+        const extra = detail?.() ?? "";
+        throw new Error(`${label} after ${Math.round((Date.now() - t) / 1000)}s: ${e.message}` +
+          (extra ? `\n--- chrome said ---\n${extra}` : ""));
+      }
+      await sleep(120);
+    }
   }
 }
 
@@ -99,9 +111,22 @@ export async function launch({ headless = true, port = 9222 + (process.pid % 900
   const chromeLog = [];
   proc.stderr.on("data", (d) => chromeLog.push(d.toString()));
 
+  /* 20s was enough on a quiet laptop and not on a ci runner that had just
+     finished running another chrome — "fetch failed" for 20 seconds says
+     nothing about why. Wait longer, give up immediately if the process is
+     already dead, and put chrome's own stderr in the error either way. */
   const version = await until(
-    () => fetch(`http://127.0.0.1:${port}/json/version`).then((r) => r.json()),
-    20_000, "chrome never opened a debugging port");
+    () => {
+      if (exited) {
+        const dead = new Error(`chrome exited before it was ready (code ${proc.exitCode})`);
+        dead.fatal = true;
+        throw dead;
+      }
+      return fetch(`http://127.0.0.1:${port}/json/version`).then((r) => r.json());
+    },
+    Number(process.env.GRRTT_CHROME_TIMEOUT_MS) || 60_000,
+    "chrome never opened a debugging port",
+    () => chromeLog.join("").trim().split("\n").slice(-6).join("\n"));
 
   const ws = new WebSocket(version.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = () => rej(new Error("cdp socket failed")); });
