@@ -331,6 +331,24 @@ try {
           { timeout: 30_000, label: `the ${name} to describe itself` });
         row.agentView = { chars: text.length, lines: text.split("\n").length };
         row.checks.push({ label: "describes itself (?agent=1)", ok: true });
+
+        /* and says where the numbers came from. this run is replaying
+           recorded fixtures, so a page claiming live data here would be
+           lying — which is exactly the failure nobody can see by looking,
+           because frozen numbers render as convincingly as real ones. */
+        if (spec.global !== "grrtt") {
+          const prov = await agent.eval(`return ${spec.global}.describe().data`);
+          if (!prov?.source) throw new Error("describe() carries no provenance at all");
+          if (!LIVE && !prov.synthetic) {
+            throw new Error(`replaying fixtures but reporting source "${prov.source}" as real`);
+          }
+          // whatever the mode: if it is synthetic, the words have to say so
+          if (prov.synthetic && !text.includes(prov.note.slice(0, 12))) {
+            throw new Error("the json admits it is synthetic and the text does not");
+          }
+          row.provenance = `${prov.source}${prov.synthetic ? " — declared synthetic" : ""}`;
+          row.checks.push({ label: "says where its numbers came from", ok: true });
+        }
         await agent.close();
       } catch (e) {
         row.checks.push({ label: "describes itself (?agent=1)", ok: false });
@@ -386,6 +404,7 @@ try {
     }
     if (row.keyboard) console.log(`   ↳ keyboard: creatures reachable, announced "${row.keyboard.announced}…"`);
     if (row.cardShape) console.log(`   ↳ card: the sparkline in words — "${row.cardShape}"`);
+    if (row.provenance) console.log(`   ↳ provenance: ${row.provenance}`);
     if (row.reducedMotion) console.log(`   ↳ reduced motion: honoured, still drawing (${row.reducedMotion.drawCalls} calls)`);
     if (row.agentView) console.log(`   ↳ ?agent=1: ${row.agentView.lines} lines, ${row.agentView.chars} chars of description`);
     if (row.visual) {

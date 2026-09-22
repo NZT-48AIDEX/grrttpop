@@ -120,7 +120,8 @@ const tools = [
         if (m.status === "fulfilled") mood = m.value.value;
         if (g.status === "fulfilled") global = g.value;
       }
-      return describeReef(sortCoins(coins, { sort }), { trending, mood, global, sort });
+      return describeReef(sortCoins(coins, { sort }),
+        { trending, mood, global, sort, data: { source: "coingecko", at: Date.now() } });
     },
   },
 
@@ -162,8 +163,10 @@ const tools = [
       const refusals = [];
       const rpc = makeRpc({ custom, onEvent: (e) => e.kind === "fail" && refusals.push(e) });
       const wallet = await peekWallet(address, { rpc, limit });
+      const d = describeTrench({ wallet, data: { source: rpc.state().endpoint ?? "solana-rpc", at: Date.now() } });
       return {
-        ...describeTrench({ wallet }).wallet,
+        ...d.wallet,
+        data: d.data,
         allItems: wallet.items,
         refusals: refusals.map(({ method, host, message }) => ({ method, host, message })),
       };
@@ -179,7 +182,8 @@ const tools = [
     inputSchema: { type: "object", properties: { count: { type: "number", default: 40 } } },
     async run({ count = 40 }) {
       const eco = await fetchEcosystem({ count });
-      return describeTrench({ eco }).ecosystem;
+      const d = describeTrench({ eco, data: { source: "coingecko", at: Date.now() } });
+      return { ...d.ecosystem, data: d.data };
     },
   },
 

@@ -25,6 +25,7 @@ You do not need to run a browser to know what this site is showing.
 ## Limits worth carrying with the data
 
 - Market data is visualization only: no trading, no custody, not financial advice.
+- Every description carries `data.source`, `data.asOf` and `data.synthetic`. When the market API is unreachable the reef renders invented coins so the page stays alive — that fallback is always labelled `synthetic: true`. Check the flag before quoting a number.
 - Prices come with their week: every coin carries 168 hourly points reduced to a sparkline and a shape. A 24h percentage alone cannot tell a steady climb from a spike that is being given back — both print the same number.
 - Solana access is read-only. No keys, no signatures, no transactions — there is no code path that could.
 - Free public Solana RPCs block token-account reads, so a wallet peek can be partial. When it is, it says so via `partial`/`gated` and is never presented as a whole wallet.

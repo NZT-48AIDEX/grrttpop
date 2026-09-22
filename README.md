@@ -164,6 +164,33 @@ thing as structured JSON. `npm run smoke` asserts each page can still describe
 itself, and `npm run check` fails if a page loses `?agent=1` — otherwise it would
 quietly go back to serving a black rectangle.
 
+## where these numbers came from
+
+Every description carries a stamp:
+
+```json
+"data": {
+  "source": "coingecko",
+  "asOf": "2026-09-22T05:45:15.148Z",
+  "ageMs": 1284,
+  "synthetic": false,
+  "harness": null,
+  "note": null
+}
+```
+
+This started as a hole. The reef's demo fallback is loud in the text view
+(**⚠️ SYNTHETIC**) and visible in `state()` as `source: "demo"` — but
+`describe()` carried nothing, so an agent asking the MCP server what the market
+was doing during an outage got forty invented coins that looked exactly like
+real ones. `?fixtures=1` had the same problem from the other direction: a replay
+of a months-old recording is structurally indistinguishable from live data.
+
+Now `synthetic` is the field to branch on, "nobody said" reports itself as
+`source: "unknown"` rather than passing for live, and `npm run smoke` fails a
+page that replays fixtures while claiming to be live — a lie no screenshot could
+ever catch, since frozen numbers render exactly as convincingly as real ones.
+
 ## discoverable
 
 | where | what |
@@ -356,6 +383,7 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `lib/describe.js` | the organism in words — the ?agent=1 view |
 | `lib/market.js` | the reef's data + modelling, browser and node |
 | `lib/trend.js` | the shape of a move: sparklines, week-vs-day, breadth |
+| `lib/provenance.js` | where the numbers came from, and whether they're real |
 | `lib/solana.js` | chain access, read-only, browser and node |
 | `mcp/server.mjs` | the site as tools for agents |
 | `mcp/protocol.mjs` | MCP over stdio, ~120 lines, no dependencies |

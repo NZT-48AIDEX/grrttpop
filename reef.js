@@ -1,4 +1,4 @@
-import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
+import { prefersReducedMotion, harnessState } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
 import { makeQualityGovernor } from "./lib/quality.js";
@@ -948,7 +948,11 @@ window.reef = {
   blobs, get coins() { return coins; }, refresh, watchlist,
   get bags() { return bags; }, dive: setDepthByBand, sound,
   /* the reef in words, for anything without eyes */
-  describe: () => describeReef(coins, { trending, mood, global: globalStats, sort: sortMode }),
+  describe: () => describeReef(coins, {
+    trending, mood, global: globalStats, sort: sortMode,
+    // demo coins are invented; fixtures are frozen. neither may pass for live.
+    data: { source: demoMode ? "demo" : "coingecko", at: lastDataAt, harness: harnessState() },
+  }),
   /* one structured snapshot, for anything without eyes */
   state: () => {
     const vis = [...blobs.values()].filter((b) => b.mesh.visible);
@@ -992,7 +996,7 @@ window.reef = {
 };
 /* a visitor with no eyes gets the reef described instead of a black canvas */
 if (isAgentView()) {
-  mountAgentView({ render: () => reefToText(window.reef.describe(), { demoMode, live: liveOn }) });
+  mountAgentView({ render: () => reefToText(window.reef.describe(), { live: liveOn }) });
 }
 
 console.log("%c🪸 the reef", "font-size:1.6rem;font-weight:900");

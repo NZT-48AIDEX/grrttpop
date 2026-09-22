@@ -1,4 +1,4 @@
-import { prefersReducedMotion } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
+import { prefersReducedMotion, harnessState } from "./lib/harness.js";   // must be first: patches rng/clock/fetch before anything reads them
 import * as THREE from "three";
 import diag from "./lib/diag.js";
 import { makeQualityGovernor } from "./lib/quality.js";
@@ -728,6 +728,8 @@ window.trench = {
   peekWallet, setView, rpc, fillCard,
   /* the trench in words, for anything without eyes */
   describe: () => describeTrench({
+    data: { source: `${rpc.state().endpoint ?? "solana-rpc"} + coingecko`,
+            at: lastEcoAt, harness: harnessState() },
     vitals,
     eco: ecoCoins,
     wallet: walletItems.length

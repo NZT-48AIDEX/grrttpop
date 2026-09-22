@@ -1,6 +1,6 @@
 # Roadmap — handoff
 
-Current as of the trend work, 2026-09-21. (No sha here on
+Current as of the provenance work, 2026-09-22. (No sha here on
 purpose: recording one is itself a commit, so it is wrong the moment it lands —
 `git log -- ROADMAP.md` is the honest answer.) Conventions and traps live in
 [CLAUDE.md](CLAUDE.md) — read that before touching anything; this file is state
@@ -64,7 +64,7 @@ resilience work it was missing.
 ```sh
 npm run check      # static: parses, imports + named exports, dom ids,
                    # agent-card promises, fixture age. seconds.
-npm run test:unit  # 66 tests over lib/, ~1.5s, no browser
+npm run test:unit  # 76 tests over lib/, ~1.6s, no browser
 npm run smoke      # 3 pages headless: 12-15 checks each + pixel baselines
 npm test           # check + unit + smoke — the gate
 npm run mcp:test   # 22 protocol + tool checks (--slow)
@@ -86,9 +86,11 @@ reports rather than blocks.
 | | `quality.js` — when to shed detail (pure policy, no three.js) |
 | | `keyboard.js` — reading order and directional neighbour, no DOM |
 | | `trend.js` — sparklines, the shape of a week, breadth |
+| | `provenance.js` — where the numbers came from, and whether they're real |
 | `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `visual.mjs` `record-fixtures.mjs` `mcp-test.mjs` |
 | `mcp/` | `server.mjs` (9 read-only tools) · `protocol.mjs` (MCP over stdio, by hand) |
-| `test/` | `market.test.mjs` `solana.test.mjs` `shape.test.mjs` `trend.test.mjs` |
+| `test/` | `market.test.mjs` `solana.test.mjs` `shape.test.mjs` `trend.test.mjs`
+           `provenance.test.mjs` |
 
 ---
 
@@ -133,6 +135,14 @@ heartbeat is quiet instead of showing a dim dot and leaving you to guess.
 
 **Adaptive quality** on every page from one shared policy. It only steps down;
 recovering upward oscillates.
+
+**Provenance on the structured path.** The demo reef was loud in words and in
+`state()`, and silent in `describe()` — so an agent could receive forty invented
+coins during a coingecko outage with nothing saying so, and a `?fixtures=1`
+replay looked exactly like live data. [lib/provenance.js](lib/provenance.js)
+stamps every description with `source` / `asOf` / `synthetic`, "nobody said"
+comes back as `unknown` rather than passing for live, and smoke now fails a page
+that replays fixtures while claiming to be live.
 
 **The week, not just the number.** Coingecko was returning 168 hourly prices
 per coin and the site read the last one. [lib/trend.js](lib/trend.js) reduces

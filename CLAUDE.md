@@ -187,6 +187,11 @@ that is a real change to the site, not a baseline update.
 - **No trackers, no cookies, no analytics.** Ever. Don't helpfully suggest them.
 - **Solana access is read-only.** No keys, no signing, no transactions. There is
   no code path that could, and there should never be one.
+- **Provenance travels with the data.** Every description carries
+  `data.source` / `data.asOf` / `data.synthetic` from `lib/provenance.js`. The
+  demo reef and fixture replay are both `synthetic: true`, and a caller that
+  says nothing gets `unknown` — never a silence that reads as live. Smoke fails
+  a page that replays fixtures while claiming otherwise.
 - **Disclaimers travel with the data.** "Not financial advice" and the
   partial/gated wallet warnings are not boilerplate to tidy away.
 - **A partial read is never presented as whole.** This is the trench's central
