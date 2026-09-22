@@ -199,12 +199,15 @@ every push to main, and on demand, force-pushing the result to the orphan
 history is written by hand. `lib/snapshot.js` decides what goes in it and
 `agent.json` advertises the file names; `check.mjs` fails if those two disagree.
 
-**The cadence is not reliable and the files say so.** This repo's scheduled
-runs have fired 6.5 hours after the requested time, twice running, and a
-`*/30` cron was dropped outright — three firings due, none delivered. Hence the
-push trigger and the off-the-boundary minutes. Never write a freshness promise
-into the feed that the scheduler cannot keep: `data.asOf` is the fact, `every`
-is a hope, and the manifest says which is which.
+**The cadence is not reliable and the files say so.** Measured over 10 hours on
+2026-09-22: the cron asked for twenty ticks and three arrived — **15%** — at
+13:40Z, 17:45Z and 21:17Z, each within half an hour of a requested minute. So
+the ticks that fire are roughly punctual and the rest simply never happen: a
+real cadence of about one snapshot every **3.8 hours**, not the two an hour the
+cron expression asks for. (`drift.yml` shows a different failure again — a
+consistent 6h37m lag on a weekly schedule.) Hence the push trigger. Never write
+a freshness promise into the feed that the scheduler cannot keep: `data.asOf`
+is the fact, `every` is a hope, and the manifest says which is which.
 
 **It needs the repo to stay awake.** GitHub switches off scheduled workflows in
 a public repo after 60 days without activity, and this job's own pushes go to

@@ -19,10 +19,11 @@ name: snapshot
 on:
   # Off the boundary on purpose — :00 and :30 are when everyone else's crons
   # fire, and github deprioritises the stampede. drift.yml already learned
-  # this. Even so, this repo's scheduled runs have landed *6.5 hours* after
-  # the requested time, twice running, so treat the cadence as a hope rather
-  # than a promise: `data.asOf` is the only honest word on how old a snapshot
-  # is, and every published file carries it.
+  # this. Measured afterwards over 10 hours: 3 of 20 requested ticks actually
+  # fired (13:40Z, 17:45Z, 21:17Z), each within half an hour of its slot. So
+  # the ones that arrive are punctual and 85% never arrive at all — a real
+  # cadence of roughly one snapshot every 3.8 hours. `data.asOf` is the only
+  # honest word on how old a snapshot is, and every published file carries it.
   schedule:
     - cron: "13,43 * * * *"
   # a push is the one moment we know the repo is awake, and the feed should
@@ -56,8 +57,9 @@ jobs:
       - name: build the snapshot
         run: >
           node tools/snapshot.mjs --out=data
-          --every="attempted twice an hour, and on every push — but github's scheduler
-          runs late and drops ticks, so read data.asOf rather than trusting this"
+          --every="asked for twice an hour and on every push; github delivers about
+          15% of scheduled ticks, so in practice roughly every 3-4 hours. read data.asOf,
+          which is measured, rather than this, which is a hope"
 
       # a fresh orphan commit each run: the branch is a current-state feed,
       # not a history, and keeping every revision would grow forever for

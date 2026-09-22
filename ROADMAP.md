@@ -56,6 +56,11 @@ browser and no clone can curl the reef. What a Worker adds is **asking** — a
 wallet peek, a different sort, a question nobody pre-computed. That is the
 remaining half.
 
+There is now a second reason. Github delivered 15% of this repo's scheduled
+ticks in a measured 10-hour window; cloudflare's cron is a real scheduler. If
+the corpus above turns out to want a dependable heartbeat rather than six
+samples a day whenever the queue feels like it, that is where it comes from.
+
 ### 3. One open question I couldn't answer from here
 
 **Does the reef's live heartbeat work on an unblocked network?**
@@ -86,10 +91,25 @@ that one frozen afternoon. Nobody knows whether *"chopping sideways"* describes
 3% of real coins or 60%. A label that fires on everything says nothing, and no
 test will ever report that, because every test agrees with it.
 
-The snapshot feed is what makes this fixable: every 30 minutes it produces a
-real market state — and then throws it away, because `data` is force-pushed.
-Keep those and the repo grows its own corpus of real days, for free, without
-recording anything about anybody.
+The snapshot feed is what makes this fixable: it produces a real market state
+and then throws it away, because `data` is force-pushed. Keep those and the
+repo grows its own corpus of real days, for free, without recording anything
+about anybody.
+
+**Measured, 2026-09-22, over a 10-hour window.** The cron asks for minutes 13
+and 43 — twenty ticks. Three arrived:
+
+| scheduled run | vs requested | gap |
+|---|---|---|
+| 13:40Z | +27 min | — |
+| 17:45Z | +2 min | 4.08h |
+| 21:17Z | +4 min | 3.53h |
+
+So **15% of ticks are delivered**, and the ones that do fire are roughly on
+time. That is not lateness, it is dropping — a different failure from
+`drift.yml`'s consistent 6h37m lag, and it means the real scheduled cadence is
+about **one snapshot every 3.8 hours**, or ~6 a day. Plan against that number,
+not against the one in the cron expression.
 
 ### Stage 1 — stop discarding the feed
 
@@ -102,16 +122,34 @@ Sizes are the whole design here. One entry of raw inputs is ~532KB
 8KB. Skip `jup-tokens.json` (342KB and almost static). So:
 
 - gzip each entry (json compresses ~9x, so ≈60KB)
-- keep 6-hourly for 14 days, then weekly — ~110 entries, ~7MB steady state
-  (retention has to key off each entry's own `asOf`, not off a run counter:
-  the scheduler skips ticks, so "every nth run" would sample unevenly)
-- **plus every weird day, whatever the cadence**: a run whose breadth flips,
-  whose index moves more than 10%, whose divergent share doubles, or that
-  recorded a refusal. Regular sampling captures the average and the average is
-  the part already covered.
+- **keep every entry for 14 days.** The first draft of this said "thin to
+  6-hourly", which assumed a 48-a-day feed. At the measured ~6 a day there is
+  nothing to thin: 6 × 60KB ≈ 380KB a day, ~5MB a fortnight. Thin to weekly
+  after that, keyed off each entry's own `asOf` — never off a run counter,
+  because the scheduler drops most ticks and "every nth run" would sample the
+  queue rather than the market.
+- record what triggered each entry. Pushes cluster in working hours, so an
+  active day is over-sampled exactly when the market is busiest. That bias
+  should be visible in the data, not baked into it.
 - force-push it as an orphan like `data`, so the branch holds the retained set
   and not the sum of all history — otherwise a clone pays for every snapshot
   ever taken
+
+**What sparse sampling does and does not cost.** Every entry carries
+`sparkline_in_7d`: 168 hourly prices per coin. So one snapshot is already a
+week of history at hourly resolution, and two a day give overlapping weeks
+whose union covers every hour. Price *resolution* is not the casualty here.
+
+What we lose is **moments**: a 429 storm, an RPC refusal, the reef falling back
+to the demo data. Those last minutes, and a sampler that looks every 3.8 hours
+will miss almost all of them — which is awkward, because they are exactly the
+scenarios stage 2 wants and the ones no fixture currently covers.
+
+So do not sample for them. **Capture them where they happen**: a run that fails
+to publish already knows what went wrong, and `tools/snapshot.mjs` already
+refuses rather than writing. Have it write the incident instead — what failed,
+the status, the raw body if there was one — to `corpus/incidents/`. A failure
+that teaches nothing is a waste of a real 429.
 
 Acceptance: `git clone --single-branch -b corpus` is under 10MB, and
 `node tools/corpus.mjs --list` prints entries with dates and why each was kept.
@@ -147,6 +185,11 @@ degenerate ones — a shape that fires on more than ~60% of coins or fewer than
 
 This is the only feedback that says whether a judgement is *useful* rather than
 merely correct, and it needs a corpus to exist at all.
+
+Be careful what the report claims. With ~6 samples a day it is a distribution
+over *sampled moments*, not over the week — though each sample carries 168
+hours of history per coin, so for price shape specifically the underlying
+series is dense even when the sampling is not. Say which one a number is.
 
 Acceptance: the report runs over any corpus and flags at least the obviously
 degenerate case (seed it with a deliberately broken threshold and watch it
