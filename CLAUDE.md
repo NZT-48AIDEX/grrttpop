@@ -184,10 +184,18 @@ that is a real change to the site, not a baseline update.
 
 ## The published feed
 
-`.github/workflows/snapshot.yml` runs `tools/snapshot.mjs` every 30 minutes and
-force-pushes the result to the orphan **`data` branch** — never to `main`, whose
+`.github/workflows/snapshot.yml` runs `tools/snapshot.mjs` twice an hour, on
+every push to main, and on demand, force-pushing the result to the orphan
+**`data` branch** — never to `main`, whose
 history is written by hand. `lib/snapshot.js` decides what goes in it and
 `agent.json` advertises the file names; `check.mjs` fails if those two disagree.
+
+**The cadence is not reliable and the files say so.** This repo's scheduled
+runs have fired 6.5 hours after the requested time, twice running, and a
+`*/30` cron was dropped outright — three firings due, none delivered. Hence the
+push trigger and the off-the-boundary minutes. Never write a freshness promise
+into the feed that the scheduler cannot keep: `data.asOf` is the fact, `every`
+is a hope, and the manifest says which is which.
 
 **It needs the repo to stay awake.** GitHub switches off scheduled workflows in
 a public repo after 60 days without activity, and this job's own pushes go to

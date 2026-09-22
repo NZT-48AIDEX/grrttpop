@@ -17,8 +17,18 @@
 name: snapshot
 
 on:
+  # Off the boundary on purpose — :00 and :30 are when everyone else's crons
+  # fire, and github deprioritises the stampede. drift.yml already learned
+  # this. Even so, this repo's scheduled runs have landed *6.5 hours* after
+  # the requested time, twice running, so treat the cadence as a hope rather
+  # than a promise: `data.asOf` is the only honest word on how old a snapshot
+  # is, and every published file carries it.
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "13,43 * * * *"
+  # a push is the one moment we know the repo is awake, and the feed should
+  # not be staler than the code that produced it
+  push:
+    branches: [main]
   workflow_dispatch:
 
 # only ever one publisher; a slow run must not race the next one
@@ -44,7 +54,10 @@ jobs:
       # no `npm ci`: lib/ has no runtime dependencies, which is the whole
       # reason this can run anywhere. three.js is the page's, not the data's.
       - name: build the snapshot
-        run: node tools/snapshot.mjs --out=data --every="30 minutes"
+        run: >
+          node tools/snapshot.mjs --out=data
+          --every="attempted twice an hour, and on every push — but github's scheduler
+          runs late and drops ticks, so read data.asOf rather than trusting this"
 
       # a fresh orphan commit each run: the branch is a current-state feed,
       # not a history, and keeping every revision would grow forever for

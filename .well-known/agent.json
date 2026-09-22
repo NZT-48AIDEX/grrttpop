@@ -85,8 +85,8 @@
         "trench.json",
         "trench.txt"
       ],
-      "every": "30 minutes",
-      "freshness": "each file carries a data block with source, asOf and synthetic. a snapshot is minutes old by design; nothing synthetic — no demo reef, no fixture replay — is ever published.",
+      "every": "attempted twice an hour, and on every push — github's scheduler runs late and drops ticks, so read asOf rather than trusting this",
+      "freshness": "each file carries a data block with source, asOf and synthetic. asOf is the only honest statement of age: a snapshot can be hours older than the cadence suggests. nothing synthetic — no demo reef, no fixture replay — is ever published.",
       "note": "these urls are absolute and point at a branch, not at the deployment: the feed is published to the data branch rather than committed to the site."
     },
     "accessibility": "prefers-reduced-motion is honoured on every page — stillness, not absence. ?motion=reduced and ?motion=full override it either way. ?agent=1 renders any page as text."

@@ -183,8 +183,14 @@ curl -s https://raw.githubusercontent.com/NZT-48AIDEX/grrttpop/data/reef.json | 
 
 `index.json` is the manifest; `reef.json`, `reef.txt`, `trench.json` and
 `trench.txt` are the same `describe()` output the pages and the MCP server hand
-out — no second implementation to drift. Refreshed every 30 minutes onto the
-orphan `data` branch, force-pushed as one commit, so nothing lands on `main`.
+out — no second implementation to drift. Published to the orphan `data` branch,
+force-pushed as one commit, so nothing lands on `main`.
+
+It runs twice an hour and on every push — in theory. In practice this repo's
+scheduled runs have landed 6.5 hours after the requested time, twice running,
+and a `*/30` cron got dropped entirely rather than delayed. So the cadence is a
+hope and `data.asOf` is the fact; every published file carries it, and anything
+reading the feed should believe the timestamp over the schedule.
 
 Locally: `npm run snapshot` (add `--fixtures --allow-synthetic` to build one
 offline).

@@ -37,7 +37,7 @@ const opt = (n) => args.find((a) => a.startsWith(`--${n}=`))?.split("=")[1];
 const FIXTURES = flag("fixtures");
 const ALLOW_SYNTHETIC = flag("allow-synthetic");
 const OUT = resolve(ROOT, opt("out") ?? "data");
-const EVERY = opt("every") ?? "30 minutes";
+const EVERY = opt("every") ?? "when the publisher runs — see data.asOf for this file's actual age";
 
 const f = FIXTURES ? fixtureFetch() : fetch;
 /* the stamp every description will carry. replaying recordings is a

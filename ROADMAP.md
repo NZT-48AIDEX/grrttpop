@@ -103,6 +103,8 @@ Sizes are the whole design here. One entry of raw inputs is ~532KB
 
 - gzip each entry (json compresses ~9x, so ≈60KB)
 - keep 6-hourly for 14 days, then weekly — ~110 entries, ~7MB steady state
+  (retention has to key off each entry's own `asOf`, not off a run counter:
+  the scheduler skips ticks, so "every nth run" would sample unevenly)
 - **plus every weird day, whatever the cadence**: a run whose breadth flips,
   whose index moves more than 10%, whose divergent share doubles, or that
   recorded a refusal. Regular sampling captures the average and the average is
@@ -227,8 +229,9 @@ npm run dev        # http-server on :4173
 Live at <https://nzt-48aidex.github.io/grrttpop/>. CI runs check + unit + mcp in
 ~20s and the browser job in ~80s on every push, with pixel baselines for
 `darwin-arm64` and `linux-x64`. `drift.yml` runs `smoke --live` weekly and
-reports rather than blocks; `snapshot.yml` publishes the `data` branch every
-30 minutes.
+reports rather than blocks; `snapshot.yml` publishes the `data` branch twice an
+hour and on every push — nominally: github's scheduler here runs hours late and
+drops ticks, so `data.asOf` is the only honest age.
 
 | | |
 |---|---|
