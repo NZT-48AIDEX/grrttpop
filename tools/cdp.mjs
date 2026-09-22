@@ -79,6 +79,23 @@ export async function launch({ headless = true, port = 9222 + (process.pid % 900
     "about:blank",
   ].filter(Boolean), { stdio: ["ignore", "pipe", "pipe"] });
 
+  /* a browser that outlives its run is not a tidiness problem: headless
+     chrome on software webgl spins a core at 100% forever, and nobody
+     connects a slow laptop a week later to a test run they have
+     forgotten. so track the real exit, and reap on every way out. */
+  let exited = false;
+  proc.once("exit", () => { exited = true; });
+  const reap = () => { if (!exited) { try { proc.kill("SIGKILL"); } catch {} } };
+  process.once("exit", reap);
+  for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) {
+    process.once(sig, () => {
+      reap();
+      // if the host installed its own handler (mcp/server.mjs does), that
+      // one decides how to exit; otherwise there is nothing left to wait for
+      if (process.listenerCount(sig) === 0) process.exit(130);
+    });
+  }
+
   const chromeLog = [];
   proc.stderr.on("data", (d) => chromeLog.push(d.toString()));
 
@@ -115,8 +132,12 @@ export async function launch({ headless = true, port = 9222 + (process.pid % 900
     async close() {
       try { ws.close(); } catch {}
       proc.kill();
-      await sleep(150);
-      if (!proc.killed) proc.kill("SIGKILL");
+      /* `proc.killed` only says a signal was delivered, never that the
+         process died — it is true the instant SIGTERM is sent. reading it
+         as "it's gone" is why this repo left ten days of orphaned browsers
+         on one machine, each burning a core. wait for the actual exit. */
+      for (let i = 0; i < 40 && !exited; i++) await sleep(50);
+      if (!exited) proc.kill("SIGKILL");
     },
   };
 }

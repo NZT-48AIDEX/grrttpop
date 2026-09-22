@@ -46,6 +46,13 @@ as done without it.
   as `.mjs` to force the module parser — don't "simplify" that away.
 - **`lib/harness.js` must be the first import** in each page script; it patches
   RNG, the clock and fetch before anything reads them. `check.mjs` enforces this.
+- **`proc.killed` does not mean the process died** — node sets it when the
+  signal was *delivered*, so `kill(); if (!proc.killed) kill("SIGKILL")` never
+  reaches the fallback. A headless chrome that hangs on SIGTERM then lives
+  forever on software webgl, spinning a core. This repo left four of them on
+  one laptop for ten days; `tools/cdp.mjs` now waits for the real `exit` event
+  and reaps on signals too. If a run ever feels absurdly slow, check
+  `pgrep -fl "puppeteer/chrome"` before blaming the change.
 - **stdout is the MCP transport.** Anything printed there that isn't a JSON-RPC
   message corrupts the stream. Logs go to stderr.
 - **CSS animations ignore the virtual clock** — they run on the compositor's.
