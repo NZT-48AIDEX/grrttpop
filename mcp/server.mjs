@@ -96,8 +96,12 @@ const tools = [
     name: "reef_snapshot",
     description:
       "The live crypto market as the reef models it: depth bands, what's rising and falling, " +
-      "biggest movers, trending coins, and the fear & greed mood. Answered by the same code the " +
-      "page runs, with no browser. Market data only — not financial advice.",
+      "biggest movers, trending coins, and the fear & greed mood. Every coin also carries its " +
+      "week — a 168-point hourly series reduced to a sparkline and a shape, so you can tell a " +
+      "coin that has climbed all week from one that spiked on tuesday and is giving it back, " +
+      "which report the same 24h number. `week` does the same for the market as a whole, with " +
+      "breadth. Answered by the same code the page runs, with no browser. Market data only — " +
+      "not financial advice.",
     inputSchema: {
       type: "object",
       properties: {
@@ -168,7 +172,10 @@ const tools = [
 
   {
     name: "trench_ecosystem",
-    description: "The Solana token ecosystem as the trench shows it: top tokens by market cap, gainers and losers.",
+    description:
+      "The Solana token ecosystem as the trench shows it: top tokens by market cap, gainers and " +
+      "losers, each with its 7-day shape (sparkline, direction, and whether the last day is " +
+      "fighting the week), plus `week` for the ecosystem as one equal-weighted index.",
     inputSchema: { type: "object", properties: { count: { type: "number", default: 40 } } },
     async run({ count = 40 }) {
       const eco = await fetchEcosystem({ count });
@@ -181,8 +188,8 @@ const tools = [
     description:
       "What a page is showing right now, in words — the same text a visitor with no eyes gets at " +
       "?agent=1. The reef reports how many creatures are in which depth band and which way they're " +
-      "moving; the trench reports what mainnet is doing. Use this to read the site as a scene " +
-      "rather than as a data dump.",
+      "moving; the trench reports what mainnet is doing. Both draw each coin's last 7 days as a " +
+      "sparkline. Use this to read the site as a scene rather than as a data dump.",
     inputSchema: {
       type: "object",
       properties: { page: pageEnum, live: liveFlag, format: { type: "string", enum: ["text", "json"], default: "text" } },

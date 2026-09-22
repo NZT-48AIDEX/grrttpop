@@ -10,6 +10,7 @@ import {
 } from "./lib/solana.js";
 import { describeTrench } from "./lib/solana.js";
 import { isAgentView, mountAgentView, trenchToText } from "./lib/describe.js";
+import { trendOf, trendSentence } from "./lib/trend.js";
 
 /* ================================================================
    the trench — solana, live.
@@ -590,6 +591,9 @@ $("w-mint").addEventListener("click", (e) => {
 });
 
 function drawSpark(c) {
+  /* the curve is decoration without this line: it shows that something
+     happened and never what. same judgement the ?agent=1 view gives. */
+  $("card-shape").textContent = trendSentence(trendOf(c));
   const cv = $("spark"), ctx = cv.getContext("2d");
   ctx.clearRect(0, 0, cv.width, cv.height);
   const data = c.sparkline_in_7d?.price;

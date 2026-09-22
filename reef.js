@@ -10,6 +10,7 @@ import {
   BAND_SPLIT as SPLIT, COINS as COIN_COUNT,
 } from "./lib/market.js";
 import { isAgentView, mountAgentView, reefToText } from "./lib/describe.js";
+import { trendOf, trendSentence } from "./lib/trend.js";
 
 /* ================================================================
    the reef — dive the crypto market.
@@ -488,6 +489,9 @@ function fillCard(c) {
 }
 
 function drawSpark(c) {
+  /* the curve is decoration without this line: it shows that something
+     happened and never what. same judgement the ?agent=1 view gives. */
+  $("card-shape").textContent = trendSentence(trendOf(c));
   const cv = $("spark"), ctx = cv.getContext("2d");
   ctx.clearRect(0, 0, cv.width, cv.height);
   const data = c.sparkline_in_7d?.price;

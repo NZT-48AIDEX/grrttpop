@@ -92,6 +92,10 @@
 .card-changes .down { color: #ff5e8a; }
 
 #spark { width: 100%; height: 64px; border-radius: 8px; background: rgba(255,255,255,.03); }
+/* the sparkline's meaning, in words. the canvas is aria-hidden, so this
+   line is the only version of it a screen reader ever gets. */
+.card-shape { margin: .35rem 0 0; font-size: .74rem; line-height: 1.35; opacity: .72; }
+.card-shape:empty { display: none; }
 
 .card-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; margin: .8rem 0; }
 .card-stats dt { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .05em; }

@@ -60,9 +60,9 @@
       "transport": "stdio (json-rpc 2.0)",
       "register": "the repo ships a .mcp.json — point your client at it, or add the command above",
       "tools": {
-        "reef_snapshot": "the live market as the reef models it: depth bands, movers, trending, mood",
+        "reef_snapshot": "the live market as the reef models it: depth bands, movers, trending, mood, and every coin's 7-day shape",
         "trench_vitals": "solana mainnet tps, epoch and progress",
-        "trench_ecosystem": "the spl ecosystem: top tokens, gainers, losers",
+        "trench_ecosystem": "the spl ecosystem: top tokens, gainers, losers, each with its week as a sparkline",
         "trench_wallet_peek": "read any public solana address's holdings — read-only, and honest about partial reads",
         "describe_page": "what a page is showing right now, in words — the ?agent=1 view, as a tool",
         "site_state": "boot a page headless and report what it actually did: fps, shaders, errors, console",

@@ -1,6 +1,6 @@
 # Roadmap — handoff
 
-Current as of the keyboard-navigation work, 2026-09-12. (No sha here on
+Current as of the trend work, 2026-09-21. (No sha here on
 purpose: recording one is itself a commit, so it is wrong the moment it lands —
 `git log -- ROADMAP.md` is the honest answer.) Conventions and traps live in
 [CLAUDE.md](CLAUDE.md) — read that before touching anything; this file is state
@@ -64,7 +64,7 @@ resilience work it was missing.
 ```sh
 npm run check      # static: parses, imports + named exports, dom ids,
                    # agent-card promises, fixture age. seconds.
-npm run test:unit  # 48 tests over lib/, ~1.2s, no browser
+npm run test:unit  # 66 tests over lib/, ~1.5s, no browser
 npm run smoke      # 3 pages headless: 12-15 checks each + pixel baselines
 npm test           # check + unit + smoke — the gate
 npm run mcp:test   # 22 protocol + tool checks (--slow)
@@ -85,9 +85,10 @@ reports rather than blocks.
 | | `describe.js` — the organism in words (`?agent=1`) |
 | | `quality.js` — when to shed detail (pure policy, no three.js) |
 | | `keyboard.js` — reading order and directional neighbour, no DOM |
+| | `trend.js` — sparklines, the shape of a week, breadth |
 | `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `visual.mjs` `record-fixtures.mjs` `mcp-test.mjs` |
 | `mcp/` | `server.mjs` (9 read-only tools) · `protocol.mjs` (MCP over stdio, by hand) |
-| `test/` | `market.test.mjs` `solana.test.mjs` |
+| `test/` | `market.test.mjs` `solana.test.mjs` `shape.test.mjs` `trend.test.mjs` |
 
 ---
 
@@ -133,6 +134,14 @@ heartbeat is quiet instead of showing a dim dot and leaving you to guess.
 **Adaptive quality** on every page from one shared policy. It only steps down;
 recovering upward oscillates.
 
+**The week, not just the number.** Coingecko was returning 168 hourly prices
+per coin and the site read the last one. [lib/trend.js](lib/trend.js) reduces
+the series to a sparkline and a shape, and flags `divergent` — the week and the
+last day pointing opposite ways, which is the case where the headline
+percentage actively misleads. It reaches `?agent=1`, `describe()`, the detail
+cards and the mcp tools; the thresholds come back with the label so a caller
+can disagree with them.
+
 **Keyboard navigation.** The creatures were pointer-only — you could tab to the
 sort buttons and never touch a coin. Each canvas now takes focus and arrow keys
 move between creatures inside it, announced through a live region; enter opens
@@ -163,10 +172,5 @@ in their place), skip links, and accessible names on the icon-only controls.
 Nothing here is needed — the list above is the honest end of the plan. These are
 the next things I'd reach for.
 
-- **`describe()` could carry the sparklines**, so an agent gets the shape of a
-  trend and not only the latest number.
-- **Drift is detected but never diagnosed.** `drift.yml` says "something moved";
-  it could diff the live response's *keys* against the recorded ones and name
-  the field that changed.
 - **The reef and the trench are two near-identical scene files.** Worth
   extracting a shared renderer only if a third page ever appears — not before.

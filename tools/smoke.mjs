@@ -269,6 +269,14 @@ try {
           if (!opened.sel) throw new Error("enter selected nothing");
           if (opened.focus !== "card-close") throw new Error(`focus did not follow into the card (went to "${opened.focus}")`);
 
+          /* the open card draws a sparkline on a canvas, which is invisible
+             to a screen reader and uninterpreted for everyone else. the line
+             under it is the only version of that curve in words — if it goes
+             blank the chart silently stops meaning anything. */
+          const shape = await page.eval(`return document.getElementById("card-shape").textContent.trim()`);
+          if (!shape.startsWith("7d:")) throw new Error(`the card's sparkline says nothing in words (got "${shape}")`);
+          row.cardShape = shape;
+
           await page.eval(`document.getElementById("card-close").click(); return 1`);
           await advance(4);
           const back = await page.eval(`return document.activeElement.id`);
@@ -377,6 +385,7 @@ try {
       console.log(`      ${row.consoleNotes.summary.slice(0, 160)}`);
     }
     if (row.keyboard) console.log(`   ↳ keyboard: creatures reachable, announced "${row.keyboard.announced}…"`);
+    if (row.cardShape) console.log(`   ↳ card: the sparkline in words — "${row.cardShape}"`);
     if (row.reducedMotion) console.log(`   ↳ reduced motion: honoured, still drawing (${row.reducedMotion.drawCalls} calls)`);
     if (row.agentView) console.log(`   ↳ ?agent=1: ${row.agentView.lines} lines, ${row.agentView.chars} chars of description`);
     if (row.visual) {

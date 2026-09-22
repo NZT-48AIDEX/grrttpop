@@ -126,14 +126,38 @@ depth bands (size = market cap · colour = 24h move · twitch = volatility)
   mid waters · majors
      15 creatures  █████···············  4 up / 11 down · median -1.60%
 
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ██▇▇▇████▇▅▅▃▁▁▁  -3.48% — falling
+  9 up · 22 down · 19 sideways · 6 spent the week going one way and today the other
+
 biggest movers
-  ↑ NEAR        +2.94%  $2.48
-  ↓ ZEC         -8.98%  $1,109
+  ↑ NEAR        +2.94%  $2.48        ▁▄▃▆▇▆▅▅▇█▇█
+  ↓ ZEC         -8.98%  $1,109       ▁▁▁▆▇▆▅▆██▇▄  ← 7d: spiked and gave most of it back
 ```
 
 The trench does the same for mainnet, including an epoch progress bar — and when
 a wallet read is partial it says **⚠️ PARTIAL READ** in the text, because the
 honesty has to survive the translation too.
+
+### one number is not a trend
+
+CoinGecko returns 168 hourly prices per coin and this site used to read the last
+one. But `-8.98%` describes a coin that has bled all week and a coin that spiked
+on tuesday and is handing it back *identically*, and an agent given only that
+number will say the wrong thing about the second one with total confidence.
+
+So every coin now carries its week: [`lib/trend.js`](lib/trend.js) reduces the
+series to a sparkline and a shape (`climbing, at its weekly high`, `spiked and
+gave most of it back`, `chopping sideways`, …), and flags the one case worth
+interrupting for — `divergent`, when the week and the last day point opposite
+ways. That flag is why ZEC gets a label above and BCH doesn't; only the coins
+whose headline number is misleading say anything extra.
+
+`week` does the same for the market as one equal-weighted index, with breadth —
+because "+1%" is forty coins drifting up or one coin carrying forty-nine, and
+those are not the same market. Every threshold comes back alongside the label
+(`weekPct`, `dayPct`, `rangePct`, `posInRange`), so a caller that disagrees with
+where the lines are drawn can see past them instead of reimplementing the maths.
 
 `describe()` sits next to `state()` on every console global and returns the same
 thing as structured JSON. `npm run smoke` asserts each page can still describe
@@ -175,10 +199,10 @@ up; otherwise register `node mcp/server.mjs` as a stdio server.
 
 | tool | what you get |
 |---|---|
-| `reef_snapshot` | the live market as the reef models it — depth bands, movers, trending, mood |
+| `reef_snapshot` | the live market as the reef models it — depth bands, movers, trending, mood, and every coin's 7-day shape |
 | `describe_page` | what a page is showing right now, in words — the ?agent=1 view as a tool |
 | `trench_vitals` | solana mainnet tps, epoch, progress, and which endpoint answered |
-| `trench_ecosystem` | the SPL ecosystem: top tokens, gainers, losers |
+| `trench_ecosystem` | the SPL ecosystem: top tokens, gainers, losers, each with its week |
 | `trench_wallet_peek` | any public address's holdings — and an honest `partial`/`gated` when the RPC refuses |
 | `site_state` | boot a page headless and report what it *did*: fps, draw calls, shader failures, errors, console |
 | `shader_try` | compile a shader change and get the driver's log back, with line numbers |
@@ -331,6 +355,7 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `lib/harness.js` | seeded rng, the stepped clock, fixture replay |
 | `lib/describe.js` | the organism in words — the ?agent=1 view |
 | `lib/market.js` | the reef's data + modelling, browser and node |
+| `lib/trend.js` | the shape of a move: sparklines, week-vs-day, breadth |
 | `lib/solana.js` | chain access, read-only, browser and node |
 | `mcp/server.mjs` | the site as tools for agents |
 | `mcp/protocol.mjs` | MCP over stdio, ~120 lines, no dependencies |
