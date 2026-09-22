@@ -17,6 +17,7 @@ You do not need to run a browser to know what this site is showing.
 
 ## For agents
 
+- **Snapshots, if you cannot run javascript.** This site renders in the browser, so fetching a page gives you an empty shell. The same data is published every 30 minutes as static files: [index.json](https://raw.githubusercontent.com/NZT-48AIDEX/grrttpop/data/index.json), plus `reef.json`, `reef.txt`, `trench.json`, `trench.txt` under `https://raw.githubusercontent.com/NZT-48AIDEX/grrttpop/data/`. Each carries a `data` block saying where it came from and when. Nothing synthetic is ever published there.
 - [agent card](/agent.json): who runs this, what it offers, how to inspect it. Also at /.well-known/agent.json
 - [card schema](/agent-card.schema.json): the shape of that card
 - MCP server: `node mcp/server.mjs` — 9 read-only tools (reef_snapshot, trench_vitals, trench_ecosystem, trench_wallet_peek, describe_page, site_state, shader_try, visual_diff, run_check). The repo ships a .mcp.json.

@@ -182,6 +182,19 @@ re-bless above. Refreshing fixtures is never a one-commit job. Diff the fixtures
 before blessing anything: if a field you rely on has been renamed or dropped,
 that is a real change to the site, not a baseline update.
 
+## The published feed
+
+`.github/workflows/snapshot.yml` runs `tools/snapshot.mjs` every 30 minutes and
+force-pushes the result to the orphan **`data` branch** — never to `main`, whose
+history is written by hand. `lib/snapshot.js` decides what goes in it and
+`agent.json` advertises the file names; `check.mjs` fails if those two disagree.
+
+**Nothing synthetic is ever published.** The demo reef and `?fixtures=1` both
+produce data that renders perfectly and means nothing, so `publishability()`
+refuses them and the tool exits non-zero rather than writing. A failed run
+leaves the previous snapshot in place — that is the designed outcome, not an
+outage to paper over. Never "fix" a red snapshot run by relaxing the refusal.
+
 ## Things that must stay true
 
 - **No trackers, no cookies, no analytics.** Ever. Don't helpfully suggest them.

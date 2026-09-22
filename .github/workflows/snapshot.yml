@@ -1,0 +1,63 @@
+# Publish the site's own answers as static files.
+#
+# Every page here renders in the browser, so an agent that fetches one gets an
+# empty shell: `?agent=1` is mounted by javascript and the numbers arrive from a
+# fetch that only happens once a browser runs the script. The agent card says
+# "you are welcome here" and then hands a curl an html skeleton.
+#
+# So run the same lib/ code in node on a schedule and push the output to the
+# orphan `data` branch, force-pushed as a single commit each time. Nothing lands
+# on main: this repo's history is written by hand, and 48 robot commits a day
+# would bury it.
+#
+# The tool refuses to publish anything synthetic — no demo reef, no fixture
+# replay — and exits non-zero instead. A failed run leaves the previous snapshot
+# in place, which is the right outcome: stale and true beats fresh and invented.
+
+name: snapshot
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+# only ever one publisher; a slow run must not race the next one
+concurrency:
+  group: snapshot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: fetch live, publish to the data branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # no `npm ci`: lib/ has no runtime dependencies, which is the whole
+      # reason this can run anywhere. three.js is the page's, not the data's.
+      - name: build the snapshot
+        run: node tools/snapshot.mjs --out=data --every="30 minutes"
+
+      # a fresh orphan commit each run: the branch is a current-state feed,
+      # not a history, and keeping every revision would grow forever for
+      # nobody's benefit.
+      - name: publish
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd data
+          git init -q
+          git checkout -qb data
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -qm "snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data
+          echo "published $(ls | tr '\n' ' ')to the data branch"

@@ -1,6 +1,6 @@
 # Roadmap — handoff
 
-Current as of the provenance work, 2026-09-22. (No sha here on
+Current as of the snapshot + provenance work, 2026-09-22. (No sha here on
 purpose: recording one is itself a commit, so it is wrong the moment it lands —
 `git log -- ROADMAP.md` is the honest answer.) Conventions and traps live in
 [CLAUDE.md](CLAUDE.md) — read that before touching anything; this file is state
@@ -45,6 +45,11 @@ The server is stdio-only, so it's for people who cloned the repo. A Worker over
 run anywhere with no DOM and no three.js, so this is a deploy target and an
 entrypoint, not a rewrite.
 
+The static feed on the `data` branch now covers *reading*: an agent with no
+browser and no clone can curl the reef. What a Worker adds is **asking** — a
+wallet peek, a different sort, a question nobody pre-computed. That is the
+remaining half.
+
 ### 3. One open question I couldn't answer from here
 
 **Does the reef's live heartbeat work on an unblocked network?**
@@ -64,7 +69,8 @@ resilience work it was missing.
 ```sh
 npm run check      # static: parses, imports + named exports, dom ids,
                    # agent-card promises, fixture age. seconds.
-npm run test:unit  # 76 tests over lib/, ~1.6s, no browser
+npm run test:unit  # 84 tests over lib/, ~1.7s, no browser
+npm run snapshot   # run the data layer in node, write the published feed
 npm run smoke      # 3 pages headless: 12-15 checks each + pixel baselines
 npm test           # check + unit + smoke — the gate
 npm run mcp:test   # 22 protocol + tool checks (--slow)
@@ -75,7 +81,8 @@ npm run dev        # http-server on :4173
 Live at <https://nzt-48aidex.github.io/grrttpop/>. CI runs check + unit + mcp in
 ~20s and the browser job in ~80s on every push, with pixel baselines for
 `darwin-arm64` and `linux-x64`. `drift.yml` runs `smoke --live` weekly and
-reports rather than blocks.
+reports rather than blocks; `snapshot.yml` publishes the `data` branch every
+30 minutes.
 
 | | |
 |---|---|
@@ -87,10 +94,13 @@ reports rather than blocks.
 | | `keyboard.js` — reading order and directional neighbour, no DOM |
 | | `trend.js` — sparklines, the shape of a week, breadth |
 | | `provenance.js` — where the numbers came from, and whether they're real |
-| `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `visual.mjs` `record-fixtures.mjs` `mcp-test.mjs` |
+| | `snapshot.js` — the published feed, and when to refuse to publish |
+| | `fixture-routes.js` — which recording answers which url (browser + node) |
+| `tools/` | `check.mjs` `smoke.mjs` `cdp.mjs` `visual.mjs` `record-fixtures.mjs` `mcp-test.mjs`
+             `snapshot.mjs` `fixture-fetch.mjs` `drift.mjs` |
 | `mcp/` | `server.mjs` (9 read-only tools) · `protocol.mjs` (MCP over stdio, by hand) |
 | `test/` | `market.test.mjs` `solana.test.mjs` `shape.test.mjs` `trend.test.mjs`
-           `provenance.test.mjs` |
+           `provenance.test.mjs` `snapshot.test.mjs` |
 
 ---
 
@@ -135,6 +145,15 @@ heartbeat is quiet instead of showing a dim dot and leaving you to guess.
 
 **Adaptive quality** on every page from one shared policy. It only steps down;
 recovering upward oscillates.
+
+**Published snapshots.** Every page renders in the browser, so a curl of
+`?agent=1` returned an html shell — the agent card invited people who then had
+nothing to fetch. `.github/workflows/snapshot.yml` runs [lib/](lib/) in node
+every 30 minutes and force-pushes `index/reef/trench` as json and text to the
+orphan `data` branch (nothing on `main`). Same `describe()` output as the pages
+and the mcp server, so there's no second implementation to drift. It refuses to
+publish anything synthetic and exits non-zero instead: a failed run leaves the
+last good snapshot standing.
 
 **Provenance on the structured path.** The demo reef was loud in words and in
 `state()`, and silent in `describe()` — so an agent could receive forty invented

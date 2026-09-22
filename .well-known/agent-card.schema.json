@@ -52,6 +52,20 @@
             "note": { "type": "string" }
           }
         },
+        "data": {
+          "type": "object",
+          "description": "static snapshots published on a schedule, for agents that cannot run javascript",
+          "required": ["index", "files"],
+          "properties": {
+            "what": { "type": "string" },
+            "index": { "type": "string", "description": "the manifest url" },
+            "base": { "type": "string" },
+            "files": { "type": "array", "items": { "type": "string" } },
+            "every": { "type": "string" },
+            "freshness": { "type": "string" },
+            "note": { "type": "string" }
+          }
+        },
         "mcp": {
           "type": "object",
           "description": "an mcp server exposing the site as callable tools",

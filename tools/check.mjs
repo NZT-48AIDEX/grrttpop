@@ -264,6 +264,22 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
         if (!server.includes(`name: "${t}"`)) fail("agent.json", `advertises an mcp tool the server does not define: ${t}`);
       }
     }
+    /* same promise, different surface: the card advertises a published
+       file set, and lib/snapshot.js decides what actually gets written. */
+    const promisedFiles = card.site?.data?.files ?? [];
+    if (promisedFiles.length) {
+      const snap = existsSync(join(ROOT, "lib", "snapshot.js"))
+        ? readFileSync(join(ROOT, "lib", "snapshot.js"), "utf8") : "";
+      if (!snap) fail("agent.json", "advertises published snapshots but lib/snapshot.js is gone");
+      for (const f of promisedFiles) {
+        if (!snap.includes(`"${f}"`)) fail("agent.json", `advertises a snapshot file nothing publishes: ${f}`);
+      }
+      const base = card.site.data.base ?? "";
+      if (base && !card.site.data.index?.startsWith(base)) {
+        fail("agent.json", "the snapshot index does not live under its own base url");
+      }
+    }
+
     if (card.site?.mcp && card.site.mcp.read_only !== true) {
       fail("agent.json", "the mcp block must declare read_only: true — every tool is read-only and the card should say so");
     }
@@ -288,7 +304,8 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
   /* lib/ was extracted so node could test it without a browser. if the
      tests disappear, that reason quietly stops being true. */
   const unit = ["test/market.test.mjs", "test/solana.test.mjs", "test/shape.test.mjs",
-                "test/trend.test.mjs", "test/provenance.test.mjs"];
+                "test/trend.test.mjs", "test/provenance.test.mjs",
+                "test/snapshot.test.mjs"];
   for (const t of unit) {
     if (!existsSync(join(ROOT, t))) fail(t, "missing — lib/ is extracted precisely so it can be tested without a browser");
   }

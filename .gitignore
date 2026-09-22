@@ -2,3 +2,6 @@ node_modules/
 .DS_Store
 .claude/
 .smoke/
+
+# the published feed is built, not committed — it lives on the data branch
+data/

@@ -164,6 +164,37 @@ thing as structured JSON. `npm run smoke` asserts each page can still describe
 itself, and `npm run check` fails if a page loses `?agent=1` — otherwise it would
 quietly go back to serving a black rectangle.
 
+## curl gets an empty shell — so the site publishes itself
+
+`?agent=1` is mounted by javascript, and the numbers arrive from a fetch that
+only happens once a browser runs the script. Which means this, until now:
+
+```sh
+curl -s "grrttpop/market.html?agent=1" | grep -c "biggest movers"   # → 0
+```
+
+An agent that did exactly what the card told it to do got an html skeleton. So
+a scheduled job runs the same `lib/` code in node and publishes the output:
+
+```sh
+curl -s https://raw.githubusercontent.com/NZT-48AIDEX/grrttpop/data/reef.txt
+curl -s https://raw.githubusercontent.com/NZT-48AIDEX/grrttpop/data/reef.json | jq .week
+```
+
+`index.json` is the manifest; `reef.json`, `reef.txt`, `trench.json` and
+`trench.txt` are the same `describe()` output the pages and the MCP server hand
+out — no second implementation to drift. Refreshed every 30 minutes onto the
+orphan `data` branch, force-pushed as one commit, so nothing lands on `main`.
+
+Locally: `npm run snapshot` (add `--fixtures --allow-synthetic` to build one
+offline).
+
+**The tool refuses to publish anything synthetic.** If CoinGecko is unreachable
+the reef falls back to invented coins so the page stays alive; if a run tried to
+publish those, or a fixture replay, `tools/snapshot.mjs` exits non-zero and
+writes nothing. The previous snapshot stands. Stale and true beats fresh and
+invented.
+
 ## where these numbers came from
 
 Every description carries a stamp:
@@ -384,6 +415,8 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `lib/market.js` | the reef's data + modelling, browser and node |
 | `lib/trend.js` | the shape of a move: sparklines, week-vs-day, breadth |
 | `lib/provenance.js` | where the numbers came from, and whether they're real |
+| `lib/snapshot.js` | the published feed: what goes in it, and when to refuse |
+| `tools/snapshot.mjs` | `npm run snapshot` — run the data layer in node, write it out |
 | `lib/solana.js` | chain access, read-only, browser and node |
 | `mcp/server.mjs` | the site as tools for agents |
 | `mcp/protocol.mjs` | MCP over stdio, ~120 lines, no dependencies |

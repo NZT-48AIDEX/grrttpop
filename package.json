@@ -8,6 +8,7 @@
     "smoke": "node tools/smoke.mjs",
     "drift": "node tools/drift.mjs",
     "record": "node tools/record-fixtures.mjs",
+    "snapshot": "node tools/snapshot.mjs",
     "mcp": "node mcp/server.mjs",
     "mcp:test": "node tools/mcp-test.mjs",
     "dev": "npx --yes http-server -p 4173 -c-1 .",
