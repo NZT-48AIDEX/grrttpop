@@ -47,7 +47,20 @@ const EVERY = opt("every") ?? "when the publisher runs — see data.asOf for thi
 const CORPUS = opt("corpus") ? resolve(ROOT, opt("corpus")) : null;
 const EVENT = opt("event") ?? process.env.GITHUB_EVENT_NAME ?? "local";
 
-const f = FIXTURES ? fixtureFetch() : captureFetch(fetch);
+/* coingecko rate-limits by ip and github's runners share theirs, so a
+   429 here is routine rather than exceptional. one patient retry turns
+   most of them into a normal run; a workflow that goes red every other
+   hour teaches everyone to ignore it, which costs more than the wait. */
+const patient = (base) => async (input, init) => {
+  const res = await base(input, init);
+  if (res.status !== 429) return res;
+  const wait = Number(res.headers.get("retry-after")) * 1000 || 30_000;
+  console.error(`   429 — waiting ${Math.round(wait / 1000)}s and trying once more`);
+  await new Promise((r) => setTimeout(r, Math.min(wait, 60_000)));
+  return base(input, init);
+};
+
+const f = FIXTURES ? fixtureFetch() : captureFetch(patient(fetch));
 /* the stamp every description will carry. replaying recordings is a
    harness, and provenanceOf() turns that into source:"fixtures" and
    synthetic:true — which is what stops this being publishable. */
@@ -66,6 +79,7 @@ function incident(stage, err) {
     at, event: EVENT, stage,
     message: err?.message ?? String(err),
     status: err?.status ?? null,
+    url: err?.url ?? null,
     body: typeof err?.body === "string" ? err.body.slice(0, 2000) : null,
     captured: FIXTURES ? null : Object.keys(f.captured ?? {}),
   };
