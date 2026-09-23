@@ -141,10 +141,15 @@ async function cadence() {
     gaps.sort((a, b) => a - b);
     const median = gaps.length ? gaps[gaps.length >> 1] : null;
 
+    /* an occasional failed run is the publisher refusing a 429, which is
+       it working. a run failing *now*, or failing often, is not. */
+    const newestFailed = week[0] && week[0].conclusion && week[0].conclusion !== "success";
+    const flaky = week.length >= 4 && failed / week.length > 0.25;
+
     const lines = [
       `- runs in the last 7 days: **${week.length}** (${Object.entries(byEvent).map(([k, v]) => `${v} ${k}`).join(", ") || "none"})`,
       `- scheduled only: **${sched.length}**` + (median ? `, median gap **${median.toFixed(1)}h**` : ""),
-      `- failed runs: ${failed}`,
+      `- failed runs: ${failed}${failed && !newestFailed && !flaky ? " (refusals are the publisher working, not breaking)" : ""}`,
     ];
     if (median && median > 1.5) {
       lines.push("", "The cron asks for twice an hour. Anything near this is github dropping",
@@ -152,7 +157,7 @@ async function cadence() {
     }
     return {
       name: "cadence",
-      status: week.length === 0 ? "fail" : failed > 0 ? "warn" : "ok",
+      status: week.length === 0 ? "fail" : newestFailed || flaky ? "warn" : "ok",
       headline: week.length === 0
         ? "no snapshot runs in 7 days — is the workflow disabled?"
         : `${week.length} runs in 7d, ${sched.length} scheduled` + (median ? `, ~${median.toFixed(1)}h apart` : ""),
@@ -209,7 +214,7 @@ async function corpus() {
     return {
       name: "corpus",
       status: enough ? "ok" : "warn",
-      headline: `${m.entries} entries over ${span.toFixed(1)}d (${mb}MB)` +
+      headline: `${m.entries} ${m.entries === 1 ? "entry" : "entries"} over ${span.toFixed(1)}d (${mb}MB)` +
         (enough ? "" : " — under 20, too few to calibrate from"),
       lines: [
         `- oldest **${m.oldest}** · newest **${m.newest}** · ~${perDay}/day`,
@@ -230,12 +235,34 @@ async function corpus() {
   }
 }
 
+/* ---------------- do the invariants still hold ---------------- */
+async function scenarios() {
+  try {
+    const { stdout } = await execFileP(process.execPath, ["tools/scenarios.mjs"], { cwd: ROOT });
+    const m = /(\d+)\/(\d+) invariants held over (\d+)/.exec(stdout);
+    return {
+      name: "scenarios",
+      status: "ok",
+      headline: m ? `${m[1]}/${m[2]} invariants held over ${m[3]} recorded day(s)` : "passed",
+      lines: [],
+    };
+  } catch (e) {
+    const out = ((e.stdout ?? "") + (e.stderr ?? "")).trim();
+    const failures = out.split("\n").filter((l) => l.includes("❌")).slice(0, 8);
+    return {
+      name: "scenarios",
+      status: "fail",
+      headline: /(\d+)\/(\d+) invariants held/.exec(out)?.[0] ?? "a recorded day broke an invariant",
+      lines: ["```", ...failures, "```", "",
+        "A recording that breaks an invariant means the invariant is wrong or the",
+        "code is. Never edit the recording — it is a day that actually happened."],
+    };
+  }
+}
+
 /* ---------------- the parts that do not exist yet ---------------- */
 /* named, so their absence is a status rather than a silence */
 const missing = () => [
-  { name: "scenarios", status: "absent", stage: 2,
-    headline: "nothing replays real payloads against invariants (`npm run scenarios`)",
-    lines: [] },
   { name: "evals", status: "absent", stage: 4,
     headline: "no scored questions, so 'useful to an agent' is still an opinion (`npm run evals`)",
     lines: [] },
@@ -248,6 +275,7 @@ const sections = [
   await feed(),
   await cadence(),
   await corpus(),
+  await scenarios(),
   await calibration(),
   ...missing(),
 ];

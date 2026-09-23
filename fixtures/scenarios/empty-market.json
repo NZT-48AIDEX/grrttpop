@@ -1,0 +1,42 @@
+{
+ "label": "every endpoint answers, with nothing in it",
+ "why": "coingecko has returned [] during incidents. the reef must describe an empty ocean rather than divide by it.",
+ "synthetic": true,
+ "files": {
+  "cg-markets.json": [],
+  "cg-eco.json": [],
+  "cg-global.json": {
+   "data": {
+    "total_market_cap": {
+     "usd": 0
+    },
+    "market_cap_change_percentage_24h_usd": 0
+   }
+  },
+  "cg-trending.json": {
+   "coins": []
+  },
+  "fng.json": {
+   "data": [
+    {
+     "value": "50",
+     "value_classification": "Neutral"
+    }
+   ]
+  },
+  "solana-rpc.json": {
+   "getEpochInfo": {
+    "epoch": 1,
+    "slotIndex": 1,
+    "slotsInEpoch": 100,
+    "absoluteSlot": 1
+   },
+   "getRecentPerformanceSamples": [
+    {
+     "numTransactions": 0,
+     "samplePeriodSecs": 60
+    }
+   ]
+  }
+ }
+}

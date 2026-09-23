@@ -160,28 +160,47 @@ called, so there is no wallet read in it (`getBalance`, `getSlot`,
 triggered each entry, because pushes cluster in working hours and that bias
 should be visible rather than baked in.
 
-### Stage 2 — replay them (`npm run scenarios`)
+### Stage 2 — replay them ✅ built
 
-A real day has no expected output, so assert **invariants**, never values.
-Put them in `lib/invariants.js` — pure, so the unit tests use them too:
+`npm run scenarios` · [lib/invariants.js](lib/invariants.js) ·
+[tools/scenarios.mjs](tools/scenarios.mjs) · `fixtures/scenarios/`
 
-- `breadth.up + down + flat === coinsCounted`
-- every `divergent` coin has `sign(weekPct) !== sign(dayPct)` and `|weekPct| > 2`
-- `posInRange` within [0,1]; `spark.length` is the requested width or 0
-- `describeReef`/`describeTrench` never throw on any recorded payload
-- the rendered text contains no `undefined`, `NaN`, `null` or `[object Object]`
-  — cheap, and it catches most of what actually goes wrong
-- the disclaimer is present; a partial wallet read is still labelled partial
-- `data.synthetic` is false for archived live entries
+Runs today's code over recorded days and asserts **properties, never
+values** — a real market has no expected output, and a test that pins today's
+numbers has to be rewritten every time it is right.
 
-Acceptance: `npm run scenarios` passes over the committed
-`fixtures/scenarios/` (a handful of labelled edge days, ~360KB) and over a
-fetched corpus, naming the entry, the invariant and the offending value on
-failure.
+Fifteen invariants, each returning the offending value rather than a boolean:
+bands account for every creature · breadth and shape counts sum to what they
+counted · every shape is in `SHAPES` · a `divergent` coin really does disagree
+with its own week · `posInRange` inside [0,1], `high ≥ low`, ≥8 points ·
+sparklines drawn from blocks or not drawn · prices finite and non-negative ·
+provenance present and synthetic data announcing itself · a live recording not
+reported as synthetic · disclaimers surviving · a partial wallet read still
+labelled partial in the words · epoch progress a percentage · and the cheapest
+one, which catches the most: **no `undefined`, `NaN`, `null` or
+`[object Object]` anywhere in the rendered text.** A renamed field shows up
+there long before it shows up as an exception.
 
-**Trap:** never hand-edit a corpus entry to make a run pass. A real day that
-breaks an invariant means either the invariant is wrong or the code is. Same
-rule as the recorded refusals.
+Sources: `fixtures/` itself, the committed edge cases in `fixtures/scenarios/`
+(28KB, all labelled synthetic — an empty market, a coin listed six hours ago
+with 6 sparkline points, a week where nothing moved, every decoration endpoint
+refusing at once), any local corpus directory, and `--fetch=N` for the newest
+bundles off the corpus branch. Corpus entries need no reader of their own: they
+are keyed like `fixtures/`, so the same replay shim takes both.
+
+Unlike the loop this one **blocks** — it is a test, and it is in `npm test`.
+Verified in both directions: 77/77 invariants across six recorded days,
+and an injected bad day fails with `BOOM price -5` naming the invariant.
+
+Building it found a false positive in `check.mjs`: its import scanner used a
+lazy `[\s\S]*?` that crossed newlines, so `export const INVARIANTS = [`
+scanned forward until a string ended in the word "from" and reported the prose
+after it as a missing module. The clause is now restricted to characters an
+import clause can contain; every import form is covered by a regression test.
+
+**Trap:** never edit a recording to make a run pass. A real day that breaks an
+invariant means the invariant is wrong or the code is — same rule as the
+fixtures and their refusals.
 
 ### Stage 3 — calibrate the judgements (`npm run calibrate`)
 

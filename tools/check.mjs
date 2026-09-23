@@ -81,8 +81,15 @@ const BARE_OK = new Set(["three"]);
 /* Scan for imports on comment-free source, anchored to the start of a line.
    Scanning raw text matches prose: a comment containing `from "somewhere"`
    reads as an import statement and gets reported as a missing module. Real
-   import statements begin a line; sentences almost never do. */
-const IMPORT_RE = /^\s*(?:import|export)\s+(?:[\s\S]*?\sfrom\s*)?["']([^"']+)["']|[^\w.]import\s*\(\s*["']([^"']+)["']\s*\)/gm;
+   import statements begin a line; sentences almost never do.
+
+   The clause between `import`/`export` and `from` is restricted to the
+   characters an import clause can actually contain. It used to be
+   `[\s\S]*?`, which is lazy but crosses newlines — so a line like
+   `export const INVARIANTS = [` would scan forward through the whole file
+   until some string ended in the word "from", and report the prose after
+   it as a missing module. It did exactly that to lib/invariants.js. */
+const IMPORT_RE = /^\s*(?:import|export)\s+(?:[\w\s{},*$]*?\sfrom\s*)?["']([^"']+)["']|[^\w.]import\s*\(\s*["']([^"']+)["']\s*\)/gm;
 const stripComments = (src) => src
   .replace(/\/\*[\s\S]*?\*\//g, "")      // block comments, glsl included
   .replace(/(^|[^:"'`\\])\/\/[^\n]*/g, "$1");   // line comments, sparing urls
@@ -306,7 +313,8 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
   const unit = ["test/market.test.mjs", "test/solana.test.mjs", "test/shape.test.mjs",
                 "test/trend.test.mjs", "test/provenance.test.mjs",
                 "test/snapshot.test.mjs", "test/calibrate.test.mjs",
-                "test/report.test.mjs", "test/corpus.test.mjs"];
+                "test/report.test.mjs", "test/corpus.test.mjs",
+                "test/invariants.test.mjs"];
   for (const t of unit) {
     if (!existsSync(join(ROOT, t))) fail(t, "missing — lib/ is extracted precisely so it can be tested without a browser");
   }

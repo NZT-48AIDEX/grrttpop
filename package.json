@@ -9,12 +9,13 @@
     "drift": "node tools/drift.mjs",
     "loop": "node tools/loop.mjs",
     "corpus": "node tools/corpus.mjs",
+    "scenarios": "node tools/scenarios.mjs",
     "record": "node tools/record-fixtures.mjs",
     "snapshot": "node tools/snapshot.mjs",
     "mcp": "node mcp/server.mjs",
     "mcp:test": "node tools/mcp-test.mjs",
     "dev": "node tools/serve.mjs --port=4173",
-    "test": "node tools/check.mjs && node --test && node tools/smoke.mjs"
+    "test": "node tools/check.mjs && node --test && node tools/scenarios.mjs && node tools/smoke.mjs"
   },
   "keywords": [
     "webgl",

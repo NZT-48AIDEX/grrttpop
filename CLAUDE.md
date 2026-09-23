@@ -238,6 +238,24 @@ refusals. If an entry breaks something, that is the corpus doing its job.
 cannot be sampled for at six snapshots a day, so a failed publish records what
 happened and the workflow pushes it even when the run failed.
 
+## Scenarios
+
+`npm run scenarios` replays recorded days — `fixtures/`, the committed edges in
+`fixtures/scenarios/`, and corpus bundles — through the real data layer and
+asserts the invariants in `lib/invariants.js`. It is part of `npm test` and it
+**blocks**, unlike the loop.
+
+**Properties, never values.** A real day has no expected output. If you find
+yourself wanting to assert a number, the scenario is the wrong tool: that is
+what `test/` is for, with data you made up on purpose.
+
+**Never edit a recording to make it pass.** Same rule as the fixtures and their
+refusals: a day that actually happened is not negotiable. If a recording breaks
+an invariant, either the invariant is wrong or the code is.
+
+Synthetic scenarios are allowed and must say so — they cover edges a real day
+may never produce, like an empty market or a coin with six hours of history.
+
 ## The loop
 
 `npm run loop` is the first thing to run before starting work: it reports the
