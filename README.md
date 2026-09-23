@@ -430,6 +430,9 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `tools/smoke.mjs` | `npm run smoke` — boot every page and assert it's alive |
 | `tools/cdp.mjs` | a browser driver in ~100 lines, zero dependencies |
 | `tools/serve.mjs` | a static server in ~100 lines, in process, zero dependencies |
+| `lib/corpus.js` | what the archive keeps, and what it lets go |
+| `tools/corpus.mjs` | `npm run corpus` — list or prune the archived days |
+| `tools/loop.mjs` | `npm run loop` — what to work on next |
 | `fixtures/` | one recorded response per api, refusals included |
 | `agent.json` | the agent-facing card |
 

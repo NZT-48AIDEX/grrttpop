@@ -54,12 +54,44 @@ jobs:
 
       # no `npm ci`: lib/ has no runtime dependencies, which is the whole
       # reason this can run anywhere. three.js is the page's, not the data's.
+      # the archive lives on its own orphan branch; carry forward what is
+      # already there so pruning decides what goes, not the checkout
+      - name: fetch the existing corpus
+        run: |
+          git clone --quiet --depth 1 --single-branch --branch corpus \
+            "https://github.com/${GITHUB_REPOSITORY}.git" corpus-work 2>/dev/null \
+            && rm -rf corpus-work/.git \
+            && echo "carried forward $(ls corpus-work/*.json.gz 2>/dev/null | wc -l) entries" \
+            || { mkdir -p corpus-work; echo "no corpus branch yet — starting one"; }
+
       - name: build the snapshot
         run: >
-          node tools/snapshot.mjs --out=data
+          node tools/snapshot.mjs --out=data --corpus=corpus-work
+          --event="${{ github.event_name }}"
           --every="asked for twice an hour and on every push; github delivers about
           15% of scheduled ticks, so in practice roughly every 3-4 hours. read data.asOf,
           which is measured, rather than this, which is a hope"
+
+      # an incident is written when publishing is refused, which is exactly
+      # when the previous step failed — so this has to run anyway, or the
+      # rarest and most useful recordings would be the ones never kept
+      - name: prune and publish the corpus
+        if: always()
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [ -d corpus-work ] || exit 0
+          node tools/corpus.mjs --prune --dir=corpus-work
+          cd corpus-work
+          [ -n "$(ls -A)" ] || { echo "nothing to publish"; exit 0; }
+          git init -q
+          git checkout -qb corpus
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -qm "corpus $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" corpus
+          echo "corpus branch now holds $(ls *.json.gz 2>/dev/null | wc -l) entries"
 
       # a fresh orphan commit each run: the branch is a current-state feed,
       # not a history, and keeping every revision would grow forever for

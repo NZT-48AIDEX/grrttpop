@@ -8,6 +8,7 @@
     "smoke": "node tools/smoke.mjs",
     "drift": "node tools/drift.mjs",
     "loop": "node tools/loop.mjs",
+    "corpus": "node tools/corpus.mjs",
     "record": "node tools/record-fixtures.mjs",
     "snapshot": "node tools/snapshot.mjs",
     "mcp": "node mcp/server.mjs",

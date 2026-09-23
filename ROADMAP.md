@@ -111,48 +111,54 @@ time. That is not lateness, it is dropping — a different failure from
 about **one snapshot every 3.8 hours**, or ~6 a day. Plan against that number,
 not against the one in the cron expression.
 
-### Stage 1 — stop discarding the feed
+### Stage 1 — stop discarding the feed ✅ built
 
-Archive the **raw upstream payloads**, not just the `describe()` output. The
-output is derived: replaying it can test nothing you haven't already written.
-Tomorrow's `lib/` has to be runnable over yesterday's market.
+`npm run corpus` · [lib/corpus.js](lib/corpus.js) ·
+[tools/corpus.mjs](tools/corpus.mjs) ·
+[tools/capture-fetch.mjs](tools/capture-fetch.mjs)
 
-Sizes are the whole design here. One entry of raw inputs is ~532KB
-(`cg-markets` 246KB, `cg-eco` 194KB, trending 88KB); the derived `reef.json` is
-8KB. Skip `jup-tokens.json` (342KB and almost static). So:
+Every snapshot run now archives the **raw upstream payloads** — not the derived
+`describe()` output, which could only ever test code that already exists — to an
+orphan `corpus` branch, force-pushed as one commit so the repo holds the
+retained set rather than every snapshot ever taken.
 
-- gzip each entry (json compresses ~9x, so ≈60KB)
-- **keep every entry for 14 days.** The first draft of this said "thin to
-  6-hourly", which assumed a 48-a-day feed. At the measured ~6 a day there is
-  nothing to thin: 6 × 60KB ≈ 380KB a day, ~5MB a fortnight. Thin to weekly
-  after that, keyed off each entry's own `asOf` — never off a run counter,
-  because the scheduler drops most ticks and "every nth run" would sample the
-  queue rather than the market.
-- record what triggered each entry. Pushes cluster in working hours, so an
-  active day is over-sampled exactly when the market is busiest. That bias
-  should be visible in the data, not baked into it.
-- force-push it as an orphan like `data`, so the branch holds the retained set
-  and not the sum of all history — otherwise a clone pays for every snapshot
-  ever taken
+They are captured from the publisher's own responses rather than re-fetched: a
+second request would be a different moment and would double the load on a
+rate-limited api for the privilege. Each bundle is keyed by the same filenames
+`fixtures/` uses, so [tools/fixture-fetch.mjs](tools/fixture-fetch.mjs) replays
+a corpus entry with no reader of its own — which is stage 2's whole input, for
+free.
 
-**What sparse sampling does and does not cost.** Every entry carries
-`sparkline_in_7d`: 168 hourly prices per coin. So one snapshot is already a
-week of history at hourly resolution, and two a day give overlapping weeks
-whose union covers every hour. Price *resolution* is not the casualty here.
+**The numbers moved again when measured.** A bundle is **168KB gzipped** from
+~532KB of json: 3.2x compression, not the 9x this plan assumed. So 14 days at
+~6 a day would be 14.5MB, over the ceiling, and the ladder was redesigned to
+spend the budget deliberately instead of letting the cap eat the oldest tier in
+silence:
 
-What we lose is **moments**: a 429 storm, an RPC refusal, the reef falling back
-to the demo data. Those last minutes, and a sampler that looks every 3.8 hours
-will miss almost all of them — which is awkward, because they are exactly the
-scenarios stage 2 wants and the ones no fixture currently covers.
+| tier | span | entries |
+|---|---|---|
+| everything | 3 days | ~19 |
+| one a day | 30 days | ~27 |
+| one a week | 180 days | ~21 |
+| one a month | beyond | trimmed to fit |
 
-So do not sample for them. **Capture them where they happen**: a run that fails
-to publish already knows what went wrong, and `tools/snapshot.mjs` already
-refuses rather than writing. Have it write the incident instead — what failed,
-the status, the raw body if there was one — to `corpus/incidents/`. A failure
-that teaches nothing is a waste of a real 429.
+Simulated against 120 and 400 days of history, both settle at **60 entries,
+9.8MB** — bounded, not merely slowed. Earliest-in-bucket wins so the kept set
+does not churn as entries arrive, and the recent window is defended last when
+the ceiling bites.
 
-Acceptance: `git clone --single-branch -b corpus` is under 10MB, and
-`node tools/corpus.mjs --list` prints entries with dates and why each was kept.
+**Incidents are captured, not sampled for.** A run that fails already knows
+what no sampler can catch — a 429, an rpc refusal, an api that changed shape —
+and those last minutes while the publisher looks every few hours. A refused
+publish now writes the incident to `corpus/incidents/` and the workflow
+publishes it even when the snapshot step failed, which is exactly when the
+rarest recordings exist.
+
+Two honest limits, both in the manifest: an entry holds what the publisher
+called, so there is no wallet read in it (`getBalance`, `getSlot`,
+`getTokenAccountsByOwner` stay `fixtures/`'s job); and `event` records what
+triggered each entry, because pushes cluster in working hours and that bias
+should be visible rather than baked in.
 
 ### Stage 2 — replay them (`npm run scenarios`)
 

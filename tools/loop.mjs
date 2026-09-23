@@ -195,12 +195,44 @@ async function calibration() {
   }
 }
 
+/* ---------------- is the archive growing, and is it bounded ---------------- */
+async function corpus() {
+  if (OFFLINE) return { name: "corpus", status: "absent", skipped: true, headline: "skipped (--offline)", lines: [] };
+  try {
+    const m = await get(`https://raw.githubusercontent.com/${REPO}/corpus/index.json`);
+    const span = m.oldest && m.newest ? (new Date(m.newest) - new Date(m.oldest)) / 86_400_000 : 0;
+    const perDay = span > 0.5 ? (m.entries / span).toFixed(1) : "—";
+    const mb = (m.bytes / 1048576).toFixed(1);
+
+    /* the number that decides whether calibration means anything yet */
+    const enough = m.entries >= 20;
+    return {
+      name: "corpus",
+      status: enough ? "ok" : "warn",
+      headline: `${m.entries} entries over ${span.toFixed(1)}d (${mb}MB)` +
+        (enough ? "" : " — under 20, too few to calibrate from"),
+      lines: [
+        `- oldest **${m.oldest}** · newest **${m.newest}** · ~${perDay}/day`,
+        `- ${mb}MB of the ceiling · ${m.incidents} incident(s)`,
+        `- retention: ${m.retention}`,
+        ...(enough ? [] : ["",
+          "Calibration holds its 'this label never fires' findings until 20 samples,",
+          "so until then the loop is describing a moment rather than a distribution.",
+          "Nothing to do but let it run."]),
+      ],
+    };
+  } catch (e) {
+    return {
+      name: "corpus", status: "absent", stage: 1,
+      headline: "no corpus branch yet — the first publish will start one",
+      lines: [`_${e.message}_`],
+    };
+  }
+}
+
 /* ---------------- the parts that do not exist yet ---------------- */
 /* named, so their absence is a status rather than a silence */
 const missing = () => [
-  { name: "corpus", status: "absent", stage: 1,
-    headline: "no archive of real days — the feed still discards every snapshot",
-    lines: [] },
   { name: "scenarios", status: "absent", stage: 2,
     headline: "nothing replays real payloads against invariants (`npm run scenarios`)",
     lines: [] },
@@ -215,6 +247,7 @@ const sections = [
   fixtures(),
   await feed(),
   await cadence(),
+  await corpus(),
   await calibration(),
   ...missing(),
 ];

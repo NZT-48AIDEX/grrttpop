@@ -222,6 +222,22 @@ refuses them and the tool exits non-zero rather than writing. A failed run
 leaves the previous snapshot in place — that is the designed outcome, not an
 outage to paper over. Never "fix" a red snapshot run by relaxing the refusal.
 
+## The corpus
+
+`corpus` is a second orphan branch: one gzipped bundle of **raw upstream
+payloads** per snapshot run, keyed by the same names `fixtures/` uses so the
+replay shim reads both. `lib/corpus.js` decides what survives — everything for
+3 days, then daily, weekly, monthly, under a hard 10MB ceiling — and
+`npm run corpus` lists or prunes it.
+
+**Never prune by hand and never edit a bundle.** A recording that has been
+tidied is a world that did not happen, same rule as the fixtures and their
+refusals. If an entry breaks something, that is the corpus doing its job.
+
+**Incidents are never pruned.** They are the rare part: a 429 or an rpc refusal
+cannot be sampled for at six snapshots a day, so a failed publish records what
+happened and the workflow pushes it even when the run failed.
+
 ## The loop
 
 `npm run loop` is the first thing to run before starting work: it reports the

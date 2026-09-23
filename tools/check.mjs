@@ -306,7 +306,7 @@ for (const [js, global] of [["main.js", "grrtt"], ["reef.js", "reef"], ["trench.
   const unit = ["test/market.test.mjs", "test/solana.test.mjs", "test/shape.test.mjs",
                 "test/trend.test.mjs", "test/provenance.test.mjs",
                 "test/snapshot.test.mjs", "test/calibrate.test.mjs",
-                "test/report.test.mjs"];
+                "test/report.test.mjs", "test/corpus.test.mjs"];
   for (const t of unit) {
     if (!existsSync(join(ROOT, t))) fail(t, "missing — lib/ is extracted precisely so it can be tested without a browser");
   }
