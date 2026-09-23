@@ -222,6 +222,24 @@ refuses them and the tool exits non-zero rather than writing. A failed run
 leaves the previous snapshot in place — that is the designed outcome, not an
 outage to paper over. Never "fix" a red snapshot run by relaxing the refusal.
 
+## The loop
+
+`npm run loop` is the first thing to run before starting work: it reports the
+suite, fixture age, the published feed, the cadence github is actually
+delivering, a calibration slice, and — as `absent` — the parts of
+[ROADMAP.md](ROADMAP.md)'s next stage that do not exist yet. It names one thing
+to do. `loop.yml` posts the same report into a standing issue, on a schedule
+*and* on push, because a 15%-delivery scheduler cannot be relied on alone.
+
+**Absent is a status, not a pass.** If a section of the loop disappears, the
+report must keep naming it rather than quietly going green — that silence is
+the failure mode the whole suite is built against.
+
+**Flags must not cry wolf.** `lib/calibrate.js` holds "this label never fires"
+until 20+ samples exist, because on a rising day nothing falls and a checker
+that complains every green day gets ignored. Same rule as drift: report what is
+evidence, say plainly when it is not.
+
 ## Things that must stay true
 
 - **No trackers, no cookies, no analytics.** Ever. Don't helpfully suggest them.

@@ -7,6 +7,7 @@
     "test:unit": "node --test",
     "smoke": "node tools/smoke.mjs",
     "drift": "node tools/drift.mjs",
+    "loop": "node tools/loop.mjs",
     "record": "node tools/record-fixtures.mjs",
     "snapshot": "node tools/snapshot.mjs",
     "mcp": "node mcp/server.mjs",

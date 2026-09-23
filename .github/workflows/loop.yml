@@ -1,0 +1,94 @@
+# The loop's output, put where someone reads it before starting work.
+#
+# ROADMAP stage 5. The other stages produce signals; this one reports them,
+# which is the difference between a loop and a pile of scripts nobody runs.
+#
+# Why this is not schedule-only: measured on 2026-09-22, github delivered 3 of
+# 20 requested ticks to snapshot.yml — 15%. A weekly report on a scheduler like
+# that is a report that mostly does not happen. So it also runs on push, which
+# is the one moment we know the repo is awake, with a staleness guard so it
+# posts at most once a week however many times you push.
+#
+# It never blocks. A red section is a thing to go and look at.
+
+name: loop
+
+on:
+  schedule:
+    - cron: "37 5 * * 4"        # thursday, off the hour, away from drift's monday
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: loop
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  report:
+    name: what an agent should know before starting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # a push should not post a report every time someone commits a typo
+      - name: is a report due
+        id: due
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'loop',
+            });
+            const issue = open[0] ?? null;
+            const ageDays = issue
+              ? (Date.now() - new Date(issue.updated_at)) / 86400000
+              : Infinity;
+            // schedule and manual runs always report; a push only if the
+            // standing report has gone stale
+            const due = context.eventName !== 'push' || ageDays >= 7;
+            core.setOutput('due', String(due));
+            core.setOutput('issue', issue ? String(issue.number) : '');
+            core.info(`event=${context.eventName} age=${ageDays.toFixed(1)}d due=${due}`);
+
+      - name: run the loop
+        if: steps.due.outputs.due == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOOP_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node tools/loop.mjs > report.md && cat report.md
+
+      - name: post it
+        if: steps.due.outputs.due == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = require('fs').readFileSync('report.md', 'utf8');
+            const title = 'loop — what to work on next';
+            const number = '${{ steps.due.outputs.issue }}';
+            if (number) {
+              // updated in place: one standing issue with the current state,
+              // not a weekly pile of stale ones
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: Number(number), title, body,
+              });
+              core.info(`updated #${number}`);
+            } else {
+              const { data } = await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['loop'],
+              });
+              core.info(`opened #${data.number}`);
+            }

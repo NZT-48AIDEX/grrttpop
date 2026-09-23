@@ -217,19 +217,48 @@ missing for an agent — and it answers itself.
 Acceptance: `npm run evals` prints a table and exits non-zero only on a
 regression against the last committed scores.
 
-### Stage 5 — close the loop
+### Stage 5 — close the loop ✅ built
 
-Extend `drift.yml`, or add `loop.yml`: weekly, run scenarios + calibrate +
-evals over the newest corpus and write the result into an issue the way drift
-already reports. Then an agent starting work has fresh feedback context
-*before* it runs anything, which is the difference between a loop and a pile of
-scripts nobody runs.
+`npm run loop` · [tools/loop.mjs](tools/loop.mjs) ·
+[.github/workflows/loop.yml](.github/workflows/loop.yml)
+
+Built first, out of order, because a plan written on one morning had two of its
+numbers invalidated by that evening — and every stage below will want the same
+correction, continuously. A loop that only closes once everything else exists
+is a loop that never gets to correct anything.
+
+It reports five sections that exist today — suite, fixture age, feed health,
+**delivered cadence** (measured from the run history, rather than quoting a
+number that goes stale), and a calibration slice over the live feed — and three
+that do not: corpus, scenarios, evals. **Absent is a reported status, not a
+pass.** A report that quietly omitted its missing halves would read as all
+green, which is the exact failure this repo's testing position exists to
+prevent.
+
+It names one thing to start on, worst first, and it never blocks.
+
+Two things the building of it taught, which change the stages below:
+
+- **A "never fires" flag is wolf-crying below a real sample count.** On a
+  rising day `falling, at its weekly low` does not fire because nothing is
+  falling. Flagging that every green day is how a drift checker earns being
+  ignored — `lib/calibrate.js` holds those flags until `DEAD_LABEL_SAMPLES`
+  (20) independent samples exist, and says plainly that it is looking at a
+  moment rather than a distribution.
+- **Schedule-only reporting does not work here.** 15% tick delivery means a
+  weekly cron mostly does not happen, so the workflow also runs on push with a
+  seven-day staleness guard. Assume the same for anything else on a timer.
+
+Run it locally before starting work; it is faster than waiting for the cron and
+it is the same report.
 
 ### How an agent picks the next thing
 
 1. Read [CLAUDE.md](CLAUDE.md), then this section.
-2. Run `npm test`, `npm run scenarios`, `npm run evals`. **The first failure is
-   the work.** Not the most interesting failure — the first one.
+2. Run **`npm run loop`**. It names one thing. **That is the work** — not the
+   most interesting item on it, the named one. (`npm test`, `npm run
+   scenarios` and `npm run evals` are what it runs on your behalf as they come
+   to exist.)
 3. All green? Take the top unanswerable eval question. Not a feature idea.
 4. **No new surface without a failing eval or a broken invariant behind it.**
    This site is small and coherent because nothing was ever added on the
