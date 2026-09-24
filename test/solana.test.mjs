@@ -6,7 +6,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  makeRpc, fetchVitals, fetchPrices, peekWallet, describeTrench,
+  makeRpc, fetchVitals, fetchPrices, peekWallet, describeTrench, TOKEN_PROGRAMS,
   isSolAddress, hostOf, RPCS, SOL_MINT,
 } from "../lib/solana.js";
 
@@ -266,6 +266,47 @@ test("peekWallet still works when the token list is unavailable", async () => {
   assert.equal(res.tokenListSize, 0);
   assert.equal(res.items.length, 1, "unpriced, but the balance is still read");
   assert.equal(res.items[0].usd, 0);
+});
+
+test("one token program answering does not make the read whole", async () => {
+  /* the case fixtures cannot produce: spl-token answers, token-2022 is
+     gated. it used to come back partial:false, gated:true — a wallet
+     missing every token-2022 holding, presented as complete. a live
+     eval asked and got exactly that. */
+  const rpc = async (method, params) => {
+    if (method === "getBalance") return { value: 2e9 };
+    if (method === "getTokenAccountsByOwner") {
+      if (params[1].programId === TOKEN_PROGRAMS[0]) {
+        return { value: [{ account: { data: { parsed: { info: {
+          mint: "So11111111111111111111111111111111111111112",
+          tokenAmount: { uiAmount: 5 },
+        } } } } }] };
+      }
+      const e = new Error("Request blocked");
+      e.blocked = true;
+      throw e;
+    }
+    throw new Error("unexpected " + method);
+  };
+  const w = await peekWallet("5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+    { rpc, fetch: async () => { throw new Error("offline"); } });
+
+  assert.equal(w.gated, true);
+  assert.equal(w.partial, true, "gated can never mean complete");
+  assert.match(w.reason, /1 of 2 token programs refused/);
+  assert.ok(w.items.length > 0, "and it still returns what it did read");
+});
+
+test("a read that lost nothing is not called partial", async () => {
+  const rpc = async (method) => {
+    if (method === "getBalance") return { value: 1e9 };
+    if (method === "getTokenAccountsByOwner") return { value: [] };
+    throw new Error("unexpected " + method);
+  };
+  const w = await peekWallet("5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+    { rpc, fetch: async () => { throw new Error("offline"); } });
+  assert.equal(w.partial, false);
+  assert.equal(w.reason, null);
 });
 
 test("describeTrench carries the partial-read warning into the description", () => {

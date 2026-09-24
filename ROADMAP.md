@@ -220,27 +220,48 @@ Acceptance: the report runs over any corpus and flags at least the obviously
 degenerate case (seed it with a deliberately broken threshold and watch it
 complain).
 
-### Stage 4 — evals, not guesses (`npm run evals`)
+### Stage 4 — evals, not guesses ✅ built
 
-**There is no usage signal here and there must never be one** — no trackers is
-not negotiable, and a Worker must not log per-visitor either. So "genuinely
-useful" gets measured against the site's own surfaces: a set of real questions
-an agent should be able to answer, each with a checker.
+`npm run evals` · [lib/evals.js](lib/evals.js) · [tools/evals.mjs](tools/evals.mjs)
+· `evals/baseline.json`
 
-- *which coins are up on the week but selling off today?* — one fetch of
-  `reef.json`, `direction: "up"` and `divergent: true`
-- *is this wallet read complete?* — must answer no, and say gated
-- *what is the market doing this week, in one sentence?* — `week.shape` + breadth
-- *how old is this data, and is any of it synthetic?* — `data.asOf`, `data.synthetic`
-- *did my shader change compile, and what moved?* — `shader_try`
+Nine real questions, each with a checker, scored on three things: could it be
+answered, how many calls it took, and **what it cost** — a plain fetch of the
+published feed, a fetch of the site, a clone with node, or a headless browser.
 
-Score each on: answerable at all · how many calls · **and whether it needed a
-browser or a clone**. That last column is the backlog, in priority order. It is
-the honest version of the question the roadmap keeps asking — what is actually
-missing for an agent — and it answers itself.
+That last column is the backlog. A question needing chrome is one most agents
+will never ask, so the expensive list *is* the priority order, derived rather
+than guessed. Today: 8 of 9 answerable from a single fetch each; the wallet
+peek needs a clone; only "is the page actually rendering" needs a browser, and
+that is the reason `site_state` exists.
 
-Acceptance: `npm run evals` prints a table and exits non-zero only on a
-regression against the last committed scores.
+`scene-in-words` is worth noting — "what is the reef showing right now, in
+words?" used to need a browser, because `?agent=1` is rendered by javascript.
+Stage 1's published `reef.txt` moved it to `feed`. That is what an improvement
+looks like here, and the baseline records it so the day it moves back is loud.
+
+Only regressions fail: something that was answerable and is not, or something
+that got more expensive. A new question is never a failure, and the committed
+baseline holds the *shape* — tier, ok, calls — never the answers, which change
+hourly.
+
+**Not in `npm test`**, deliberately: these ask the live internet, and a gate
+that depends on coingecko's mood is a gate that teaches people to rerun it. The
+loop runs them and reports.
+
+**It found a real bug on its first run.** `peek at a public wallet — is what
+you got the whole thing?` came back `partial: false, gated: true`. There are
+two token programs; `partial` was `accounts.every(a => a === null)`, so a read
+where spl-token answered and token-2022 was gated reported itself as complete
+while missing every token-2022 holding. The fixtures cannot produce that case —
+one recorded refusal keyed by method fails both calls together — so smoke had
+only ever seen all-or-nothing. Fixed, with a regression test for the mixed
+case, and the eval's checker now asserts the shape directly: gated can never
+mean complete.
+
+That is the whole argument for this stage. Every other signal here says "is it
+correct". This one asked "can you actually get at it", and the first honest
+answer was a hole in the honesty the site is built around.
 
 ### Stage 5 — close the loop ✅ built
 

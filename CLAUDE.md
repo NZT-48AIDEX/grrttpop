@@ -256,6 +256,25 @@ an invariant, either the invariant is wrong or the code is.
 Synthetic scenarios are allowed and must say so — they cover edges a real day
 may never produce, like an empty market or a coin with six hours of history.
 
+## Evals
+
+`npm run evals` asks the site real questions and records what each cost to
+answer: a fetch of the feed, a fetch of the site, a clone, or a browser. The
+expensive ones are the backlog, in priority order.
+
+**This is the only measure of "useful" available here, and it must stay that
+way.** There is no usage signal and there must never be one — not a counter,
+not a log line per visitor, not in a worker. Ask the surfaces, never the
+readers.
+
+**Only regressions fail.** Something that was answerable and is not, or
+something that got more expensive. `evals/baseline.json` holds the shape —
+tier, ok, calls — and never the answers, which change hourly. `--bless` after
+a deliberate change.
+
+**Not in `npm test`.** They ask the live internet; a gate that depends on
+coingecko's mood is one people learn to rerun until it passes.
+
 ## The loop
 
 `npm run loop` is the first thing to run before starting work: it reports the

@@ -10,6 +10,7 @@
     "loop": "node tools/loop.mjs",
     "corpus": "node tools/corpus.mjs",
     "scenarios": "node tools/scenarios.mjs",
+    "evals": "node tools/evals.mjs",
     "record": "node tools/record-fixtures.mjs",
     "snapshot": "node tools/snapshot.mjs",
     "mcp": "node mcp/server.mjs",

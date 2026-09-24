@@ -1,0 +1,61 @@
+{
+  "what": "what each question cost to answer, last time anyone checked",
+  "why": "a regression here means something an agent could fetch now needs a clone or a browser",
+  "blessedAt": "2026-09-24T03:02:43.920Z",
+  "scores": [
+    {
+      "id": "how-old-and-is-it-real",
+      "tier": "feed",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "is-it-tracking-me",
+      "tier": "site",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "market-in-a-sentence",
+      "tier": "feed",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "page-actually-renders",
+      "tier": "browser",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "scene-in-words",
+      "tier": "feed",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "solana-vitals",
+      "tier": "feed",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "spl-mover-holding",
+      "tier": "feed",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "wallet-completeness",
+      "tier": "clone",
+      "ok": true,
+      "calls": 1
+    },
+    {
+      "id": "week-vs-day",
+      "tier": "feed",
+      "ok": true,
+      "calls": 1
+    }
+  ]
+}

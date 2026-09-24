@@ -260,13 +260,42 @@ async function scenarios() {
   }
 }
 
+/* ---------------- what can an agent actually get at ---------------- */
+async function evals() {
+  if (OFFLINE) return { name: "evals", status: "absent", skipped: true, headline: "skipped (--offline)", lines: [] };
+  try {
+    const { stdout } = await execFileP(process.execPath, ["tools/evals.mjs", "--json"], { cwd: ROOT, maxBuffer: 8e6 });
+    const { board, diff } = JSON.parse(stdout);
+    return {
+      name: "evals",
+      status: diff.ok ? (board.failed ? "warn" : "ok") : "fail",
+      headline: `${board.answered}/${board.ran} answered in ${board.calls} calls · ` +
+        `${board.backlog.length} still need a clone or a browser`,
+      lines: [
+        ...Object.entries(board.byTier).map(([t, n]) => `- ${n} answered from ${t}`),
+        ...(board.backlog.length ? ["", "**the backlog, worst first:**",
+          ...board.backlog.map((b) => `  - _${b.tier}_ — ${b.question}`)] : []),
+        ...(diff.improvements.length ? ["", ...diff.improvements.map((i) => `⬆️ ${i.id}: ${i.why}`)] : []),
+      ],
+    };
+  } catch (e) {
+    /* a non-zero exit is a regression, which is the signal, not a crash */
+    let parsed = null;
+    try { parsed = JSON.parse(e.stdout ?? ""); } catch {}
+    return {
+      name: "evals",
+      status: "fail",
+      headline: parsed?.diff?.regressions?.length
+        ? `${parsed.diff.regressions.length} question(s) got harder to answer`
+        : `evals could not run: ${e.message.split("\n")[0]}`,
+      lines: (parsed?.diff?.regressions ?? []).map((r) => `- **${r.id}** — ${r.why}`),
+    };
+  }
+}
+
 /* ---------------- the parts that do not exist yet ---------------- */
 /* named, so their absence is a status rather than a silence */
-const missing = () => [
-  { name: "evals", status: "absent", stage: 4,
-    headline: "no scored questions, so 'useful to an agent' is still an opinion (`npm run evals`)",
-    lines: [] },
-].filter((s) => !existsSync(join(ROOT, "tools", `${s.name}.mjs`)));
+const missing = () => [].filter((s) => !existsSync(join(ROOT, "tools", `${s.name}.mjs`)));
 
 /* ---------------- go ---------------- */
 const sections = [
@@ -276,6 +305,7 @@ const sections = [
   await cadence(),
   await corpus(),
   await scenarios(),
+  await evals(),
   await calibration(),
   ...missing(),
 ];
