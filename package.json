@@ -11,6 +11,7 @@
     "corpus": "node tools/corpus.mjs",
     "scenarios": "node tools/scenarios.mjs",
     "evals": "node tools/evals.mjs",
+    "calibrate": "node tools/calibrate.mjs",
     "record": "node tools/record-fixtures.mjs",
     "snapshot": "node tools/snapshot.mjs",
     "mcp": "node mcp/server.mjs",

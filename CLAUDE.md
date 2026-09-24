@@ -256,6 +256,21 @@ an invariant, either the invariant is wrong or the code is.
 Synthetic scenarios are allowed and must say so — they cover edges a real day
 may never produce, like an empty market or a coin with six hours of history.
 
+## Calibration
+
+`npm run calibrate` replays the corpus and counts what each label describes.
+It is the only check that can say a judgement is *useless* while every other
+signal says it is correct — nothing throws when `chopping sideways` swallows
+60% of the market.
+
+**Moments, not samples.** The reef and the spl ecosystem from one recording are
+two rows of one observation. `calibrate()` counts distinct `at` values, and the
+dead-label gate reads moments, so paired rows cannot open it early.
+
+**Nine moments over a day is one market week, not nine markets.** Correlated
+samples make a distribution look firmer than it is. The note says which it is
+looking at; do not retune a threshold from a single regime.
+
 ## Evals
 
 `npm run evals` asks the site real questions and records what each cost to

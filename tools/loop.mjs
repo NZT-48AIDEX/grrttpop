@@ -172,31 +172,32 @@ async function cadence() {
 async function calibration() {
   if (OFFLINE) return { name: "calibration", status: "absent", skipped: true, headline: "skipped (--offline)", lines: [] };
   try {
-    const [reef, trench] = await Promise.all([get(FEED + "reef.json"), get(FEED + "trench.json")]);
-    const samples = [reef.week, trench.ecosystem?.week].filter(Boolean);
-    const c = calibrate(samples);
-
-    const top = c.labels.filter((l) => l.count).slice(0, 6)
-      .map((l) => `  - \`${l.label}\` — ${l.count} coin${l.count === 1 ? "" : "s"} (${(l.share * 100).toFixed(0)}%)`);
-    const dead = c.labels.filter((l) => !l.count).map((l) => `\`${l.label}\``);
+    /* bounded on purpose: the whole corpus would be megabytes per loop
+       run, and twenty moments is exactly where the dead-label gate opens */
+    const { stdout } = await execFileP(process.execPath,
+      ["tools/calibrate.mjs", "--json", "--fetch=20"], { cwd: ROOT, maxBuffer: 8e6 });
+    const c = JSON.parse(stdout);
+    const top = c.labels.filter((l) => l.count).slice(0, 5)
+      .map((l) => `  - \`${l.label}\` — ${(l.share * 100).toFixed(0)}%`);
+    const serious = c.flags.filter((f) => f.kind !== "very-rare");
 
     return {
       name: "calibration",
-      status: c.flags.some((f) => f.kind === "too-coarse" || f.kind === "unknown-label") ? "warn" : "ok",
-      headline: `${c.coins} coins over ${c.samples} sample(s), ${c.flags.length} flag(s)`,
+      status: serious.length ? "warn" : "ok",
+      headline: `${c.moments} moment(s), ${c.coins} coin-observations, ${c.flags.length} flag(s)` +
+        (c.enoughForDeadLabels ? "" : " — under 20 moments, silent labels not judged"),
       lines: [
         `_${c.note}_`, "",
-        "labels in use:", ...top,
-        ...(dead.length ? ["", `not seen in this sample: ${dead.join(", ")}` +
-          (c.enoughForDeadLabels ? "" : " _(not evidence of a dead label — see the note)_")] : []),
-        `\ndivergent: ${(c.breadth.divergentShare * 100).toFixed(0)}% of coins`,
+        ...(c.span ? [`spanning ${c.span.hours}h, ${c.span.from} → ${c.span.to}`, ""] : []),
+        "most common shapes:", ...top,
+        `\ndivergent: **${(c.breadth.divergentShare * 100).toFixed(0)}%** of coin-observations`,
+        ...(c.silentLabels.length ? ["", `not seen: ${c.silentLabels.map((l) => `\`${l}\``).join(", ")}` +
+          (c.enoughForDeadLabels ? "" : " _(not evidence — see the note)_")] : []),
         ...(c.flags.length ? ["", "flags:", ...c.flags.map((f) => `  - **${f.kind}** \`${f.label}\` — ${f.why}`)] : []),
-        "",
-        "_This is one moment, not a corpus. Stage 1 and 3 turn it into a distribution._",
       ],
     };
   } catch (e) {
-    return { name: "calibration", status: "warn", headline: `could not calibrate: ${e.message}`, lines: [], stage: 3 };
+    return { name: "calibration", status: "warn", headline: `could not calibrate: ${e.message.split("\n")[0]}`, lines: [] };
   }
 }
 

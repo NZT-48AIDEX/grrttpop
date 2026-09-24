@@ -202,23 +202,50 @@ import clause can contain; every import form is covered by a regression test.
 invariant means the invariant is wrong or the code is — same rule as the
 fixtures and their refusals.
 
-### Stage 3 — calibrate the judgements (`npm run calibrate`)
+### Stage 3 — calibrate the judgements ✅ built
 
-Print the distribution of every label across the corpus, and flag the
-degenerate ones — a shape that fires on more than ~60% of coins or fewer than
-~1%. Same for `divergent` share, and p50/p90 of `weekPct` and `rangePct`.
+`npm run calibrate` · [lib/calibrate.js](lib/calibrate.js) ·
+[tools/calibrate.mjs](tools/calibrate.mjs)
 
-This is the only feedback that says whether a judgement is *useful* rather than
-merely correct, and it needs a corpus to exist at all.
+Replays the corpus and counts what every label actually describes. The first
+real distribution, over 9 moments spanning 20.6h and 810 coin-observations:
 
-Be careful what the report claims. With ~6 samples a day it is a distribution
-over *sampled moments*, not over the week — though each sample carries 168
-hours of history per coin, so for price shape specifically the underlying
-series is dense even when the sampling is not. Say which one a number is.
+```
+  up on the week, sliding back       318   39.3%
+  flat all week                      252   31.1%
+  climbing, at its weekly high        95   11.7%
+  climbing                            58    7.2%
+  spiked and gave most of it back     36    4.4%
+  chopping sideways                   33    4.1%
+  falling                              9    1.1%
+  falling, at its weekly low           9    1.1%
+  down on the week, bouncing           0      0%
+  dumped and bought back               0      0%
 
-Acceptance: the report runs over any corpus and flags at least the obviously
-degenerate case (seed it with a deliberately broken threshold and watch it
-complain).
+  divergent: 43.7% of coin-observations
+```
+
+Two things to watch, neither actionable yet:
+
+- **`divergent` is at 43.7%.** The flag exists to mark the case worth
+  interrupting for, and the `divergent-common` complaint fires above 50%. If it
+  stays near half across *different* regimes, the threshold is too loose and
+  the annotation is noise. It may equally be honest: `up on the week, sliding
+  back` is the most common shape right now, so this really was a week that rose
+  and turned.
+- **The two down-market mirror shapes have never fired.** Expected in a rising
+  week, and precisely why the dead-label gate stays shut below 20 moments.
+
+**Moments, not samples.** The reef and the spl ecosystem come out of one
+recording: two rows of a single observation of a single market. Counting them
+as two would reach the gate twice as fast while knowing nothing more, so
+`calibrate()` counts distinct `at` values and reports the span in hours. Nine
+moments over 20.6h is one market week looked at nine times — the numbers above
+describe that week, not markets in general, and the tool says so rather than
+letting the reader assume otherwise.
+
+The loop runs it bounded to the newest 20 moments; the whole corpus would be
+megabytes per run, and 20 is exactly where the gate opens.
 
 ### Stage 4 — evals, not guesses ✅ built
 

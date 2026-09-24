@@ -83,6 +83,53 @@ test("divergent is only called dead with enough samples, and noisy whenever", ()
     "if most coins are flagged, the flag is noise");
 });
 
+test("two rows of one snapshot are one moment, not two", () => {
+  /* the reef and the spl ecosystem come out of a single recording. as
+     evidence about thresholds they are one observation of one market,
+     and counting them as two reaches the dead-label gate twice as fast
+     while knowing nothing more. */
+  const at = "2026-09-24T03:00:00.000Z";
+  const c = calibrate([
+    { ...sample({ climbing: 50 }), at, what: "reef" },
+    { ...sample({ climbing: 40 }), at, what: "spl" },
+  ]);
+  assert.equal(c.samples, 2);
+  assert.equal(c.moments, 1);
+  assert.match(c.note, /2 sample\(s\) over 1 moment\(s\)/);
+});
+
+test("the gate reads moments, so paired rows cannot open it early", () => {
+  const paired = [];
+  for (let i = 0; i < DEAD_LABEL_SAMPLES; i++) {
+    const at = `2026-09-${String(10 + Math.floor(i / 2)).padStart(2, "0")}T00:00:00.000Z`;
+    paired.push({ ...sample({ climbing: 10 }), at });
+  }
+  const c = calibrate(paired);
+  assert.equal(c.samples, DEAD_LABEL_SAMPLES);
+  assert.equal(c.moments, DEAD_LABEL_SAMPLES / 2, "two rows per moment");
+  assert.equal(c.enoughForDeadLabels, false, "twenty rows over ten moments is not twenty observations");
+  assert.equal(c.flags.filter((f) => f.kind === "never-fires").length, 0);
+});
+
+test("samples with no moment given are counted as their own", () => {
+  const many = Array.from({ length: DEAD_LABEL_SAMPLES }, () => sample({ climbing: 10 }));
+  const c = calibrate(many);
+  assert.equal(c.moments, DEAD_LABEL_SAMPLES, "no `at` means the caller did not say they shared one");
+  assert.equal(c.enoughForDeadLabels, true);
+});
+
+test("the span says how much real time the evidence covers", () => {
+  const c = calibrate([
+    { ...sample({ climbing: 5 }), at: "2026-09-23T00:00:00.000Z" },
+    { ...sample({ climbing: 5 }), at: "2026-09-24T12:00:00.000Z" },
+  ]);
+  assert.equal(c.span.hours, 36);
+  assert.equal(c.span.from, "2026-09-23T00:00:00.000Z");
+
+  /* one moment covers no time, and saying "0h" would imply it did */
+  assert.equal(calibrate([sample({ climbing: 1 })]).span, null);
+});
+
 test("counts add up across samples", () => {
   const c = calibrate([sample({ climbing: 10 }), sample({ climbing: 5, falling: 5 })]);
   assert.equal(c.samples, 2);

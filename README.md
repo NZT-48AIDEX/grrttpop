@@ -430,6 +430,9 @@ check forever. `state().frames` tells you whether anything actually rendered.
 | `tools/smoke.mjs` | `npm run smoke` — boot every page and assert it's alive |
 | `tools/cdp.mjs` | a browser driver in ~100 lines, zero dependencies |
 | `tools/serve.mjs` | a static server in ~100 lines, in process, zero dependencies |
+| `lib/calibrate.js` | whether a label describes anything, across real days |
+| `tools/calibrate.mjs` | `npm run calibrate` — the distribution, and its flags |
+| `tools/recordings.mjs` | where a recorded day comes from, and how to replay it |
 | `lib/evals.js` | scoring what an agent can reach, and what it costs |
 | `tools/evals.mjs` | `npm run evals` — nine real questions, with checkers |
 | `lib/invariants.js` | what must be true of any day, not what was true of one |
