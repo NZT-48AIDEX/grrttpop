@@ -284,6 +284,12 @@ delivering, a calibration slice, and — as `absent` — the parts of
 to do. `loop.yml` posts the same report into a standing issue, on a schedule
 *and* on push, because a 15%-delivery scheduler cannot be relied on alone.
 
+**A stale report is worse than none.** `loop.yml` refreshes the standing issue
+on any push older than six hours, and stamps the time into the title, because a
+report that describes yesterday's world with today's confidence is the failure
+it exists to prevent. The first guard was seven days and the issue sat for one
+insisting that stages already built did not exist.
+
 **Absent is a status, not a pass.** If a section of the loop disappears, the
 report must keep naming it rather than quietly going green — that silence is
 the failure mode the whole suite is built against.

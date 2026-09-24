@@ -41,7 +41,15 @@ jobs:
           cache: npm
       - run: npm ci
 
-      # a push should not post a report every time someone commits a typo
+      # A push should not run this for every typo, but the guard used to be
+      # seven days — and with a weekly cron delivering 15% of its ticks, the
+      # standing issue sat unchanged for over a day insisting that stages
+      # which had since been built did not exist. A report describing
+      # yesterday's world with today's confidence is worse than no report,
+      # which is the exact failure this thing was written to prevent.
+      #
+      # Six hours. Editing an issue body sends no notifications, so a fresh
+      # report costs a minute of ci and nobody's attention.
       - name: is a report due
         id: due
         uses: actions/github-script@v7
@@ -52,15 +60,15 @@ jobs:
               state: 'open', labels: 'loop',
             });
             const issue = open[0] ?? null;
-            const ageDays = issue
-              ? (Date.now() - new Date(issue.updated_at)) / 86400000
+            const ageHours = issue
+              ? (Date.now() - new Date(issue.updated_at)) / 3600000
               : Infinity;
             // schedule and manual runs always report; a push only if the
             // standing report has gone stale
-            const due = context.eventName !== 'push' || ageDays >= 7;
+            const due = context.eventName !== 'push' || ageHours >= 6;
             core.setOutput('due', String(due));
             core.setOutput('issue', issue ? String(issue.number) : '');
-            core.info(`event=${context.eventName} age=${ageDays.toFixed(1)}d due=${due}`);
+            core.info(`event=${context.eventName} age=${ageHours.toFixed(1)}h due=${due}`);
 
       - name: run the loop
         if: steps.due.outputs.due == 'true'
@@ -75,7 +83,10 @@ jobs:
         with:
           script: |
             const body = require('fs').readFileSync('report.md', 'utf8');
-            const title = 'loop — what to work on next';
+            /* the age of the report belongs where you see it without
+               opening it: a standing issue looks current by default */
+            const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            const title = `loop — what to work on next (${stamp}Z)`;
             const number = '${{ steps.due.outputs.issue }}';
             if (number) {
               // updated in place: one standing issue with the current state,
