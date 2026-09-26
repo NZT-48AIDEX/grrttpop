@@ -1,0 +1,282 @@
+{
+  "network": {
+    "tps": 4359,
+    "epoch": 1043,
+    "epochPercent": 51
+  },
+  "ecosystem": {
+    "tokens": 40,
+    "rising": 28,
+    "topGainers": [
+      {
+        "id": "pyth-network",
+        "symbol": "PYTH",
+        "name": "Pyth Network",
+        "price": 0.07989,
+        "change24h": 9.56641,
+        "change1h": -1.7691,
+        "change7d": 28.5909,
+        "marketCap": 628522677,
+        "trend": {
+          "spark": "▁▁▂▃▃▄▃▂▄▅▇█",
+          "shape": "climbing, at its weekly high",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 31.21,
+          "dayPct": 8.94,
+          "rangePct": 38.53,
+          "posInRange": 1,
+          "high": 0.0797475339309263,
+          "low": 0.057566087666514186,
+          "points": 168
+        }
+      },
+      {
+        "id": "pump-fun",
+        "symbol": "PUMP",
+        "name": "Pump.fun",
+        "price": 0.00442088,
+        "change24h": 8.66959,
+        "change1h": -1.4488,
+        "change7d": 3.6887,
+        "marketCap": 2061703882,
+        "trend": {
+          "spark": "▃▄▇▆█▇▄▁▁▂▅█",
+          "shape": "climbing",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 5.04,
+          "dayPct": 7.22,
+          "rangePct": 22.28,
+          "posInRange": 0.73,
+          "high": 0.004624315052345208,
+          "low": 0.003781692258924072,
+          "points": 168
+        }
+      },
+      {
+        "id": "ethena",
+        "symbol": "ENA",
+        "name": "Ethena",
+        "price": 0.271953,
+        "change24h": 4.51305,
+        "change1h": -1.0547,
+        "change7d": 30.694,
+        "marketCap": 2746524663,
+        "trend": {
+          "spark": "▁▂▂▂▂▂▁▁▃▄▇█",
+          "shape": "climbing",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 33.79,
+          "dayPct": 3.34,
+          "rangePct": 46.24,
+          "posInRange": 0.87,
+          "high": 0.2837932954366511,
+          "low": 0.1940556466476306,
+          "points": 168
+        }
+      },
+      {
+        "id": "render-token",
+        "symbol": "RENDER",
+        "name": "Render",
+        "price": 1.98,
+        "change24h": 3.03443,
+        "change1h": -1.8381,
+        "change7d": 24.6855,
+        "marketCap": 1025207393,
+        "trend": {
+          "spark": "▁▂▄▅▅▆▄▄▆▇▇█",
+          "shape": "climbing",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 27.7,
+          "dayPct": 3.29,
+          "rangePct": 36.41,
+          "posInRange": 0.89,
+          "high": 2.061878500417347,
+          "low": 1.5115824334322776,
+          "points": 168
+        }
+      },
+      {
+        "id": "world-liberty-financial",
+        "symbol": "WLFI",
+        "name": "World Liberty Financial",
+        "price": 0.058456,
+        "change24h": 2.76237,
+        "change1h": -1.0037,
+        "change7d": -0.5276,
+        "marketCap": 1857283416,
+        "trend": {
+          "spark": "███▆▇█▄▁▃▅▅█",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.32,
+          "dayPct": 2.65,
+          "rangePct": 10.28,
+          "posInRange": 0.84,
+          "high": 0.05946620672469744,
+          "low": 0.053924150840746025,
+          "points": 168
+        }
+      }
+    ],
+    "topLosers": [
+      {
+        "id": "injective-protocol",
+        "symbol": "INJ",
+        "name": "Injective",
+        "price": 7.7,
+        "change24h": -2.29645,
+        "change1h": -1.1271,
+        "change7d": -4.8438,
+        "marketCap": 769973831,
+        "trend": {
+          "spark": "▂▂▁▂▁▄▄▃█▇▆▁",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": -0.33,
+          "dayPct": -6.52,
+          "rangePct": 14.08,
+          "posInRange": 0.1,
+          "high": 8.607601628079944,
+          "low": 7.5455452161795105,
+          "points": 168
+        }
+      },
+      {
+        "id": "pudgy-penguins",
+        "symbol": "PENGU",
+        "name": "Pudgy Penguins",
+        "price": 0.00986952,
+        "change24h": -1.16696,
+        "change1h": -2.0849,
+        "change7d": 20.4362,
+        "marketCap": 620432319,
+        "trend": {
+          "spark": "▁▁▂▄▅██▇▇▇██",
+          "shape": "up on the week, sliding back",
+          "direction": "up",
+          "divergent": true,
+          "weekPct": 24.66,
+          "dayPct": -1.07,
+          "rangePct": 44.12,
+          "posInRange": 0.71,
+          "high": 0.010951083424557808,
+          "low": 0.007598396882253426,
+          "points": 168
+        }
+      },
+      {
+        "id": "pancakeswap-token",
+        "symbol": "CAKE",
+        "name": "PancakeSwap",
+        "price": 2.75,
+        "change24h": -0.48562,
+        "change1h": -0.6426,
+        "change7d": 14.2835,
+        "marketCap": 876200269,
+        "trend": {
+          "spark": "▁▃▄▄▃▅▄▅████",
+          "shape": "up on the week, sliding back",
+          "direction": "up",
+          "divergent": true,
+          "weekPct": 14.73,
+          "dayPct": -0.57,
+          "rangePct": 21.84,
+          "posInRange": 0.85,
+          "high": 2.8272859443445553,
+          "low": 2.3205715764734114,
+          "points": 168
+        }
+      },
+      {
+        "id": "ondo-us-dollar-yield",
+        "symbol": "USDY",
+        "name": "Ondo US Dollar Yield",
+        "price": 1.15,
+        "change24h": -0.05461,
+        "change1h": -0.0181,
+        "change7d": -0.0039,
+        "marketCap": 2275281558,
+        "trend": {
+          "spark": "▃▆▁▂▄▇▆▇▇▇██",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.02,
+          "dayPct": -0.03,
+          "rangePct": 0.96,
+          "posInRange": 0.88,
+          "high": 1.1477822947222338,
+          "low": 1.136895525443489,
+          "points": 168
+        }
+      },
+      {
+        "id": "ethena-usde",
+        "symbol": "USDE",
+        "name": "Ethena USDe",
+        "price": 0.999658,
+        "change24h": -0.01956,
+        "change1h": -0.0008,
+        "change7d": -0.0018,
+        "marketCap": 4942375336,
+        "trend": {
+          "spark": "▂▆▇█▁▆▄▃▅▆▆▁",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0,
+          "dayPct": -0.02,
+          "rangePct": 0.07,
+          "posInRange": 0.29,
+          "high": 1.0001098122636656,
+          "low": 0.9994209508282638,
+          "points": 168
+        }
+      }
+    ],
+    "week": {
+      "spark": "▁▁▂▄▅▅▅▆▅▄▄▆▆▇██",
+      "shape": "climbing, at its weekly high",
+      "direction": "up",
+      "divergent": false,
+      "weekPct": 6.74,
+      "dayPct": 0.47,
+      "rangePct": 9.24,
+      "posInRange": 0.93,
+      "high": 1.073709775661683,
+      "low": 0.9828631406795865,
+      "points": 168,
+      "coinsCounted": 40,
+      "breadth": {
+        "up": 21,
+        "down": 0,
+        "flat": 19,
+        "divergent": 3
+      },
+      "shapes": {
+        "flat all week": 16,
+        "climbing, at its weekly high": 9,
+        "climbing": 9,
+        "chopping sideways": 3,
+        "up on the week, sliding back": 3
+      }
+    }
+  },
+  "wallet": null,
+  "data": {
+    "source": "solana-rpc.publicnode.com + coingecko",
+    "asOf": "2026-09-26T21:35:26.109Z",
+    "ageMs": 498,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "read-only — no keys, no signatures, no transactions. not financial advice."
+}

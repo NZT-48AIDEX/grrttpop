@@ -1,0 +1,33 @@
+{
+  "what": "static snapshots of the reef and the trench, for agents that cannot run javascript",
+  "why": "this site renders its data in the browser, so curling a page returns an empty shell. these files are the same describe() output the pages and the mcp server produce, published on a schedule.",
+  "generatedAt": "2026-09-26T21:35:26.607Z",
+  "every": "asked for twice an hour and on every push; github delivers about 15% of scheduled ticks, so in practice roughly every 3-4 hours. read data.asOf, which is measured, rather than this, which is a hope",
+  "files": [
+    {
+      "name": "reef.json",
+      "what": "the live crypto market as the reef models it — bands, movers, 7-day shapes, breadth"
+    },
+    {
+      "name": "reef.txt",
+      "what": "the same thing in words, as ?agent=1 renders it"
+    },
+    {
+      "name": "trench.json",
+      "what": "solana mainnet vitals and the spl ecosystem"
+    },
+    {
+      "name": "trench.txt",
+      "what": "the same thing in words"
+    }
+  ],
+  "freshness": "every file carries a `data` block with `source`, `asOf` and `synthetic`. asOf is the only honest statement of age — a snapshot can be hours older than `every` suggests. nothing here is ever published from the demo reef or from recorded fixtures.",
+  "live": "https://nzt-48aidex.github.io/grrttpop/",
+  "interactive": "add ?agent=1 to any page for the same text, current to the second — needs javascript",
+  "mcp": "node mcp/server.mjs from the repo, for tools rather than files",
+  "limits": [
+    "market data only — no trading, no custody, not financial advice",
+    "solana access is read-only: no keys, no signatures, no transactions",
+    "no trackers, no cookies, no analytics — fetching these costs you nothing but bytes"
+  ]
+}
