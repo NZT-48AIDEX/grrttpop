@@ -1,0 +1,284 @@
+{
+  "network": {
+    "tps": 4402,
+    "epoch": 1048,
+    "epochPercent": 76
+  },
+  "ecosystem": {
+    "tokens": 40,
+    "rising": 32,
+    "topGainers": [
+      {
+        "id": "pump-fun",
+        "symbol": "PUMP",
+        "name": "Pump.fun",
+        "price": 0.00635363,
+        "change24h": 20.2027,
+        "change1h": 0.7923,
+        "change7d": 46.421,
+        "marketCap": 2954735742,
+        "trend": {
+          "spark": "▁▃▄▄▆█████▆█",
+          "shape": "climbing, at its weekly high",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 44.2,
+          "dayPct": 18.73,
+          "rangePct": 47.57,
+          "posInRange": 0.94,
+          "high": 0.006409198360717011,
+          "low": 0.004343171556394191,
+          "points": 168
+        }
+      },
+      {
+        "id": "raydium",
+        "symbol": "RAY",
+        "name": "Raydium",
+        "price": 2.07,
+        "change24h": 9.71638,
+        "change1h": -0.5428,
+        "change7d": 3.1309,
+        "marketCap": 559987694,
+        "trend": {
+          "spark": "▇█▅▁▁▁▃▂▁▂▂▆",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.28,
+          "dayPct": 10.55,
+          "rangePct": 25.45,
+          "posInRange": 0.52,
+          "high": 2.320332906416318,
+          "low": 1.8495979068592907,
+          "points": 168
+        }
+      },
+      {
+        "id": "jupiter-exchange-solana",
+        "symbol": "JUP",
+        "name": "Jupiter",
+        "price": 0.328374,
+        "change24h": 5.3185,
+        "change1h": -0.2283,
+        "change7d": -2.0869,
+        "marketCap": 1089984893,
+        "trend": {
+          "spark": "▇██▃▄▄▄▃▃▅▁▃",
+          "shape": "down on the week, bouncing",
+          "direction": "down",
+          "divergent": true,
+          "weekPct": -2.61,
+          "dayPct": 5.7,
+          "rangePct": 20.43,
+          "posInRange": 0.33,
+          "high": 0.37219813448680855,
+          "low": 0.30904792932288894,
+          "points": 168
+        }
+      },
+      {
+        "id": "pudgy-penguins",
+        "symbol": "PENGU",
+        "name": "Pudgy Penguins",
+        "price": 0.00920946,
+        "change24h": 4.45416,
+        "change1h": -0.0603,
+        "change7d": -5.3843,
+        "marketCap": 578973303,
+        "trend": {
+          "spark": "▇█▆▃▅▇▇▆▄▆▁▂",
+          "shape": "down on the week, bouncing",
+          "direction": "down",
+          "divergent": true,
+          "weekPct": -6.17,
+          "dayPct": 4.7,
+          "rangePct": 20.19,
+          "posInRange": 0.29,
+          "high": 0.010490419927145642,
+          "low": 0.008728548257573182,
+          "points": 168
+        }
+      },
+      {
+        "id": "injective-protocol",
+        "symbol": "INJ",
+        "name": "Injective",
+        "price": 7.64,
+        "change24h": 3.65623,
+        "change1h": 0.0878,
+        "change7d": 1.2775,
+        "marketCap": 763820245,
+        "trend": {
+          "spark": "██▄▁▅▆▃▃▂▄▄▆",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": -0.58,
+          "dayPct": 3.91,
+          "rangePct": 9.2,
+          "posInRange": 0.65,
+          "high": 7.887097450489109,
+          "low": 7.222783675186927,
+          "points": 168
+        }
+      }
+    ],
+    "topLosers": [
+      {
+        "id": "world-liberty-financial",
+        "symbol": "WLFI",
+        "name": "World Liberty Financial",
+        "price": 0.054818,
+        "change24h": -0.74002,
+        "change1h": 0.119,
+        "change7d": -5.5799,
+        "marketCap": 1742222298,
+        "trend": {
+          "spark": "██▆▅▆▅▄▂▃▄▂▁",
+          "shape": "falling, at its weekly low",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -6.53,
+          "dayPct": -0.91,
+          "rangePct": 9.11,
+          "posInRange": 0.1,
+          "high": 0.05920621268400963,
+          "low": 0.05426095306781678,
+          "points": 168
+        }
+      },
+      {
+        "id": "official-trump",
+        "symbol": "TRUMP",
+        "name": "Official Trump",
+        "price": 2.04,
+        "change24h": -0.64247,
+        "change1h": 0.0468,
+        "change7d": -1.9612,
+        "marketCap": 575812746,
+        "trend": {
+          "spark": "██▂▁▃▄▅▇▄█▅▄",
+          "shape": "falling",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -2.8,
+          "dayPct": -0.26,
+          "rangePct": 15,
+          "posInRange": 0.33,
+          "high": 2.2433746092675486,
+          "low": 1.9506906226335408,
+          "points": 168
+        }
+      },
+      {
+        "id": "ondo-us-dollar-yield",
+        "symbol": "USDY",
+        "name": "Ondo US Dollar Yield",
+        "price": 1.15,
+        "change24h": -0.05478,
+        "change1h": -0.0522,
+        "change7d": 0.0593,
+        "marketCap": 2284001387,
+        "trend": {
+          "spark": "▁▁▄▅▆▂▅▆▅▆██",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.12,
+          "dayPct": -0.13,
+          "rangePct": 0.44,
+          "posInRange": 0.69,
+          "high": 1.149131335909382,
+          "low": 1.1441321028745268,
+          "points": 168
+        }
+      },
+      {
+        "id": "open-usd",
+        "symbol": "OUSD",
+        "name": "Open USD",
+        "price": 0.999808,
+        "change24h": -0.02102,
+        "change1h": 0.0005,
+        "change7d": null,
+        "marketCap": 666144569,
+        "trend": {
+          "spark": "▂▁▂▄▅▆▅██▅▇█",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.02,
+          "dayPct": -0.02,
+          "rangePct": 0.08,
+          "posInRange": 0.66,
+          "high": 1.0000730877942672,
+          "low": 0.9992867053988208,
+          "points": 76
+        }
+      },
+      {
+        "id": "usdgo",
+        "symbol": "USDGO",
+        "name": "USDGO",
+        "price": 1,
+        "change24h": -0.00992,
+        "change1h": 0.0007,
+        "change7d": 0.0218,
+        "marketCap": 1198786082,
+        "trend": {
+          "spark": "▂▁▂▄▆█▇█▇▆▆▆",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.02,
+          "dayPct": 0,
+          "rangePct": 0.07,
+          "posInRange": 0.6,
+          "high": 1.0003277721154815,
+          "low": 0.9996138389295686,
+          "points": 168
+        }
+      }
+    ],
+    "week": {
+      "spark": "▃▂▅▂▁▂▂▇██▁▁▂▂▄▅",
+      "shape": "chopping sideways",
+      "direction": "flat",
+      "divergent": false,
+      "weekPct": 0.34,
+      "dayPct": 0.55,
+      "rangePct": 2.92,
+      "posInRange": 0.63,
+      "high": 1.0139714915169196,
+      "low": 0.985222465468947,
+      "points": 76,
+      "coinsCounted": 40,
+      "breadth": {
+        "up": 2,
+        "down": 7,
+        "flat": 31,
+        "divergent": 5
+      },
+      "shapes": {
+        "flat all week": 17,
+        "chopping sideways": 14,
+        "climbing, at its weekly high": 1,
+        "climbing": 1,
+        "down on the week, bouncing": 5,
+        "falling, at its weekly low": 1,
+        "falling": 1
+      }
+    }
+  },
+  "wallet": null,
+  "data": {
+    "source": "solana-rpc.publicnode.com + coingecko",
+    "asOf": "2026-10-03T22:07:21.062Z",
+    "ageMs": 415,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "read-only — no keys, no signatures, no transactions. not financial advice."
+}

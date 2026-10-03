@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-10-03T22:07:21.031Z, 0s ago
+
+50 creatures. 37 rising, 13 falling.
+mood: 67 😋
+total market $2.90T · -2.18% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ████████████████····  8 up / 2 down · median +0.58%
+  mid waters · majors
+     15 creatures  ████████████████····  12 up / 3 down · median +2.00%
+  the deep · small caps
+     25 creatures  ██████████████······  17 up / 8 down · median +0.06%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ▅▄▁█▄▄▇▇█▅▄█▇▁▂▅  +0.16% — chopping sideways
+  8 up · 18 down · 24 sideways · 15 spent the week going one way and today the other
+
+biggest movers
+  ↑ PUMP       +20.45%  $0.006361    ▁▃▄▄▆█████▆█  🔥 trending
+  ↑ QNT        +14.55%  $264.19      ▁▃▆▅▆▇██▆▅▅▆  🔥 trending
+  ↑ WLD        +11.21%  $0.6008      ▄▆▃▁▁▁▄▄▂▅▆█
+  ↑ TAO         +4.68%  $301.07      ██▄▃▅▃▄▄▄▅▁▁  ← 7d: down on the week, bouncing  🔥 trending
+  ↑ SUI         +4.42%  $1.18        ▄█▄▁▁▁▂▂▂▃▁▃
+  ↓ BTW        -14.93%  $1.17        ▁▃▆▁▅▅▄▇██▇█
+  ↓ M           -2.67%  $1.03        █▇▆▅▂▁▁▁▁▂▂▁
+  ↓ FIGR_HEL…   -2.03%  $1.02        █▇▁▁▄▄▄▄▃▅▆▅
+  ↓ LTC         -0.74%  $69.29       █▇▆▃▃▁▁▁▂▅▄▄
+  ↓ USDY        -0.15%  $1.15        ▁▁▄▅▆▂▅▆▅▆██
+
+trending on coingecko: super-iguana, quant-network, starknet, pump-fun, pudgy-penguins, pons, pepe, layerzero
+
+market data only — no trading, no custody, not financial advice
