@@ -1,0 +1,349 @@
+{
+  "coins": 50,
+  "bands": [
+    {
+      "band": 0,
+      "name": "the shallows · blue chips",
+      "creatures": 10,
+      "rising": 5,
+      "falling": 5,
+      "medianChange24h": 0.16
+    },
+    {
+      "band": 1,
+      "name": "mid waters · majors",
+      "creatures": 15,
+      "rising": 9,
+      "falling": 6,
+      "medianChange24h": 0.17
+    },
+    {
+      "band": 2,
+      "name": "the deep · small caps",
+      "creatures": 25,
+      "rising": 11,
+      "falling": 14,
+      "medianChange24h": -0.01
+    }
+  ],
+  "rising": 25,
+  "falling": 25,
+  "biggestGainers": [
+    {
+      "id": "rain",
+      "symbol": "RAIN",
+      "name": "Rain",
+      "price": 0.01099255,
+      "change24h": 6.59655,
+      "change1h": 0.9619,
+      "change7d": -7.2268,
+      "marketCap": 7796543449,
+      "rank": 19,
+      "trending": false,
+      "trend": {
+        "spark": "█▅▆▅▄▄▃▂▁▁▁▂",
+        "shape": "down on the week, bouncing",
+        "direction": "down",
+        "divergent": true,
+        "weekPct": -14.73,
+        "dayPct": 5.86,
+        "rangePct": 32.48,
+        "posInRange": 0.24,
+        "high": 0.01340833372721687,
+        "low": 0.010120729118627837,
+        "points": 168
+      }
+    },
+    {
+      "id": "figure-heloc",
+      "symbol": "FIGR_HELOC",
+      "name": "Figure Heloc",
+      "price": 1.065,
+      "change24h": 6.38364,
+      "change1h": -0.0011,
+      "change7d": -0.3306,
+      "marketCap": 25305419914,
+      "rank": 9,
+      "trending": false,
+      "trend": {
+        "spark": "█▆▄▅▅▃▃▃▄▂▁▂",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": -0.33,
+        "dayPct": 6.38,
+        "rangePct": 7.41,
+        "posInRange": 0.86,
+        "high": 1.0752143497294704,
+        "low": 1.0010215557405486,
+        "points": 119
+      }
+    },
+    {
+      "id": "near",
+      "symbol": "NEAR",
+      "name": "NEAR Protocol",
+      "price": 5.29,
+      "change24h": 5.69925,
+      "change1h": 0.3942,
+      "change7d": 9.1489,
+      "marketCap": 6927744687,
+      "rank": 20,
+      "trending": true,
+      "trend": {
+        "spark": "▃▄▅█▆▅█▆▁▂▆█",
+        "shape": "climbing",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 8.76,
+        "dayPct": 5.33,
+        "rangePct": 24.93,
+        "posInRange": 0.79,
+        "high": 5.503555333772081,
+        "low": 4.405311354355813,
+        "points": 168
+      }
+    },
+    {
+      "id": "uniswap",
+      "symbol": "UNI",
+      "name": "Uniswap",
+      "price": 7.62,
+      "change24h": 3.5474,
+      "change1h": 0.9854,
+      "change7d": -15.9257,
+      "marketCap": 4764883817,
+      "rank": 24,
+      "trending": false,
+      "trend": {
+        "spark": "████▇▄▃▂▁▁▁▂",
+        "shape": "down on the week, bouncing",
+        "direction": "down",
+        "divergent": true,
+        "weekPct": -16.39,
+        "dayPct": 2.36,
+        "rangePct": 30.3,
+        "posInRange": 0.24,
+        "high": 9.186486423173163,
+        "low": 7.050456642513025,
+        "points": 168
+      }
+    },
+    {
+      "id": "bittensor",
+      "symbol": "TAO",
+      "name": "Bittensor",
+      "price": 284.6,
+      "change24h": 2.98507,
+      "change1h": 0.4201,
+      "change7d": -6.7579,
+      "marketCap": 3227306286,
+      "rank": 36,
+      "trending": true,
+      "trend": {
+        "spark": "█████▇▅▃▁▁▂▄",
+        "shape": "dumped and bought back",
+        "direction": "down",
+        "divergent": true,
+        "weekPct": -7.89,
+        "dayPct": 2.47,
+        "rangePct": 20.27,
+        "posInRange": 0.52,
+        "high": 308.8768712845492,
+        "low": 256.81066227919854,
+        "points": 168
+      }
+    }
+  ],
+  "biggestLosers": [
+    {
+      "id": "quant-network",
+      "symbol": "QNT",
+      "name": "Quant",
+      "price": 236.39,
+      "change24h": -4.26187,
+      "change1h": -0.8852,
+      "change7d": -10.1192,
+      "marketCap": 3440952362,
+      "rank": 34,
+      "trending": true,
+      "trend": {
+        "spark": "█▅▆▇▇▅▄▁▁▃▄▃",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -13.54,
+        "dayPct": -3.03,
+        "rangePct": 23.71,
+        "posInRange": 0.29,
+        "high": 276.2793370521632,
+        "low": 223.3276170003368,
+        "points": 168
+      }
+    },
+    {
+      "id": "memecore",
+      "symbol": "M",
+      "name": "MemeCore",
+      "price": 0.98097,
+      "change24h": -4.08083,
+      "change1h": -0.7962,
+      "change7d": -4.8648,
+      "marketCap": 2241423329,
+      "rank": 49,
+      "trending": false,
+      "trend": {
+        "spark": "▇▇▆▃▆▇▆▇█▄▃▁",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -4.6,
+        "dayPct": -3.39,
+        "rangePct": 8.04,
+        "posInRange": 0.02,
+        "high": 1.0687008087081022,
+        "low": 0.989209230374705,
+        "points": 168
+      }
+    },
+    {
+      "id": "crypto-com-chain",
+      "symbol": "CRO",
+      "name": "Cronos",
+      "price": 0.060372,
+      "change24h": -2.51754,
+      "change1h": 0.3365,
+      "change7d": -8.8055,
+      "marketCap": 2991170452,
+      "rank": 40,
+      "trending": false,
+      "trend": {
+        "spark": "▇███▇▄▃▂▁▁▁▁",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -8.69,
+        "dayPct": -2.84,
+        "rangePct": 18.05,
+        "posInRange": 0.11,
+        "high": 0.06965927129297123,
+        "low": 0.05900841026123925,
+        "points": 168
+      }
+    },
+    {
+      "id": "cardano",
+      "symbol": "ADA",
+      "name": "Cardano",
+      "price": 0.248511,
+      "change24h": -2.44893,
+      "change1h": 0.6289,
+      "change7d": 2.1896,
+      "marketCap": 9330965030,
+      "rank": 17,
+      "trending": false,
+      "trend": {
+        "spark": "▃▅███▅▅▃▁▁▄▄",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": 1.46,
+        "dayPct": -2.39,
+        "rangePct": 23.93,
+        "posInRange": 0.4,
+        "high": 0.2793979971726206,
+        "low": 0.22544464609489503,
+        "points": 168
+      }
+    },
+    {
+      "id": "canton-network",
+      "symbol": "CC",
+      "name": "Canton",
+      "price": 0.119433,
+      "change24h": -2.33672,
+      "change1h": 0.414,
+      "change7d": -5.8196,
+      "marketCap": 4755236815,
+      "rank": 26,
+      "trending": false,
+      "trend": {
+        "spark": "▅█▇██▃▂▁▁▃▃▂",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -6.01,
+        "dayPct": -3.16,
+        "rangePct": 12.96,
+        "posInRange": 0.27,
+        "high": 0.12949318501852775,
+        "low": 0.11463646060636545,
+        "points": 168
+      }
+    }
+  ],
+  "trending": [
+    "swarm-engine",
+    "starknet",
+    "celestia",
+    "pudgy-penguins",
+    "near",
+    "quantus",
+    "backpack",
+    "aerodrome-finance",
+    "lighter",
+    "raydium",
+    "quant-network",
+    "hyperliquid",
+    "ethereum",
+    "bittensor",
+    "bitcoin"
+  ],
+  "mood": {
+    "value": 61,
+    "emoji": "😋"
+  },
+  "week": {
+    "spark": "███▆▅▅▅▄▁▁▂▂▂▃▃▃",
+    "shape": "falling",
+    "direction": "down",
+    "divergent": false,
+    "weekPct": -4.14,
+    "dayPct": -0.38,
+    "rangePct": 8.9,
+    "posInRange": 0.42,
+    "high": 1.0066685052033575,
+    "low": 0.9243717397232837,
+    "points": 119,
+    "coinsCounted": 50,
+    "breadth": {
+      "up": 3,
+      "down": 30,
+      "flat": 17,
+      "divergent": 7
+    },
+    "shapes": {
+      "falling": 21,
+      "flat all week": 13,
+      "chopping sideways": 4,
+      "down on the week, bouncing": 6,
+      "falling, at its weekly low": 2,
+      "climbing": 2,
+      "climbing, at its weekly high": 1,
+      "dumped and bought back": 1
+    }
+  },
+  "global": {
+    "totalMcap": 2816733634125.548,
+    "change24h": -2.3369560085384635
+  },
+  "data": {
+    "source": "coingecko",
+    "asOf": "2026-10-11T02:11:45.090Z",
+    "ageMs": 567,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "market data only — no trading, no custody, not financial advice"
+}

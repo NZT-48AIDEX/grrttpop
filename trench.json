@@ -1,0 +1,284 @@
+{
+  "network": {
+    "tps": 4472,
+    "epoch": 1054,
+    "epochPercent": 36
+  },
+  "ecosystem": {
+    "tokens": 40,
+    "rising": 23,
+    "topGainers": [
+      {
+        "id": "starknet",
+        "symbol": "STRK",
+        "name": "Starknet",
+        "price": 0.115062,
+        "change24h": 54.96909,
+        "change1h": 16.0734,
+        "change7d": 114.9938,
+        "marketCap": 853987200,
+        "trend": {
+          "spark": "▁▂▂▁▁▁▁▂▃▅▅█",
+          "shape": "climbing, at its weekly high",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 92.54,
+          "dayPct": 35.26,
+          "rangePct": 114.13,
+          "posInRange": 0.98,
+          "high": 0.10350559444305928,
+          "low": 0.04833825777423525,
+          "points": 168
+        }
+      },
+      {
+        "id": "injective-protocol",
+        "symbol": "INJ",
+        "name": "Injective",
+        "price": 7.68,
+        "change24h": 9.76662,
+        "change1h": -0.7348,
+        "change7d": 0.887,
+        "marketCap": 768366534,
+        "trend": {
+          "spark": "▆▆▆▆█▆▅▄▁▂▂▅",
+          "shape": "climbing",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 2.71,
+          "dayPct": 11.13,
+          "rangePct": 26.31,
+          "posInRange": 0.74,
+          "high": 8.220373628125131,
+          "low": 6.508248566970615,
+          "points": 168
+        }
+      },
+      {
+        "id": "pancakeswap-token",
+        "symbol": "CAKE",
+        "name": "PancakeSwap",
+        "price": 2.25,
+        "change24h": 1.91422,
+        "change1h": 0.4467,
+        "change7d": -9.9616,
+        "marketCap": 805729468,
+        "trend": {
+          "spark": "███▇▇▄▂▂▁▁▂▂",
+          "shape": "down on the week, bouncing",
+          "direction": "down",
+          "divergent": true,
+          "weekPct": -10.27,
+          "dayPct": 1.99,
+          "rangePct": 20.89,
+          "posInRange": 0.36,
+          "high": 2.5364222643349974,
+          "low": 2.098196504006119,
+          "points": 168
+        }
+      },
+      {
+        "id": "ethena",
+        "symbol": "ENA",
+        "name": "Ethena",
+        "price": 0.223096,
+        "change24h": 1.8428,
+        "change1h": 1.551,
+        "change7d": -6.3784,
+        "marketCap": 2990880170,
+        "trend": {
+          "spark": "▆▇██▆▅▄▂▁▂▂▃",
+          "shape": "falling",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -7.85,
+          "dayPct": 0.35,
+          "rangePct": 31.95,
+          "posInRange": 0.36,
+          "high": 0.2605920884184228,
+          "low": 0.19749209425011405,
+          "points": 168
+        }
+      },
+      {
+        "id": "chainlink",
+        "symbol": "LINK",
+        "name": "Chainlink",
+        "price": 13,
+        "change24h": 1.12415,
+        "change1h": 0.4153,
+        "change7d": -7.7536,
+        "marketCap": 9971835791,
+        "trend": {
+          "spark": "███▇▇▆▄▂▁▁▁▂",
+          "shape": "down on the week, bouncing",
+          "direction": "down",
+          "divergent": true,
+          "weekPct": -7.83,
+          "dayPct": 0.96,
+          "rangePct": 17.06,
+          "posInRange": 0.38,
+          "high": 14.265471591895803,
+          "low": 12.18626395049874,
+          "points": 168
+        }
+      }
+    ],
+    "topLosers": [
+      {
+        "id": "jupiter-exchange-solana",
+        "symbol": "JUP",
+        "name": "Jupiter",
+        "price": 0.357698,
+        "change24h": -5.68521,
+        "change1h": 0.5815,
+        "change7d": 8.6925,
+        "marketCap": 1187331643,
+        "trend": {
+          "spark": "▁▁▂▄▄▁▂█▃██▇",
+          "shape": "up on the week, sliding back",
+          "direction": "up",
+          "divergent": true,
+          "weekPct": 8.13,
+          "dayPct": -6.23,
+          "rangePct": 21.76,
+          "posInRange": 0.61,
+          "high": 0.3839137269592568,
+          "low": 0.3153162520617151,
+          "points": 168
+        }
+      },
+      {
+        "id": "pyth-network",
+        "symbol": "PYTH",
+        "name": "Pyth Network",
+        "price": 0.078358,
+        "change24h": -4.35655,
+        "change1h": 1.5433,
+        "change7d": 0.9042,
+        "marketCap": 617063093,
+        "trend": {
+          "spark": "▅▄▅▅▅▁▁▂▇█▆▅",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": -0.31,
+          "dayPct": -5.35,
+          "rangePct": 21.57,
+          "posInRange": 0.43,
+          "high": 0.0863201019062536,
+          "low": 0.07100432756241502,
+          "points": 168
+        }
+      },
+      {
+        "id": "raydium",
+        "symbol": "RAY",
+        "name": "Raydium",
+        "price": 2.34,
+        "change24h": -0.39995,
+        "change1h": -0.7589,
+        "change7d": 12.5795,
+        "marketCap": 631133094,
+        "trend": {
+          "spark": "▁▁▁▃▃▄██▇▇▅▇",
+          "shape": "climbing",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 14.16,
+          "dayPct": -0.04,
+          "rangePct": 25.93,
+          "posInRange": 0.68,
+          "high": 2.5225963008002776,
+          "low": 2.0030950681392206,
+          "points": 168
+        }
+      },
+      {
+        "id": "aave",
+        "symbol": "AAVE",
+        "name": "Aave",
+        "price": 168.91,
+        "change24h": -0.20972,
+        "change1h": 0.6162,
+        "change7d": -7.5174,
+        "marketCap": 2607287709,
+        "trend": {
+          "spark": "█▇███▅▄▃▁▁▃▃",
+          "shape": "falling",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -8.21,
+          "dayPct": -1.69,
+          "rangePct": 14.63,
+          "posInRange": 0.27,
+          "high": 184.71825939764716,
+          "low": 161.1446925221376,
+          "points": 168
+        }
+      },
+      {
+        "id": "wrapped-solana",
+        "symbol": "WSOL",
+        "name": "Wrapped SOL",
+        "price": 109.85,
+        "change24h": -0.0488,
+        "change1h": 0.1249,
+        "change7d": -8.448,
+        "marketCap": 1372049807,
+        "trend": {
+          "spark": "█████▇▅▃▁▁▁▁",
+          "shape": "falling",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -8.59,
+          "dayPct": -0.05,
+          "rangePct": 14.53,
+          "posInRange": 0.22,
+          "high": 121.80899199049522,
+          "low": 106.3531209248422,
+          "points": 168
+        }
+      }
+    ],
+    "week": {
+      "spark": "▇██████▄▃▄▁▁▄▃▄▇",
+      "shape": "chopping sideways",
+      "direction": "flat",
+      "divergent": false,
+      "weekPct": 0.34,
+      "dayPct": 1.28,
+      "rangePct": 5.76,
+      "posInRange": 0.84,
+      "high": 1.0123896310368508,
+      "low": 0.9572185027602614,
+      "points": 168,
+      "coinsCounted": 40,
+      "breadth": {
+        "up": 5,
+        "down": 16,
+        "flat": 19,
+        "divergent": 3
+      },
+      "shapes": {
+        "flat all week": 17,
+        "falling": 14,
+        "down on the week, bouncing": 2,
+        "climbing": 3,
+        "up on the week, sliding back": 1,
+        "climbing, at its weekly high": 1,
+        "chopping sideways": 2
+      }
+    }
+  },
+  "wallet": null,
+  "data": {
+    "source": "solana-rpc.publicnode.com + coingecko",
+    "asOf": "2026-10-11T02:11:45.161Z",
+    "ageMs": 687,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "read-only — no keys, no signatures, no transactions. not financial advice."
+}

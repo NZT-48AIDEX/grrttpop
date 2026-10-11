@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-10-11T02:11:45.090Z, 1s ago
+
+50 creatures. 25 rising, 25 falling.
+mood: 61 😋
+total market $2.82T · -2.34% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ██████████··········  5 up / 5 down · median +0.16%
+  mid waters · majors
+     15 creatures  ████████████········  9 up / 6 down · median +0.17%
+  the deep · small caps
+     25 creatures  █████████···········  11 up / 14 down · median -0.01%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ███▆▅▅▅▄▁▁▂▂▂▃▃▃  -4.14% — falling
+  3 up · 30 down · 17 sideways · 7 spent the week going one way and today the other
+
+biggest movers
+  ↑ RAIN        +6.60%  $0.0110      █▅▆▅▄▄▃▂▁▁▁▂  ← 7d: down on the week, bouncing
+  ↑ FIGR_HEL…   +6.38%  $1.06        █▆▄▅▅▃▃▃▄▂▁▂
+  ↑ NEAR        +5.70%  $5.29        ▃▄▅█▆▅█▆▁▂▆█  🔥 trending
+  ↑ UNI         +3.55%  $7.62        ████▇▄▃▂▁▁▁▂  ← 7d: down on the week, bouncing
+  ↑ TAO         +2.99%  $284.60      █████▇▅▃▁▁▂▄  ← 7d: dumped and bought back  🔥 trending
+  ↓ QNT         -4.26%  $236.39      █▅▆▇▇▅▄▁▁▃▄▃  🔥 trending
+  ↓ M           -4.08%  $0.9810      ▇▇▆▃▆▇▆▇█▄▃▁
+  ↓ CRO         -2.52%  $0.0604      ▇███▇▄▃▂▁▁▁▁
+  ↓ ADA         -2.45%  $0.2485      ▃▅███▅▅▃▁▁▄▄
+  ↓ CC          -2.34%  $0.1194      ▅█▇██▃▂▁▁▃▃▂
+
+trending on coingecko: swarm-engine, starknet, celestia, pudgy-penguins, near, quantus, backpack, aerodrome-finance
+
+market data only — no trading, no custody, not financial advice
