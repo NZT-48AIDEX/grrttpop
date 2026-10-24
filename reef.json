@@ -1,0 +1,347 @@
+{
+  "coins": 50,
+  "bands": [
+    {
+      "band": 0,
+      "name": "the shallows · blue chips",
+      "creatures": 10,
+      "rising": 2,
+      "falling": 8,
+      "medianChange24h": -1
+    },
+    {
+      "band": 1,
+      "name": "mid waters · majors",
+      "creatures": 15,
+      "rising": 5,
+      "falling": 10,
+      "medianChange24h": -1.78
+    },
+    {
+      "band": 2,
+      "name": "the deep · small caps",
+      "creatures": 25,
+      "rising": 7,
+      "falling": 18,
+      "medianChange24h": -1.51
+    }
+  ],
+  "rising": 14,
+  "falling": 36,
+  "biggestGainers": [
+    {
+      "id": "memecore",
+      "symbol": "M",
+      "name": "MemeCore",
+      "price": 0.919342,
+      "change24h": 3.19598,
+      "change1h": -2.8968,
+      "change7d": 20.5635,
+      "marketCap": 2103851194,
+      "rank": 47,
+      "trending": false,
+      "trend": {
+        "spark": "▁▂▁▁▂▂▂▂▅▅▅█",
+        "shape": "climbing",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 24.55,
+        "dayPct": 6.22,
+        "rangePct": 70.3,
+        "posInRange": 0.6,
+        "high": 1.143541515990758,
+        "low": 0.6715028597814973,
+        "points": 168
+      }
+    },
+    {
+      "id": "rain",
+      "symbol": "RAIN",
+      "name": "Rain",
+      "price": 0.00844752,
+      "change24h": 2.06971,
+      "change1h": 1.3414,
+      "change7d": -3.2759,
+      "marketCap": 6006016808,
+      "rank": 19,
+      "trending": false,
+      "trend": {
+        "spark": "▇██▆▄██▆▄▃▂▁",
+        "shape": "down on the week, bouncing",
+        "direction": "down",
+        "divergent": true,
+        "weekPct": -4.68,
+        "dayPct": 0.95,
+        "rangePct": 22.05,
+        "posInRange": 0.32,
+        "high": 0.009542486558514222,
+        "low": 0.007818396064597031,
+        "points": 168
+      }
+    },
+    {
+      "id": "monero",
+      "symbol": "XMR",
+      "name": "Monero",
+      "price": 605.42,
+      "change24h": 1.57235,
+      "change1h": 0.3127,
+      "change7d": 8.0546,
+      "marketCap": 11395796955,
+      "rank": 13,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▃▄▆▄▄█▆▅▂▃",
+        "shape": "climbing",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 7.45,
+        "dayPct": 0.94,
+        "rangePct": 16.17,
+        "posInRange": 0.46,
+        "high": 650.1861558340586,
+        "low": 559.6785835588622,
+        "points": 168
+      }
+    },
+    {
+      "id": "figure-heloc",
+      "symbol": "FIGR_HELOC",
+      "name": "Figure Heloc",
+      "price": 1.032,
+      "change24h": 1.0913,
+      "change1h": 0.0003,
+      "change7d": 0.2779,
+      "marketCap": 26389009297,
+      "rank": 9,
+      "trending": false,
+      "trend": {
+        "spark": "██▁▁▃▂▁▃▃▃▁▁",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": 0.27,
+        "dayPct": 0.88,
+        "rangePct": 5.86,
+        "posInRange": 0.4,
+        "high": 1.0675672202967723,
+        "low": 1.0084915782131958,
+        "points": 134
+      }
+    },
+    {
+      "id": "usds",
+      "symbol": "USDS",
+      "name": "USDS",
+      "price": 1,
+      "change24h": 0.03604,
+      "change1h": -0.0048,
+      "change7d": 0.0666,
+      "marketCap": 10027768989,
+      "rank": 14,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▃▅█▇▇▅▄▃▅▅",
+        "shape": "flat all week",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": 0.06,
+        "dayPct": 0.02,
+        "rangePct": 0.24,
+        "posInRange": 0.52,
+        "high": 1.0014871389075788,
+        "low": 0.999053879934692,
+        "points": 168
+      }
+    }
+  ],
+  "biggestLosers": [
+    {
+      "id": "ethena",
+      "symbol": "ENA",
+      "name": "Ethena",
+      "price": 0.187542,
+      "change24h": -9.68215,
+      "change1h": 1.7508,
+      "change7d": 0.7069,
+      "marketCap": 2514057882,
+      "rank": 41,
+      "trending": false,
+      "trend": {
+        "spark": "▂▁▂▂▂▄█▇▅▆▆▂",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -2.66,
+        "dayPct": -11.41,
+        "rangePct": 26.49,
+        "posInRange": 0.21,
+        "high": 0.2225362088050543,
+        "low": 0.1759249094064767,
+        "points": 168
+      }
+    },
+    {
+      "id": "aave",
+      "symbol": "AAVE",
+      "name": "Aave",
+      "price": 136.33,
+      "change24h": -6.85208,
+      "change1h": 1.3189,
+      "change7d": -9.6442,
+      "marketCap": 2104759296,
+      "rank": 48,
+      "trending": true,
+      "trend": {
+        "spark": "▆▆▆▅▆▇█▆▄▅▃▁",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -11.22,
+        "dayPct": -8.2,
+        "rangePct": 17.55,
+        "posInRange": 0.01,
+        "high": 158.754528304442,
+        "low": 135.0584937784933,
+        "points": 168
+      }
+    },
+    {
+      "id": "near",
+      "symbol": "NEAR",
+      "name": "NEAR Protocol",
+      "price": 4.44,
+      "change24h": -6.262,
+      "change1h": 1.2871,
+      "change7d": -8.1724,
+      "marketCap": 5815776442,
+      "rank": 21,
+      "trending": false,
+      "trend": {
+        "spark": "▅▄▆▅▄▆█▇▅▅▃▁",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -10.59,
+        "dayPct": -7.82,
+        "rangePct": 23.19,
+        "posInRange": 0.06,
+        "high": 5.375248455141259,
+        "low": 4.3633098607705625,
+        "points": 168
+      }
+    },
+    {
+      "id": "bitway",
+      "symbol": "BTW",
+      "name": "Bitway",
+      "price": 1.74,
+      "change24h": -4.84561,
+      "change1h": 0.1048,
+      "change7d": -32.0482,
+      "marketCap": 2621738885,
+      "rank": 39,
+      "trending": false,
+      "trend": {
+        "spark": "██▆▃▁▃▁▁▁▁▁▁",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -33.11,
+        "dayPct": -1.23,
+        "rangePct": 80.72,
+        "posInRange": 0.24,
+        "high": 2.644415748625825,
+        "low": 1.4632617711333817,
+        "points": 168
+      }
+    },
+    {
+      "id": "ondo-finance",
+      "symbol": "ONDO",
+      "name": "Ondo",
+      "price": 0.405164,
+      "change24h": -4.73124,
+      "change1h": 1.1229,
+      "change7d": -7.3826,
+      "marketCap": 1972933328,
+      "rank": 49,
+      "trending": false,
+      "trend": {
+        "spark": "▅▄▅▄▅▇█▇▄▅▃▁",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -9.13,
+        "dayPct": -6.26,
+        "rangePct": 16.7,
+        "posInRange": 0.01,
+        "high": 0.4682831937645458,
+        "low": 0.40125540678083504,
+        "points": 168
+      }
+    }
+  ],
+  "trending": [
+    "universal-high-income-2",
+    "binance-super-cz-2",
+    "dacity-coin-3",
+    "hyperliquid",
+    "pudgy-penguins",
+    "tether",
+    "pearl-2",
+    "bitcoin",
+    "quantus",
+    "solana",
+    "aerodrome-finance",
+    "cardano",
+    "aave",
+    "axis-robotics",
+    "pi-network"
+  ],
+  "mood": {
+    "value": 51,
+    "emoji": "😐"
+  },
+  "week": {
+    "spark": "▅▄▄▃▆▇▇█▆▅▃▄▄▃▂▁",
+    "shape": "falling, at its weekly low",
+    "direction": "down",
+    "divergent": false,
+    "weekPct": -3.74,
+    "dayPct": -1.42,
+    "rangePct": 6.77,
+    "posInRange": 0.06,
+    "high": 1.0236249017266887,
+    "low": 0.9587400884260255,
+    "points": 134,
+    "coinsCounted": 50,
+    "breadth": {
+      "up": 2,
+      "down": 28,
+      "flat": 20,
+      "divergent": 1
+    },
+    "shapes": {
+      "chopping sideways": 6,
+      "falling, at its weekly low": 21,
+      "flat all week": 14,
+      "falling": 6,
+      "climbing": 2,
+      "down on the week, bouncing": 1
+    }
+  },
+  "global": {
+    "totalMcap": 2710636255255.263,
+    "change24h": -3.990361578372233
+  },
+  "data": {
+    "source": "coingecko",
+    "asOf": "2026-10-24T19:48:34.765Z",
+    "ageMs": 891,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "market data only — no trading, no custody, not financial advice"
+}

@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-10-24T19:48:34.765Z, 1s ago
+
+50 creatures. 14 rising, 36 falling.
+mood: 51 😐
+total market $2.71T · -3.99% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ████················  2 up / 8 down · median -1.00%
+  mid waters · majors
+     15 creatures  ███████·············  5 up / 10 down · median -1.78%
+  the deep · small caps
+     25 creatures  ██████··············  7 up / 18 down · median -1.51%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ▅▄▄▃▆▇▇█▆▅▃▄▄▃▂▁  -3.74% — falling, at its weekly low
+  2 up · 28 down · 20 sideways · 1 spent the week going one way and today the other
+
+biggest movers
+  ↑ M           +3.20%  $0.9193      ▁▂▁▁▂▂▂▂▅▅▅█
+  ↑ RAIN        +2.07%  $0.008448    ▇██▆▄██▆▄▃▂▁  ← 7d: down on the week, bouncing
+  ↑ XMR         +1.57%  $605.42      ▁▁▃▄▆▄▄█▆▅▂▃
+  ↑ FIGR_HEL…   +1.09%  $1.03        ██▁▁▃▂▁▃▃▃▁▁
+  ↑ USDS        +0.04%  $1.00        ▁▁▃▅█▇▇▅▄▃▅▅
+  ↓ ENA         -9.68%  $0.1875      ▂▁▂▂▂▄█▇▅▆▆▂
+  ↓ AAVE        -6.85%  $136.33      ▆▆▆▅▆▇█▆▄▅▃▁  🔥 trending
+  ↓ NEAR        -6.26%  $4.44        ▅▄▆▅▄▆█▇▅▅▃▁
+  ↓ BTW         -4.85%  $1.74        ██▆▃▁▃▁▁▁▁▁▁
+  ↓ ONDO        -4.73%  $0.4052      ▅▄▅▄▅▇█▇▄▅▃▁
+
+trending on coingecko: universal-high-income-2, binance-super-cz-2, dacity-coin-3, hyperliquid, pudgy-penguins, tether, pearl-2, bitcoin
+
+market data only — no trading, no custody, not financial advice
