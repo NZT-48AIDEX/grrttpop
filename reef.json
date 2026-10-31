@@ -1,0 +1,349 @@
+{
+  "coins": 50,
+  "bands": [
+    {
+      "band": 0,
+      "name": "the shallows · blue chips",
+      "creatures": 10,
+      "rising": 8,
+      "falling": 2,
+      "medianChange24h": 1.15
+    },
+    {
+      "band": 1,
+      "name": "mid waters · majors",
+      "creatures": 15,
+      "rising": 12,
+      "falling": 3,
+      "medianChange24h": 0.94
+    },
+    {
+      "band": 2,
+      "name": "the deep · small caps",
+      "creatures": 25,
+      "rising": 20,
+      "falling": 5,
+      "medianChange24h": 1.63
+    }
+  ],
+  "rising": 40,
+  "falling": 10,
+  "biggestGainers": [
+    {
+      "id": "quant-network",
+      "symbol": "QNT",
+      "name": "Quant",
+      "price": 203.91,
+      "change24h": 8.32428,
+      "change1h": 1.1475,
+      "change7d": 16.1166,
+      "marketCap": 2970330422,
+      "rank": 35,
+      "trending": false,
+      "trend": {
+        "spark": "▁▃▅█▇▆▆▅▄▃▄▆",
+        "shape": "climbing",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 13.46,
+        "dayPct": 7.47,
+        "rangePct": 23.89,
+        "posInRange": 0.63,
+        "high": 218.45958869450476,
+        "low": 176.33127383045277,
+        "points": 168
+      }
+    },
+    {
+      "id": "chainlink",
+      "symbol": "LINK",
+      "name": "Chainlink",
+      "price": 11.89,
+      "change24h": 6.89928,
+      "change1h": 0.4541,
+      "change7d": 2.9481,
+      "marketCap": 9116673271,
+      "rank": 15,
+      "trending": false,
+      "trend": {
+        "spark": "▇▆▆▅▅▇█▇▆▁▄▆",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": 1.35,
+        "dayPct": 4.68,
+        "rangePct": 14.07,
+        "posInRange": 0.81,
+        "high": 11.956414345834283,
+        "low": 10.48202859545674,
+        "points": 168
+      }
+    },
+    {
+      "id": "pump-fun",
+      "symbol": "PUMP",
+      "name": "Pump.fun",
+      "price": 0.00424656,
+      "change24h": 6.68657,
+      "change1h": 0.4011,
+      "change7d": 2.2951,
+      "marketCap": 1953108558,
+      "rank": 50,
+      "trending": false,
+      "trend": {
+        "spark": "▇▆▅▆▄█▇██▁▂▃",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": -0.45,
+        "dayPct": 7.36,
+        "rangePct": 18.89,
+        "posInRange": 0.53,
+        "high": 0.004582797916026551,
+        "low": 0.0038546780469255176,
+        "points": 168
+      }
+    },
+    {
+      "id": "aave",
+      "symbol": "AAVE",
+      "name": "Aave",
+      "price": 134.55,
+      "change24h": 6.46626,
+      "change1h": -0.3456,
+      "change7d": -0.551,
+      "marketCap": 2077507626,
+      "rank": 46,
+      "trending": false,
+      "trend": {
+        "spark": "██▇▇▅▆▇▅▅▁▃▆",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": -1.52,
+        "dayPct": 7.2,
+        "rangePct": 16.74,
+        "posInRange": 0.82,
+        "high": 138.3998532408222,
+        "low": 118.55499305626591,
+        "points": 168
+      }
+    },
+    {
+      "id": "zcash",
+      "symbol": "ZEC",
+      "name": "Zcash",
+      "price": 1281.03,
+      "change24h": 5.14865,
+      "change1h": -0.4633,
+      "change7d": 10.2698,
+      "marketCap": 21789576144,
+      "rank": 10,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▁▃▄██▅▇▄▄▆",
+        "shape": "climbing",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 7.96,
+        "dayPct": 5.25,
+        "rangePct": 14.48,
+        "posInRange": 0.57,
+        "high": 1356.7683390166058,
+        "low": 1185.1596791061684,
+        "points": 168
+      }
+    }
+  ],
+  "biggestLosers": [
+    {
+      "id": "tron",
+      "symbol": "TRX",
+      "name": "TRON",
+      "price": 0.306818,
+      "change24h": -7.55301,
+      "change1h": 0.1784,
+      "change7d": -6.4576,
+      "marketCap": 29142326794,
+      "rank": 8,
+      "trending": false,
+      "trend": {
+        "spark": "▄▄▄▄▄▅▅▄▆█▄▁",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -6.53,
+        "dayPct": -7.2,
+        "rangePct": 17.59,
+        "posInRange": 0,
+        "high": 0.36171872730132004,
+        "low": 0.30761894837321857,
+        "points": 168
+      }
+    },
+    {
+      "id": "memecore",
+      "symbol": "M",
+      "name": "MemeCore",
+      "price": 0.902415,
+      "change24h": -3.96907,
+      "change1h": -0.5735,
+      "change7d": -4.7013,
+      "marketCap": 2065705731,
+      "rank": 47,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▃▃▄▇█▆▆▄▂▁",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": -1.4,
+        "dayPct": -3.01,
+        "rangePct": 26.67,
+        "posInRange": 0.06,
+        "high": 1.1361045689077882,
+        "low": 0.8968968210904756,
+        "points": 168
+      }
+    },
+    {
+      "id": "hyperliquid",
+      "symbol": "HYPE",
+      "name": "Hyperliquid",
+      "price": 88.01,
+      "change24h": -2.29032,
+      "change1h": 0.228,
+      "change7d": 16.4989,
+      "marketCap": 21066374060,
+      "rank": 11,
+      "trending": true,
+      "trend": {
+        "spark": "▁▁▁▁▁▃▃▂███▆",
+        "shape": "up on the week, sliding back",
+        "direction": "up",
+        "divergent": true,
+        "weekPct": 15.54,
+        "dayPct": -2.08,
+        "rangePct": 28.01,
+        "posInRange": 0.6,
+        "high": 96.34654633988114,
+        "low": 75.26435207190718,
+        "points": 168
+      }
+    },
+    {
+      "id": "leo-token",
+      "symbol": "LEO",
+      "name": "LEO Token",
+      "price": 9.26,
+      "change24h": -1.48089,
+      "change1h": 0.2089,
+      "change7d": 3.0136,
+      "marketCap": 8514199350,
+      "rank": 17,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▁▁▁▃▇████▇",
+        "shape": "up on the week, sliding back",
+        "direction": "up",
+        "divergent": true,
+        "weekPct": 2.8,
+        "dayPct": -1.22,
+        "rangePct": 5.56,
+        "posInRange": 0.63,
+        "high": 9.476397230851576,
+        "low": 8.977414740016268,
+        "points": 168
+      }
+    },
+    {
+      "id": "figure-heloc",
+      "symbol": "FIGR_HELOC",
+      "name": "Figure Heloc",
+      "price": 1.022,
+      "change24h": -0.43265,
+      "change1h": -0.3735,
+      "change7d": -0.8276,
+      "marketCap": 26540260354,
+      "rank": 9,
+      "trending": false,
+      "trend": {
+        "spark": "█▆▄▃▁▁▂▂▄▁▁▁",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": -0.45,
+        "dayPct": 0.23,
+        "rangePct": 6.21,
+        "posInRange": 0.42,
+        "high": 1.063395140280724,
+        "low": 1.0011954181198008,
+        "points": 131
+      }
+    }
+  ],
+  "trending": [
+    "super-pepe",
+    "super-inu-3",
+    "canton-network",
+    "pudgy-penguins",
+    "binancecoin",
+    "bitcoin",
+    "pepe",
+    "aerodrome-finance",
+    "ethereum",
+    "ripple",
+    "thorchain",
+    "solana",
+    "quantus",
+    "hyperliquid",
+    "pearl-2"
+  ],
+  "mood": {
+    "value": 30,
+    "emoji": "😟"
+  },
+  "week": {
+    "spark": "▆▅▄▄▇███▅▇▄▁▁▁▂▂",
+    "shape": "chopping sideways",
+    "direction": "flat",
+    "divergent": false,
+    "weekPct": -0.67,
+    "dayPct": 0.09,
+    "rangePct": 6.34,
+    "posInRange": 0.4,
+    "high": 1.0299902910024439,
+    "low": 0.9685482009253659,
+    "points": 131,
+    "coinsCounted": 50,
+    "breadth": {
+      "up": 8,
+      "down": 18,
+      "flat": 24,
+      "divergent": 17
+    },
+    "shapes": {
+      "down on the week, bouncing": 13,
+      "flat all week": 12,
+      "falling, at its weekly low": 3,
+      "chopping sideways": 12,
+      "climbing": 5,
+      "up on the week, sliding back": 3,
+      "dumped and bought back": 1,
+      "falling": 1
+    }
+  },
+  "global": {
+    "totalMcap": 2627952026435.9614,
+    "change24h": -1.5014169992481092
+  },
+  "data": {
+    "source": "coingecko",
+    "asOf": "2026-10-31T19:32:41.179Z",
+    "ageMs": 364,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "market data only — no trading, no custody, not financial advice"
+}

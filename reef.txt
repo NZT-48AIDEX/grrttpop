@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-10-31T19:32:41.179Z, 0s ago
+
+50 creatures. 40 rising, 10 falling.
+mood: 30 😟
+total market $2.63T · -1.50% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ████████████████····  8 up / 2 down · median +1.15%
+  mid waters · majors
+     15 creatures  ████████████████····  12 up / 3 down · median +0.94%
+  the deep · small caps
+     25 creatures  ████████████████····  20 up / 5 down · median +1.63%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ▆▅▄▄▇███▅▇▄▁▁▁▂▂  -0.67% — chopping sideways
+  8 up · 18 down · 24 sideways · 17 spent the week going one way and today the other
+
+biggest movers
+  ↑ QNT         +8.32%  $203.91      ▁▃▅█▇▆▆▅▄▃▄▆
+  ↑ LINK        +6.90%  $11.89       ▇▆▆▅▅▇█▇▆▁▄▆
+  ↑ PUMP        +6.69%  $0.004247    ▇▆▅▆▄█▇██▁▂▃
+  ↑ AAVE        +6.47%  $134.55      ██▇▇▅▆▇▅▅▁▃▆
+  ↑ ZEC         +5.15%  $1,281       ▁▁▁▃▄██▅▇▄▄▆
+  ↓ TRX         -7.55%  $0.3068      ▄▄▄▄▄▅▅▄▆█▄▁
+  ↓ M           -3.97%  $0.9024      ▁▁▃▃▄▇█▆▆▄▂▁
+  ↓ HYPE        -2.29%  $88.01       ▁▁▁▁▁▃▃▂███▆  ← 7d: up on the week, sliding back  🔥 trending
+  ↓ LEO         -1.48%  $9.26        ▁▁▁▁▁▃▇████▇  ← 7d: up on the week, sliding back
+  ↓ FIGR_HEL…   -0.43%  $1.02        █▆▄▃▁▁▂▂▄▁▁▁
+
+trending on coingecko: super-pepe, super-inu-3, canton-network, pudgy-penguins, binancecoin, bitcoin, pepe, aerodrome-finance
+
+market data only — no trading, no custody, not financial advice

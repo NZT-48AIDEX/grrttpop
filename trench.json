@@ -1,0 +1,281 @@
+{
+  "network": {
+    "tps": 1781,
+    "epoch": 1073,
+    "epochPercent": 63
+  },
+  "ecosystem": {
+    "tokens": 40,
+    "rising": 34,
+    "topGainers": [
+      {
+        "id": "chainlink",
+        "symbol": "LINK",
+        "name": "Chainlink",
+        "price": 11.89,
+        "change24h": 6.82661,
+        "change1h": 0.4541,
+        "change7d": 2.9481,
+        "marketCap": 9116673271,
+        "trend": {
+          "spark": "▇▆▆▅▅▇█▇▆▁▄▆",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 1.35,
+          "dayPct": 4.68,
+          "rangePct": 14.07,
+          "posInRange": 0.81,
+          "high": 11.956414345834283,
+          "low": 10.48202859545674,
+          "points": 168
+        }
+      },
+      {
+        "id": "pump-fun",
+        "symbol": "PUMP",
+        "name": "Pump.fun",
+        "price": 0.00424656,
+        "change24h": 6.65896,
+        "change1h": 0.4011,
+        "change7d": 2.2951,
+        "marketCap": 1953108558,
+        "trend": {
+          "spark": "▇▆▅▆▄█▇██▁▂▃",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": -0.45,
+          "dayPct": 7.36,
+          "rangePct": 18.89,
+          "posInRange": 0.53,
+          "high": 0.004582797916026551,
+          "low": 0.0038546780469255176,
+          "points": 168
+        }
+      },
+      {
+        "id": "pyth-network",
+        "symbol": "PYTH",
+        "name": "Pyth Network",
+        "price": 0.064949,
+        "change24h": 6.50692,
+        "change1h": -0.262,
+        "change7d": -5.6868,
+        "marketCap": 510964966,
+        "trend": {
+          "spark": "▆▇██▇█▇▇▅▁▂▃",
+          "shape": "down on the week, bouncing",
+          "direction": "down",
+          "divergent": true,
+          "weekPct": -6.91,
+          "dayPct": 7.99,
+          "rangePct": 27.31,
+          "posInRange": 0.35,
+          "high": 0.07588983235046626,
+          "low": 0.05960857238683168,
+          "points": 168
+        }
+      },
+      {
+        "id": "aave",
+        "symbol": "AAVE",
+        "name": "Aave",
+        "price": 134.55,
+        "change24h": 6.46021,
+        "change1h": -0.3456,
+        "change7d": -0.551,
+        "marketCap": 2077507626,
+        "trend": {
+          "spark": "██▇▇▅▆▇▅▅▁▃▆",
+          "shape": "chopping sideways",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": -1.52,
+          "dayPct": 7.2,
+          "rangePct": 16.74,
+          "posInRange": 0.82,
+          "high": 138.3998532408222,
+          "low": 118.55499305626591,
+          "points": 168
+        }
+      },
+      {
+        "id": "pancakeswap-token",
+        "symbol": "CAKE",
+        "name": "PancakeSwap",
+        "price": 1.95,
+        "change24h": 5.0067,
+        "change1h": -0.2066,
+        "change7d": -4.535,
+        "marketCap": 674866964,
+        "trend": {
+          "spark": "▇▇▇██▇█▇▅▁▁▃",
+          "shape": "down on the week, bouncing",
+          "direction": "down",
+          "divergent": true,
+          "weekPct": -4.8,
+          "dayPct": 4.77,
+          "rangePct": 16.28,
+          "posInRange": 0.36,
+          "high": 2.1470572010752673,
+          "low": 1.8464755099333163,
+          "points": 168
+        }
+      }
+    ],
+    "topLosers": [
+      {
+        "id": "open-usd",
+        "symbol": "OUSD",
+        "name": "Open USD",
+        "price": 0.999556,
+        "change24h": -0.20944,
+        "change1h": -0.1862,
+        "change7d": -0.0006,
+        "marketCap": 886784660,
+        "trend": {
+          "spark": "▂▂▃▆▆▁▁▁▁█▆▇",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.23,
+          "dayPct": 0.09,
+          "rangePct": 0.74,
+          "posInRange": 0.43,
+          "high": 1.005808104631766,
+          "low": 0.9983715483140444,
+          "points": 168
+        }
+      },
+      {
+        "id": "euro-coin",
+        "symbol": "EURC",
+        "name": "EURC",
+        "price": 1.12,
+        "change24h": -0.07893,
+        "change1h": -0.0019,
+        "change7d": -0.3325,
+        "marketCap": 503916677,
+        "trend": {
+          "spark": "▇██▅▃▁▁▂▃▆▃▃",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": -0.35,
+          "dayPct": -0.09,
+          "rangePct": 0.93,
+          "posInRange": 0.35,
+          "high": 1.1217052475902405,
+          "low": 1.1113506013989152,
+          "points": 168
+        }
+      },
+      {
+        "id": "ondo-us-dollar-yield",
+        "symbol": "USDY",
+        "name": "Ondo US Dollar Yield",
+        "price": 1.15,
+        "change24h": -0.04947,
+        "change1h": 0.0487,
+        "change7d": 0.173,
+        "marketCap": 2399872764,
+        "trend": {
+          "spark": "▁▁▄▅███▇▅▃▆▆",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.2,
+          "dayPct": 0.22,
+          "rangePct": 0.32,
+          "posInRange": 0.89,
+          "high": 1.1513305744732059,
+          "low": 1.1476707980582421,
+          "points": 168
+        }
+      },
+      {
+        "id": "hastra-prime",
+        "symbol": "PRIME",
+        "name": "Hastra PRIME",
+        "price": 1.067,
+        "change24h": -0.02873,
+        "change1h": 0.0123,
+        "change7d": 0.0826,
+        "marketCap": 556185632,
+        "trend": {
+          "spark": "▄▅▆▄▂▁▂▇█▃█▇",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.05,
+          "dayPct": -0.03,
+          "rangePct": 0.18,
+          "posInRange": 0.7,
+          "high": 1.067011796366953,
+          "low": 1.0650871493453957,
+          "points": 168
+        }
+      },
+      {
+        "id": "paypal-usd",
+        "symbol": "PYUSD",
+        "name": "PayPal USD",
+        "price": 1,
+        "change24h": -0.01993,
+        "change1h": -0.0055,
+        "change7d": 0.002,
+        "marketCap": 2850764085,
+        "trend": {
+          "spark": "█▇▇▅▅▆▆▅▄▁██",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.01,
+          "dayPct": 0,
+          "rangePct": 0.37,
+          "posInRange": 0.87,
+          "high": 1.0008829093490512,
+          "low": 0.9972048519006873,
+          "points": 168
+        }
+      }
+    ],
+    "week": {
+      "spark": "█▇███▇▇███▆▆▁▁▂▂",
+      "shape": "down on the week, bouncing",
+      "direction": "down",
+      "divergent": true,
+      "weekPct": -2.07,
+      "dayPct": 1.57,
+      "rangePct": 5.59,
+      "posInRange": 0.38,
+      "high": 1.0122191815487527,
+      "low": 0.958666257377247,
+      "points": 168,
+      "coinsCounted": 40,
+      "breadth": {
+        "up": 0,
+        "down": 17,
+        "flat": 23,
+        "divergent": 16
+      },
+      "shapes": {
+        "flat all week": 19,
+        "down on the week, bouncing": 16,
+        "chopping sideways": 4,
+        "falling": 1
+      }
+    }
+  },
+  "wallet": null,
+  "data": {
+    "source": "solana-rpc.publicnode.com + coingecko",
+    "asOf": "2026-10-31T19:32:41.212Z",
+    "ageMs": 512,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "read-only — no keys, no signatures, no transactions. not financial advice."
+}
