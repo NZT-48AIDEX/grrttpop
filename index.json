@@ -1,0 +1,279 @@
+{
+  "what": "recorded upstream payloads, one bundle per snapshot run — the raw inputs the site saw",
+  "why": "so tomorrow's code can run against yesterday's market. fixtures/ is one afternoon; this is every day the publisher managed to catch.",
+  "replay": "each bundle's `files` are keyed by the same names fixtures/ uses, so the same replay shim reads both",
+  "generatedAt": "2026-10-31T19:32:41.937Z",
+  "entries": 43,
+  "oldest": "2026-09-23T06:41:00.000Z",
+  "newest": "2026-10-31T19:32:00.000Z",
+  "incidents": 5,
+  "bytes": 7328861,
+  "retention": "everything for 3 days, then one a day to 30, one a week to 180, then one a month — under a 10MB ceiling",
+  "caveats": [
+    "sampling is whatever github's scheduler delivered — roughly six a day, unevenly spaced",
+    "pushes cluster in working hours, so active days are over-sampled; each entry records its trigger",
+    "each bundle carries 168 hourly prices per coin, so price history is dense even where sampling is not",
+    "short-lived failures cannot be sampled for and are captured as incidents instead",
+    "an entry holds what the publisher called, not every fixture: no wallet read, so getBalance/getSlot/getTokenAccountsByOwner are absent. fixtures/ still owns those paths."
+  ],
+  "index": [
+    {
+      "name": "2026-09-23T0641Z.json.gz",
+      "at": "2026-09-23T06:41:17.311Z",
+      "event": "push",
+      "bytes": 170815
+    },
+    {
+      "name": "2026-09-28T0111Z.json.gz",
+      "at": "2026-09-28T01:11:11.244Z",
+      "event": "schedule",
+      "bytes": 169483
+    },
+    {
+      "name": "2026-10-02T0218Z.json.gz",
+      "at": "2026-10-02T02:18:22.294Z",
+      "event": "schedule",
+      "bytes": 168853
+    },
+    {
+      "name": "2026-10-03T0029Z.json.gz",
+      "at": "2026-10-03T00:29:45.659Z",
+      "event": "schedule",
+      "bytes": 169780
+    },
+    {
+      "name": "2026-10-04T0036Z.json.gz",
+      "at": "2026-10-04T00:36:51.344Z",
+      "event": "schedule",
+      "bytes": 167615
+    },
+    {
+      "name": "2026-10-05T0224Z.json.gz",
+      "at": "2026-10-05T02:24:25.150Z",
+      "event": "schedule",
+      "bytes": 169697
+    },
+    {
+      "name": "2026-10-06T0048Z.json.gz",
+      "at": "2026-10-06T00:48:33.659Z",
+      "event": "schedule",
+      "bytes": 171564
+    },
+    {
+      "name": "2026-10-07T0558Z.json.gz",
+      "at": "2026-10-07T05:58:01.823Z",
+      "event": "schedule",
+      "bytes": 171166
+    },
+    {
+      "name": "2026-10-08T0602Z.json.gz",
+      "at": "2026-10-08T06:02:33.641Z",
+      "event": "schedule",
+      "bytes": 171572
+    },
+    {
+      "name": "2026-10-09T0607Z.json.gz",
+      "at": "2026-10-09T06:07:25.939Z",
+      "event": "schedule",
+      "bytes": 171974
+    },
+    {
+      "name": "2026-10-10T0245Z.json.gz",
+      "at": "2026-10-10T02:45:57.328Z",
+      "event": "schedule",
+      "bytes": 170891
+    },
+    {
+      "name": "2026-10-11T0211Z.json.gz",
+      "at": "2026-10-11T02:11:45.090Z",
+      "event": "schedule",
+      "bytes": 166911
+    },
+    {
+      "name": "2026-10-12T0239Z.json.gz",
+      "at": "2026-10-12T02:39:15.815Z",
+      "event": "schedule",
+      "bytes": 170753
+    },
+    {
+      "name": "2026-10-13T0200Z.json.gz",
+      "at": "2026-10-13T02:00:27.898Z",
+      "event": "schedule",
+      "bytes": 171110
+    },
+    {
+      "name": "2026-10-14T0112Z.json.gz",
+      "at": "2026-10-14T01:12:59.531Z",
+      "event": "schedule",
+      "bytes": 170908
+    },
+    {
+      "name": "2026-10-15T0151Z.json.gz",
+      "at": "2026-10-15T01:51:25.854Z",
+      "event": "schedule",
+      "bytes": 171672
+    },
+    {
+      "name": "2026-10-16T0430Z.json.gz",
+      "at": "2026-10-16T04:30:54.053Z",
+      "event": "schedule",
+      "bytes": 171261
+    },
+    {
+      "name": "2026-10-17T0028Z.json.gz",
+      "at": "2026-10-17T00:28:29.857Z",
+      "event": "schedule",
+      "bytes": 170644
+    },
+    {
+      "name": "2026-10-18T0132Z.json.gz",
+      "at": "2026-10-18T01:32:31.996Z",
+      "event": "schedule",
+      "bytes": 167765
+    },
+    {
+      "name": "2026-10-19T0118Z.json.gz",
+      "at": "2026-10-19T01:18:56.015Z",
+      "event": "schedule",
+      "bytes": 167914
+    },
+    {
+      "name": "2026-10-20T0449Z.json.gz",
+      "at": "2026-10-20T04:49:04.635Z",
+      "event": "schedule",
+      "bytes": 171817
+    },
+    {
+      "name": "2026-10-21T0059Z.json.gz",
+      "at": "2026-10-21T00:59:45.672Z",
+      "event": "schedule",
+      "bytes": 171490
+    },
+    {
+      "name": "2026-10-22T0152Z.json.gz",
+      "at": "2026-10-22T01:52:51.033Z",
+      "event": "schedule",
+      "bytes": 170764
+    },
+    {
+      "name": "2026-10-23T0010Z.json.gz",
+      "at": "2026-10-23T00:10:35.689Z",
+      "event": "schedule",
+      "bytes": 171456
+    },
+    {
+      "name": "2026-10-24T0107Z.json.gz",
+      "at": "2026-10-24T01:07:14.834Z",
+      "event": "schedule",
+      "bytes": 171622
+    },
+    {
+      "name": "2026-10-25T0031Z.json.gz",
+      "at": "2026-10-25T00:31:37.670Z",
+      "event": "schedule",
+      "bytes": 163829
+    },
+    {
+      "name": "2026-10-26T0144Z.json.gz",
+      "at": "2026-10-26T01:44:03.958Z",
+      "event": "schedule",
+      "bytes": 169419
+    },
+    {
+      "name": "2026-10-27T0004Z.json.gz",
+      "at": "2026-10-27T00:04:58.934Z",
+      "event": "schedule",
+      "bytes": 171706
+    },
+    {
+      "name": "2026-10-28T0003Z.json.gz",
+      "at": "2026-10-28T00:03:26.996Z",
+      "event": "schedule",
+      "bytes": 170722
+    },
+    {
+      "name": "2026-10-28T2153Z.json.gz",
+      "at": "2026-10-28T21:53:52.691Z",
+      "event": "schedule",
+      "bytes": 171084
+    },
+    {
+      "name": "2026-10-29T0147Z.json.gz",
+      "at": "2026-10-29T01:47:15.542Z",
+      "event": "schedule",
+      "bytes": 171372
+    },
+    {
+      "name": "2026-10-29T0828Z.json.gz",
+      "at": "2026-10-29T08:28:00.338Z",
+      "event": "schedule",
+      "bytes": 171237
+    },
+    {
+      "name": "2026-10-29T1533Z.json.gz",
+      "at": "2026-10-29T15:33:28.168Z",
+      "event": "schedule",
+      "bytes": 170778
+    },
+    {
+      "name": "2026-10-29T2037Z.json.gz",
+      "at": "2026-10-29T20:37:02.270Z",
+      "event": "schedule",
+      "bytes": 170633
+    },
+    {
+      "name": "2026-10-30T0024Z.json.gz",
+      "at": "2026-10-30T00:24:10.891Z",
+      "event": "schedule",
+      "bytes": 170404
+    },
+    {
+      "name": "2026-10-30T0628Z.json.gz",
+      "at": "2026-10-30T06:28:13.102Z",
+      "event": "schedule",
+      "bytes": 171699
+    },
+    {
+      "name": "2026-10-30T1335Z.json.gz",
+      "at": "2026-10-30T13:35:59.045Z",
+      "event": "schedule",
+      "bytes": 172220
+    },
+    {
+      "name": "2026-10-30T1852Z.json.gz",
+      "at": "2026-10-30T18:52:00.691Z",
+      "event": "schedule",
+      "bytes": 170860
+    },
+    {
+      "name": "2026-10-30T2257Z.json.gz",
+      "at": "2026-10-30T22:57:55.334Z",
+      "event": "schedule",
+      "bytes": 171005
+    },
+    {
+      "name": "2026-10-31T0222Z.json.gz",
+      "at": "2026-10-31T02:22:02.413Z",
+      "event": "schedule",
+      "bytes": 170491
+    },
+    {
+      "name": "2026-10-31T0853Z.json.gz",
+      "at": "2026-10-31T08:53:06.852Z",
+      "event": "schedule",
+      "bytes": 171055
+    },
+    {
+      "name": "2026-10-31T1519Z.json.gz",
+      "at": "2026-10-31T15:19:13.477Z",
+      "event": "schedule",
+      "bytes": 171313
+    },
+    {
+      "name": "2026-10-31T1932Z.json.gz",
+      "at": "2026-10-31T19:32:41.179Z",
+      "event": "schedule",
+      "bytes": 169537
+    }
+  ]
+}
