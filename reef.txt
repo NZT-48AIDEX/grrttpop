@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-11-07T10:41:13.102Z, 0s ago
+
+50 creatures. 17 rising, 33 falling.
+mood: 25 😟
+total market $2.57T · -2.85% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ██████████··········  5 up / 5 down · median -0.09%
+  mid waters · majors
+     15 creatures  █████···············  4 up / 11 down · median -0.48%
+  the deep · small caps
+     25 creatures  ██████··············  8 up / 17 down · median -0.17%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ▆▅▃▂▄▄▄▇██▆▁▁▁▁▁  -2.30% — falling
+  4 up · 20 down · 26 sideways · 6 spent the week going one way and today the other
+
+biggest movers
+  ↑ QNT         +3.79%  $196.49      ▆▆▆▆▃▃▂██▁▁▃
+  ↑ AAVE        +1.90%  $131.06      ▆█▇▅▁▂▂▅▅▃▄▄
+  ↑ TRX         +0.38%  $0.3195      ▂▁▃▅▆██▇▆▆▆▆
+  ↑ XAUT        +0.15%  $4,058       ▁▁▁▂▂▂▄▆█▇▆▇
+  ↑ HYPE        +0.12%  $78.29       ███▇▅▆▆▆▅▁▁▁  ← 7d: down on the week, bouncing  🔥 trending
+  ↓ BCH         -3.86%  $257.25      █▇▇▆▅▅▄▆█▄▂▁
+  ↓ CC          -3.41%  $0.0945      ▄▄▄▂▁▃▄▅█▃▅▁
+  ↓ M           -3.39%  $0.8065      █▆▃▃▂▃▃▂▁▁▁▁
+  ↓ SHIB        -2.75%  $0.000004    ▇▇▇▅▁▃▄██▁▂▁
+  ↓ XRP         -2.63%  $1.17        ▅▅▅▅▅▆▆██▄▂▁
+
+trending on coingecko: harmony, pearl-2, ondo-finance, bitcoin, near, akedo, dacity-coin-4, pi-network
+
+market data only — no trading, no custody, not financial advice
