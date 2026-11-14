@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-11-14T08:57:32.814Z, 0s ago
+
+50 creatures. 11 rising, 39 falling.
+mood: 13 😱
+total market $2.29T · -4.64% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ████████············  4 up / 6 down · median -2.33%
+  mid waters · majors
+     15 creatures  ███·················  2 up / 13 down · median -2.81%
+  the deep · small caps
+     25 creatures  ████················  5 up / 20 down · median -1.46%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ████▇▅▆▆▆▅▄▃▂▂▂▁  -5.59% — falling, at its weekly low
+  2 up · 33 down · 15 sideways
+
+biggest movers
+  ↑ FIGR_HEL…   +4.54%  $1.05        ▄▆█▇▆▆▆██▁▁▅
+  ↑ M           +3.15%  $0.8326      ██▃▁▁▁▂▄▃▇▇█
+  ↑ TRX         +0.73%  $0.3128      ███▆▆▇▆▅▅▄▁▁
+  ↑ LEO         +0.39%  $9.31        █▇▇▃▇▇▃▂▂▁▄▆
+  ↑ USYC        +0.04%  $1.14        ▁▁▁▁▁▂▃▃▃▄▅█
+  ↓ ENA         -6.86%  $0.1276      █▇▆▆▇▆▆▆▃▂▂▁  🔥 trending
+  ↓ NEAR        -6.07%  $3.31        ██▆▄▆▆▆█▃▁▂▁
+  ↓ SOL         -5.95%  $75.10       ███▆▆▅▄▅▄▃▂▁  🔥 trending
+  ↓ PEPE        -5.85%  $0.000004    ▅▅▆▇▇██▅▂▁▂▁  🔥 trending
+  ↓ UNI         -5.64%  $5.49        ███▇██▆▅▃▂▁▁
+
+trending on coingecko: akedo, bitcoin, ethereum, solana, hyperliquid, bittensor, pepe, pudgy-penguins
+
+market data only — no trading, no custody, not financial advice

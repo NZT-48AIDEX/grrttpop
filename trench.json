@@ -1,0 +1,284 @@
+{
+  "network": {
+    "tps": 1095,
+    "epoch": 1086,
+    "epochPercent": 27
+  },
+  "ecosystem": {
+    "tokens": 40,
+    "rising": 14,
+    "topGainers": [
+      {
+        "id": "injective-protocol",
+        "symbol": "INJ",
+        "name": "Injective",
+        "price": 7.95,
+        "change24h": 5.31279,
+        "change1h": -0.5163,
+        "change7d": -3.4683,
+        "marketCap": 795059116,
+        "trend": {
+          "spark": "██▇▇█▆█▆▁▁▃▇",
+          "shape": "dumped and bought back",
+          "direction": "down",
+          "divergent": true,
+          "weekPct": -3.08,
+          "dayPct": 8.05,
+          "rangePct": 17.05,
+          "posInRange": 0.69,
+          "high": 8.414842535012461,
+          "low": 7.1893205861285345,
+          "points": 168
+        }
+      },
+      {
+        "id": "world-liberty-financial",
+        "symbol": "WLFI",
+        "name": "World Liberty Financial",
+        "price": 0.04720999,
+        "change24h": 0.2009,
+        "change1h": -0.1711,
+        "change7d": 2.5729,
+        "marketCap": 1500353109,
+        "trend": {
+          "spark": "▁▁▂▁█▇▆▇▇▅▆▆",
+          "shape": "climbing",
+          "direction": "up",
+          "divergent": false,
+          "weekPct": 3.09,
+          "dayPct": 0.84,
+          "rangePct": 5.77,
+          "posInRange": 0.68,
+          "high": 0.048450530456839974,
+          "low": 0.04580766154665642,
+          "points": 168
+        }
+      },
+      {
+        "id": "susdai",
+        "symbol": "SUSDAI",
+        "name": "Staked USDai",
+        "price": 1.12,
+        "change24h": 0.08323,
+        "change1h": 0.0071,
+        "change7d": 0.1738,
+        "marketCap": 438922593,
+        "trend": {
+          "spark": "▁▁▂▁▂▃▅▅▅▄▅█",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.19,
+          "dayPct": 0.07,
+          "rangePct": 0.21,
+          "posInRange": 0.98,
+          "high": 1.1218747983397057,
+          "low": 1.119572931341138,
+          "points": 168
+        }
+      },
+      {
+        "id": "hastra-prime",
+        "symbol": "PRIME",
+        "name": "Hastra PRIME",
+        "price": 1.07,
+        "change24h": 0.05817,
+        "change1h": -0.0003,
+        "change7d": 0.0926,
+        "marketCap": 543716694,
+        "trend": {
+          "spark": "▃▁▂▃▄▅▆███▆▆",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.09,
+          "dayPct": 0.07,
+          "rangePct": 0.15,
+          "posInRange": 1,
+          "high": 1.0696147753801346,
+          "low": 1.0679649484742244,
+          "points": 168
+        }
+      },
+      {
+        "id": "ethena-staked-usde",
+        "symbol": "SUSDE",
+        "name": "Ethena Staked USDe",
+        "price": 1.26,
+        "change24h": 0.0426,
+        "change1h": 0.0019,
+        "change7d": 0.0922,
+        "marketCap": 1200331479,
+        "trend": {
+          "spark": "▁▁▁▂▃▆█▇▇▆▇█",
+          "shape": "flat all week",
+          "direction": "flat",
+          "divergent": false,
+          "weekPct": 0.09,
+          "dayPct": 0.03,
+          "rangePct": 0.14,
+          "posInRange": 0.92,
+          "high": 1.2573353439488972,
+          "low": 1.255548465419668,
+          "points": 168
+        }
+      }
+    ],
+    "topLosers": [
+      {
+        "id": "ethena",
+        "symbol": "ENA",
+        "name": "Ethena",
+        "price": 0.127648,
+        "change24h": -6.85682,
+        "change1h": -1.4277,
+        "change7d": -22.3713,
+        "marketCap": 1723249023,
+        "trend": {
+          "spark": "█▇▆▆▇▆▆▆▃▂▂▁",
+          "shape": "falling, at its weekly low",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -21.26,
+          "dayPct": -6.16,
+          "rangePct": 27.38,
+          "posInRange": 0.01,
+          "high": 0.1641262672015961,
+          "low": 0.12884609076637688,
+          "points": 168
+        }
+      },
+      {
+        "id": "pyth-network",
+        "symbol": "PYTH",
+        "name": "Pyth Network",
+        "price": 0.061896,
+        "change24h": -6.59799,
+        "change1h": -1.3327,
+        "change7d": -3.7245,
+        "marketCap": 487424989,
+        "trend": {
+          "spark": "▅▃▁▁▆▆██▄▆▆▄",
+          "shape": "falling",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -2.62,
+          "dayPct": -5.81,
+          "rangePct": 17.74,
+          "posInRange": 0.38,
+          "high": 0.06950522441342954,
+          "low": 0.05903350061631409,
+          "points": 168
+        }
+      },
+      {
+        "id": "binance-staked-sol",
+        "symbol": "BNSOL",
+        "name": "Binance Staked SOL",
+        "price": 85.42,
+        "change24h": -6.18703,
+        "change1h": -0.4603,
+        "change7d": -16.4884,
+        "marketCap": 784713161,
+        "trend": {
+          "spark": "███▆▆▅▄▅▄▃▂▁",
+          "shape": "falling, at its weekly low",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -16.01,
+          "dayPct": -5.07,
+          "rangePct": 20.13,
+          "posInRange": 0.04,
+          "high": 102.6518127689472,
+          "low": 85.45353820058602,
+          "points": 168
+        }
+      },
+      {
+        "id": "solana",
+        "symbol": "SOL",
+        "name": "Solana",
+        "price": 75.1,
+        "change24h": -5.94703,
+        "change1h": -0.6037,
+        "change7d": -16.5832,
+        "marketCap": 44424429354,
+        "trend": {
+          "spark": "███▆▆▅▄▅▄▃▂▁",
+          "shape": "falling, at its weekly low",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -16.06,
+          "dayPct": -5.07,
+          "rangePct": 20.21,
+          "posInRange": 0.04,
+          "high": 90.21674317497738,
+          "low": 75.04962914854622,
+          "points": 168
+        }
+      },
+      {
+        "id": "wrapped-solana",
+        "symbol": "WSOL",
+        "name": "Wrapped SOL",
+        "price": 75.08,
+        "change24h": -5.92727,
+        "change1h": -0.5282,
+        "change7d": -16.5217,
+        "marketCap": 990044626,
+        "trend": {
+          "spark": "███▇▆▅▄▅▄▃▂▁",
+          "shape": "falling, at its weekly low",
+          "direction": "down",
+          "divergent": false,
+          "weekPct": -15.98,
+          "dayPct": -5,
+          "rangePct": 20.25,
+          "posInRange": 0.04,
+          "high": 90.19448501522253,
+          "low": 75.00637321766206,
+          "points": 168
+        }
+      }
+    ],
+    "week": {
+      "spark": "███▇▆▇▇▆▆▆▆▄▃▂▂▁",
+      "shape": "falling, at its weekly low",
+      "direction": "down",
+      "divergent": false,
+      "weekPct": -5.04,
+      "dayPct": -1.03,
+      "rangePct": 5.63,
+      "posInRange": 0.06,
+      "high": 1,
+      "low": 0.9466781431762719,
+      "points": 168,
+      "coinsCounted": 40,
+      "breadth": {
+        "up": 2,
+        "down": 18,
+        "flat": 20,
+        "divergent": 2
+      },
+      "shapes": {
+        "flat all week": 19,
+        "falling, at its weekly low": 14,
+        "falling": 3,
+        "climbing": 1,
+        "up on the week, sliding back": 1,
+        "dumped and bought back": 1,
+        "chopping sideways": 1
+      }
+    }
+  },
+  "wallet": null,
+  "data": {
+    "source": "solana-rpc.publicnode.com + coingecko",
+    "asOf": "2026-11-14T08:57:32.840Z",
+    "ageMs": 521,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "read-only — no keys, no signatures, no transactions. not financial advice."
+}
