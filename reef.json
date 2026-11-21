@@ -1,0 +1,346 @@
+{
+  "coins": 50,
+  "bands": [
+    {
+      "band": 0,
+      "name": "the shallows · blue chips",
+      "creatures": 10,
+      "rising": 1,
+      "falling": 9,
+      "medianChange24h": -3.22
+    },
+    {
+      "band": 1,
+      "name": "mid waters · majors",
+      "creatures": 15,
+      "rising": 3,
+      "falling": 12,
+      "medianChange24h": -3.41
+    },
+    {
+      "band": 2,
+      "name": "the deep · small caps",
+      "creatures": 25,
+      "rising": 8,
+      "falling": 17,
+      "medianChange24h": -0.93
+    }
+  ],
+  "rising": 12,
+  "falling": 38,
+  "biggestGainers": [
+    {
+      "id": "monero",
+      "symbol": "XMR",
+      "name": "Monero",
+      "price": 475.21,
+      "change24h": 2.87798,
+      "change1h": 0.8185,
+      "change7d": -10.9055,
+      "marketCap": 8950055361,
+      "rank": 12,
+      "trending": false,
+      "trend": {
+        "spark": "▇▇▇▇▇████▆▂▁",
+        "shape": "down on the week, bouncing",
+        "direction": "down",
+        "divergent": true,
+        "weekPct": -12.24,
+        "dayPct": 1.55,
+        "rangePct": 25.21,
+        "posInRange": 0.39,
+        "high": 535.3092305456269,
+        "low": 427.528842059243,
+        "points": 168
+      }
+    },
+    {
+      "id": "figure-heloc",
+      "symbol": "FIGR_HELOC",
+      "name": "Figure Heloc",
+      "price": 1.033,
+      "change24h": 1.68019,
+      "change1h": -0.0075,
+      "change7d": -1.2568,
+      "marketCap": 27856170457,
+      "rank": 9,
+      "trending": false,
+      "trend": {
+        "spark": "▆██▆▃▁▁▃▄▂▂▄",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": -1.25,
+        "dayPct": 1.68,
+        "rangePct": 6.08,
+        "posInRange": 0.46,
+        "high": 1.0661252302143076,
+        "low": 1.005030361571916,
+        "points": 131
+      }
+    },
+    {
+      "id": "crypto-com-chain",
+      "symbol": "CRO",
+      "name": "Cronos",
+      "price": 0.04078878,
+      "change24h": 0.06293,
+      "change1h": 0.4231,
+      "change7d": -13.0506,
+      "marketCap": 2119175479,
+      "rank": 39,
+      "trending": false,
+      "trend": {
+        "spark": "██▇▆███▆▅▃▂▁",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -13.55,
+        "dayPct": -2.62,
+        "rangePct": 20.21,
+        "posInRange": 0.19,
+        "high": 0.04620847017227052,
+        "low": 0.038439200708100654,
+        "points": 168
+      }
+    },
+    {
+      "id": "hashnote-usyc",
+      "symbol": "USYC",
+      "name": "Circle USYC",
+      "price": 1.14,
+      "change24h": 0.04711,
+      "change1h": 0,
+      "change7d": 0.0698,
+      "marketCap": 2016987416,
+      "rank": 42,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▁▁▁▁▁▂▃▃▆█",
+        "shape": "flat all week",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": 0.07,
+        "dayPct": 0.05,
+        "rangePct": 0.07,
+        "posInRange": 1,
+        "high": 1.1447397158383719,
+        "low": 1.1439402569838417,
+        "points": 168
+      }
+    },
+    {
+      "id": "dai",
+      "symbol": "DAI",
+      "name": "Dai",
+      "price": 1,
+      "change24h": 0.043,
+      "change1h": 0.0056,
+      "change7d": 0.0435,
+      "marketCap": 4365893587,
+      "rank": 21,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▁▃▄▃▂▃▃▃▄█",
+        "shape": "flat all week",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": 0.02,
+        "dayPct": 0,
+        "rangePct": 0.07,
+        "posInRange": 0.75,
+        "high": 1.0003687700909298,
+        "low": 0.9996701101835728,
+        "points": 168
+      }
+    }
+  ],
+  "biggestLosers": [
+    {
+      "id": "memecore",
+      "symbol": "M",
+      "name": "MemeCore",
+      "price": 0.76844,
+      "change24h": -11.59293,
+      "change1h": -1.014,
+      "change7d": -8.7843,
+      "marketCap": 1767608821,
+      "rank": 44,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▂▂▅█▇█▇▂▄▁",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -9.57,
+        "dayPct": -9.14,
+        "rangePct": 18.17,
+        "posInRange": 0.05,
+        "high": 0.9132793385689736,
+        "low": 0.7728411193967195,
+        "points": 168
+      }
+    },
+    {
+      "id": "sui",
+      "symbol": "SUI",
+      "name": "Sui",
+      "price": 0.637489,
+      "change24h": -6.82915,
+      "change1h": 0.7039,
+      "change7d": -18.6971,
+      "marketCap": 2638596598,
+      "rank": 32,
+      "trending": true,
+      "trend": {
+        "spark": "███████▇█▇▄▁",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -19.53,
+        "dayPct": -9.41,
+        "rangePct": 29.69,
+        "posInRange": 0.15,
+        "high": 0.7720722324600789,
+        "low": 0.5953135315854257,
+        "points": 168
+      }
+    },
+    {
+      "id": "the-open-network",
+      "symbol": "GRAM",
+      "name": "Gram (prev. Toncoin)",
+      "price": 0.949446,
+      "change24h": -6.67954,
+      "change1h": 1.3727,
+      "change7d": -14.9063,
+      "marketCap": 2729086379,
+      "rank": 31,
+      "trending": false,
+      "trend": {
+        "spark": "█▇█▇▇▇█▅▆▅▅▁",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -15.39,
+        "dayPct": -8.85,
+        "rangePct": 22.21,
+        "posInRange": 0.15,
+        "high": 1.0969262502709725,
+        "low": 0.8975690072537591,
+        "points": 168
+      }
+    },
+    {
+      "id": "hyperliquid",
+      "symbol": "HYPE",
+      "name": "Hyperliquid",
+      "price": 59.79,
+      "change24h": -5.93902,
+      "change1h": 1.4354,
+      "change7d": -14.1586,
+      "marketCap": 14210849606,
+      "rank": 10,
+      "trending": true,
+      "trend": {
+        "spark": "▆▆▇▆███▆█▆▄▁",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -14.96,
+        "dayPct": -8.48,
+        "rangePct": 24.79,
+        "posInRange": 0.15,
+        "high": 70.40880522960465,
+        "low": 56.42300371165904,
+        "points": 168
+      }
+    },
+    {
+      "id": "binancecoin",
+      "symbol": "BNB",
+      "name": "BNB",
+      "price": 534.61,
+      "change24h": -5.87884,
+      "change1h": 0.8392,
+      "change7d": -14.3401,
+      "marketCap": 70306112253,
+      "rank": 4,
+      "trending": false,
+      "trend": {
+        "spark": "███████▇█▇▄▁",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -14.91,
+        "dayPct": -7.88,
+        "rangePct": 21.07,
+        "posInRange": 0.14,
+        "high": 616.6573743166149,
+        "low": 509.3307606564632,
+        "points": 168
+      }
+    }
+  ],
+  "trending": [
+    "wasted-4",
+    "bitcoin",
+    "hyperliquid",
+    "bittensor",
+    "sui",
+    "pearl-2",
+    "monad",
+    "solana",
+    "zcash",
+    "pudgy-penguins",
+    "pepe",
+    "ethereum",
+    "evaa-protocol",
+    "chainflip",
+    "near"
+  ],
+  "mood": {
+    "value": 12,
+    "emoji": "😱"
+  },
+  "week": {
+    "spark": "▇██████▇▇▇▇▆▅▃▂▁",
+    "shape": "falling",
+    "direction": "down",
+    "divergent": false,
+    "weekPct": -6.75,
+    "dayPct": -1.22,
+    "rangePct": 12.07,
+    "posInRange": 0.18,
+    "high": 1.0224939217636788,
+    "low": 0.91240414816524,
+    "points": 131,
+    "coinsCounted": 50,
+    "breadth": {
+      "up": 0,
+      "down": 34,
+      "flat": 16,
+      "divergent": 2
+    },
+    "shapes": {
+      "falling": 27,
+      "flat all week": 15,
+      "chopping sideways": 1,
+      "down on the week, bouncing": 2,
+      "falling, at its weekly low": 5
+    }
+  },
+  "global": {
+    "totalMcap": 2038298310603.0608,
+    "change24h": -7.046408209127521
+  },
+  "data": {
+    "source": "coingecko",
+    "asOf": "2026-11-21T12:38:03.236Z",
+    "ageMs": 315,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "market data only — no trading, no custody, not financial advice"
+}

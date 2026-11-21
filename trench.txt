@@ -1,0 +1,24 @@
+the trench — solana, live
+
+source: solana-rpc.publicnode.com + coingecko · 2026-11-21T12:38:03.341Z, 1s ago
+
+mainnet: 1,704 tps — this is literally the speed of the water here
+epoch 1092 · 92% through  ██████████████████··
+
+the spl ecosystem: 40 tokens, 11 rising
+  ↑ USYC        +0.05%  $1.14        ▁▁▁▁▁▁▁▂▃▃▆█
+  ↑ USD1        +0.04%  $0.9993      ▁▁▄▅▄▆▇▇██▇▅
+  ↑ SOFID       +0.02%  $0.9995      ▄█▆▆▂▄▄▃▃▂▂▁
+  ↑ USDS        +0.02%  $1.00        ▄▄▃▅▆▆▆▇▇▁▅█
+  ↑ USDY        +0.02%  $1.15        ▄▁▅▄▆▇▃▄▁▄█▅
+  ↓ CAKE        -7.14%  $1.45        ▇█▇▆███▆▇▆▄▁
+  ↓ PYTH        -7.11%  $0.0468      ███▆▆▆▆▆█▅▃▁
+  ↓ ENA         -6.48%  $0.0961      ████▇▇▆▆▆▃▂▁
+  ↓ JUP         -5.92%  $0.2154      ▆██▇▅▇▇▇█▅▂▁
+  ↓ RENDER      -5.50%  $1.26        ▇▆▆▆▆▆█▇█▆▃▁
+
+the week — 7 days, hourly, 40 of them
+  the ecosystem as one      █▆▇▇▇▇▇▇█▇▇▇▆▄▂▁  -7.10% — falling
+  0 up · 19 down · 21 sideways
+
+read-only — no keys, no signatures, no transactions. not financial advice.

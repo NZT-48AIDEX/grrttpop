@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-11-21T12:38:03.236Z, 0s ago
+
+50 creatures. 12 rising, 38 falling.
+mood: 12 😱
+total market $2.04T · -7.05% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ██··················  1 up / 9 down · median -3.22%
+  mid waters · majors
+     15 creatures  ████················  3 up / 12 down · median -3.41%
+  the deep · small caps
+     25 creatures  ██████··············  8 up / 17 down · median -0.93%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ▇██████▇▇▇▇▆▅▃▂▁  -6.75% — falling
+  0 up · 34 down · 16 sideways · 2 spent the week going one way and today the other
+
+biggest movers
+  ↑ XMR         +2.88%  $475.21      ▇▇▇▇▇████▆▂▁  ← 7d: down on the week, bouncing
+  ↑ FIGR_HEL…   +1.68%  $1.03        ▆██▆▃▁▁▃▄▂▂▄
+  ↑ CRO         +0.06%  $0.0408      ██▇▆███▆▅▃▂▁
+  ↑ USYC        +0.05%  $1.14        ▁▁▁▁▁▁▁▂▃▃▆█
+  ↑ DAI         +0.04%  $1.00        ▁▁▁▃▄▃▂▃▃▃▄█
+  ↓ M          -11.59%  $0.7684      ▁▁▂▂▅█▇█▇▂▄▁
+  ↓ SUI         -6.83%  $0.6375      ███████▇█▇▄▁  🔥 trending
+  ↓ GRAM        -6.68%  $0.9494      █▇█▇▇▇█▅▆▅▅▁
+  ↓ HYPE        -5.94%  $59.79       ▆▆▇▆███▆█▆▄▁  🔥 trending
+  ↓ BNB         -5.88%  $534.61      ███████▇█▇▄▁
+
+trending on coingecko: wasted-4, bitcoin, hyperliquid, bittensor, sui, pearl-2, monad, solana
+
+market data only — no trading, no custody, not financial advice
