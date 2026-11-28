@@ -1,0 +1,350 @@
+{
+  "coins": 50,
+  "bands": [
+    {
+      "band": 0,
+      "name": "the shallows · blue chips",
+      "creatures": 10,
+      "rising": 2,
+      "falling": 8,
+      "medianChange24h": -1.07
+    },
+    {
+      "band": 1,
+      "name": "mid waters · majors",
+      "creatures": 15,
+      "rising": 5,
+      "falling": 10,
+      "medianChange24h": -0.01
+    },
+    {
+      "band": 2,
+      "name": "the deep · small caps",
+      "creatures": 25,
+      "rising": 8,
+      "falling": 17,
+      "medianChange24h": -0.66
+    }
+  ],
+  "rising": 15,
+  "falling": 35,
+  "biggestGainers": [
+    {
+      "id": "bitway",
+      "symbol": "BTW",
+      "name": "Bitway",
+      "price": 1.32,
+      "change24h": 21.27197,
+      "change1h": -6.0984,
+      "change7d": 122.4678,
+      "marketCap": 1993925656,
+      "rank": 43,
+      "trending": true,
+      "trend": {
+        "spark": "▁▁▁▁▁▁▃▃▃▄▆█",
+        "shape": "climbing, at its weekly high",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 131.92,
+        "dayPct": 35.42,
+        "rangePct": 143.93,
+        "posInRange": 0.95,
+        "high": 1.5371116513773593,
+        "low": 0.6301502727739199,
+        "points": 168
+      }
+    },
+    {
+      "id": "monero",
+      "symbol": "XMR",
+      "name": "Monero",
+      "price": 418.19,
+      "change24h": 4.24211,
+      "change1h": -1.1195,
+      "change7d": -10.3667,
+      "marketCap": 7881956710,
+      "rank": 14,
+      "trending": false,
+      "trend": {
+        "spark": "▆▆▇▇▆▇██▅▄▁▂",
+        "shape": "down on the week, bouncing",
+        "direction": "down",
+        "divergent": true,
+        "weekPct": -9.81,
+        "dayPct": 4.77,
+        "rangePct": 31.35,
+        "posInRange": 0.25,
+        "high": 524.3558781432487,
+        "low": 399.19675873926366,
+        "points": 168
+      }
+    },
+    {
+      "id": "pax-gold",
+      "symbol": "PAXG",
+      "name": "PAX Gold",
+      "price": 3642.92,
+      "change24h": 0.75507,
+      "change1h": -0.0029,
+      "change7d": 2.6311,
+      "marketCap": 1629540870,
+      "rank": 47,
+      "trending": false,
+      "trend": {
+        "spark": "▃▃▅█▇▄▁▄▄▇██",
+        "shape": "climbing, at its weekly high",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 2.74,
+        "dayPct": 0.84,
+        "rangePct": 6.56,
+        "posInRange": 0.91,
+        "high": 3664.353891938812,
+        "low": 3438.756087593096,
+        "points": 168
+      }
+    },
+    {
+      "id": "tether-gold",
+      "symbol": "XAUT",
+      "name": "Tether Gold",
+      "price": 3643.14,
+      "change24h": 0.70705,
+      "change1h": -0.012,
+      "change7d": 2.7519,
+      "marketCap": 2947415083,
+      "rank": 25,
+      "trending": false,
+      "trend": {
+        "spark": "▃▃▅▇▇▃▁▄▄▇██",
+        "shape": "climbing, at its weekly high",
+        "direction": "up",
+        "divergent": false,
+        "weekPct": 2.87,
+        "dayPct": 0.78,
+        "rangePct": 6.63,
+        "posInRange": 0.9,
+        "high": 3667.8022101531765,
+        "low": 3439.7045903477883,
+        "points": 168
+      }
+    },
+    {
+      "id": "leo-token",
+      "symbol": "LEO",
+      "name": "LEO Token",
+      "price": 9.1,
+      "change24h": 0.61253,
+      "change1h": 0.0369,
+      "change7d": -0.4673,
+      "marketCap": 8367153724,
+      "rank": 13,
+      "trending": false,
+      "trend": {
+        "spark": "▇█▇██▅▄▁▁▅▄▄",
+        "shape": "chopping sideways",
+        "direction": "flat",
+        "divergent": false,
+        "weekPct": -0.57,
+        "dayPct": 0.43,
+        "rangePct": 3.44,
+        "posInRange": 0.51,
+        "high": 9.229668572729764,
+        "low": 8.922956847539885,
+        "points": 168
+      }
+    }
+  ],
+  "biggestLosers": [
+    {
+      "id": "memecore",
+      "symbol": "M",
+      "name": "MemeCore",
+      "price": 0.743564,
+      "change24h": -12.13426,
+      "change1h": -0.1371,
+      "change7d": -3.0448,
+      "marketCap": 1712454879,
+      "rank": 46,
+      "trending": false,
+      "trend": {
+        "spark": "▁▁▁▂▃▂▁▆█▇▇▃",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -2.08,
+        "dayPct": -10.74,
+        "rangePct": 17.35,
+        "posInRange": 0.08,
+        "high": 0.8705213952650762,
+        "low": 0.7418260499000722,
+        "points": 168
+      }
+    },
+    {
+      "id": "rain",
+      "symbol": "RAIN",
+      "name": "Rain",
+      "price": 0.0021359,
+      "change24h": -8.56274,
+      "change1h": -0.0105,
+      "change7d": -38.4407,
+      "marketCap": 1530925826,
+      "rank": 50,
+      "trending": false,
+      "trend": {
+        "spark": "█▆▆▆▅▄▄▃▂▂▁▁",
+        "shape": "falling, at its weekly low",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -38.06,
+        "dayPct": -6.99,
+        "rangePct": 86.39,
+        "posInRange": 0.03,
+        "high": 0.003969691954492997,
+        "low": 0.0021297843849505476,
+        "points": 168
+      }
+    },
+    {
+      "id": "figure-heloc",
+      "symbol": "FIGR_HELOC",
+      "name": "Figure Heloc",
+      "price": 1.011,
+      "change24h": -5.36483,
+      "change1h": -0.0786,
+      "change7d": -2.2931,
+      "marketCap": 27724812935,
+      "rank": 9,
+      "trending": false,
+      "trend": {
+        "spark": "▅█▆▅▇▅▅▇██▃▁",
+        "shape": "down on the week, bouncing",
+        "direction": "down",
+        "divergent": true,
+        "weekPct": -2.01,
+        "dayPct": 0.95,
+        "rangePct": 6.54,
+        "posInRange": 0.15,
+        "high": 1.068435453611255,
+        "low": 1.0028065776306656,
+        "points": 128
+      }
+    },
+    {
+      "id": "zcash",
+      "symbol": "ZEC",
+      "name": "Zcash",
+      "price": 722.64,
+      "change24h": -4.03879,
+      "change1h": -0.0844,
+      "change7d": -8.9082,
+      "marketCap": 12334157626,
+      "rank": 11,
+      "trending": false,
+      "trend": {
+        "spark": "▆▇▇█▄▁▁▄▁▂▃▂",
+        "shape": "falling",
+        "direction": "down",
+        "divergent": false,
+        "weekPct": -8.36,
+        "dayPct": -2.46,
+        "rangePct": 26.19,
+        "posInRange": 0.23,
+        "high": 860.2694355653551,
+        "low": 681.7476958305268,
+        "points": 168
+      }
+    },
+    {
+      "id": "hedera-hashgraph",
+      "symbol": "HBAR",
+      "name": "Hedera",
+      "price": 0.052139,
+      "change24h": -3.22312,
+      "change1h": -0.3776,
+      "change7d": 1.1067,
+      "marketCap": 2312550251,
+      "rank": 35,
+      "trending": false,
+      "trend": {
+        "spark": "▃▃▃▆▄▁▁▅▇█▇▆",
+        "shape": "up on the week, sliding back",
+        "direction": "up",
+        "divergent": true,
+        "weekPct": 2.34,
+        "dayPct": -2.63,
+        "rangePct": 14.12,
+        "posInRange": 0.54,
+        "high": 0.05575995082010827,
+        "low": 0.048862632499185675,
+        "points": 168
+      }
+    }
+  ],
+  "trending": [
+    "world-liberty-financial",
+    "variational-x",
+    "usd1-wlfi",
+    "pumpchan",
+    "pudgy-penguins",
+    "zylo-ecosystem",
+    "official-trump",
+    "bitcoin",
+    "hyperliquid",
+    "uniswap",
+    "o1-exchange",
+    "pearl-2",
+    "bitway",
+    "bittensor",
+    "internet-computer"
+  ],
+  "mood": {
+    "value": 10,
+    "emoji": "😱"
+  },
+  "week": {
+    "spark": "▇█▆▄▂▂▁▃▇▆▆██▇▇▇",
+    "shape": "chopping sideways",
+    "direction": "flat",
+    "divergent": false,
+    "weekPct": 0.87,
+    "dayPct": -0.08,
+    "rangePct": 6.37,
+    "posInRange": 0.63,
+    "high": 1.0316770371693191,
+    "low": 0.9699039434562536,
+    "points": 128,
+    "coinsCounted": 50,
+    "breadth": {
+      "up": 13,
+      "down": 10,
+      "flat": 27,
+      "divergent": 10
+    },
+    "shapes": {
+      "chopping sideways": 13,
+      "falling, at its weekly low": 3,
+      "flat all week": 14,
+      "down on the week, bouncing": 2,
+      "up on the week, sliding back": 7,
+      "falling": 5,
+      "climbing": 2,
+      "climbing, at its weekly high": 3,
+      "spiked and gave most of it back": 1
+    }
+  },
+  "global": {
+    "totalMcap": 2069252958075.336,
+    "change24h": -3.7253422660575395
+  },
+  "data": {
+    "source": "coingecko",
+    "asOf": "2026-11-28T16:52:09.601Z",
+    "ageMs": 565,
+    "synthetic": false,
+    "harness": null,
+    "note": null
+  },
+  "note": "market data only — no trading, no custody, not financial advice"
+}

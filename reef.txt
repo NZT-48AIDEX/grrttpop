@@ -1,0 +1,36 @@
+the reef — the live crypto market, as an ocean
+
+source: coingecko · 2026-11-28T16:52:09.601Z, 1s ago
+
+50 creatures. 15 rising, 35 falling.
+mood: 10 😱
+total market $2.07T · -3.73% 24h
+heartbeat: n/a — a snapshot has no socket; the live trade pulses only exist in a browser
+
+depth bands (size = market cap · colour = 24h move · twitch = volatility)
+  the shallows · blue chips
+     10 creatures  ████················  2 up / 8 down · median -1.07%
+  mid waters · majors
+     15 creatures  ███████·············  5 up / 10 down · median -0.01%
+  the deep · small caps
+     25 creatures  ██████··············  8 up / 17 down · median -0.66%
+
+the week — 7 days, hourly, 50 of them
+  the reef as one creature  ▇█▆▄▂▂▁▃▇▆▆██▇▇▇  +0.87% — chopping sideways
+  13 up · 10 down · 27 sideways · 10 spent the week going one way and today the other
+
+biggest movers
+  ↑ BTW        +21.27%  $1.32        ▁▁▁▁▁▁▃▃▃▄▆█  🔥 trending
+  ↑ XMR         +4.24%  $418.19      ▆▆▇▇▆▇██▅▄▁▂  ← 7d: down on the week, bouncing
+  ↑ PAXG        +0.76%  $3,643       ▃▃▅█▇▄▁▄▄▇██
+  ↑ XAUT        +0.71%  $3,643       ▃▃▅▇▇▃▁▄▄▇██
+  ↑ LEO         +0.61%  $9.10        ▇█▇██▅▄▁▁▅▄▄
+  ↓ M          -12.13%  $0.7436      ▁▁▁▂▃▂▁▆█▇▇▃
+  ↓ RAIN        -8.56%  $0.002136    █▆▆▆▅▄▄▃▂▂▁▁
+  ↓ FIGR_HEL…   -5.36%  $1.01        ▅█▆▅▇▅▅▇██▃▁  ← 7d: down on the week, bouncing
+  ↓ ZEC         -4.04%  $722.64      ▆▇▇█▄▁▁▄▁▂▃▂
+  ↓ HBAR        -3.22%  $0.0521      ▃▃▃▆▄▁▁▅▇█▇▆  ← 7d: up on the week, sliding back
+
+trending on coingecko: world-liberty-financial, variational-x, usd1-wlfi, pumpchan, pudgy-penguins, zylo-ecosystem, official-trump, bitcoin
+
+market data only — no trading, no custody, not financial advice
